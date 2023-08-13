@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Oraculum", "src\Oraculum\Oraculum.csproj", "{EEB1D86B-A59D-4958-A32A-7875C52F030A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OraculumTest", "OraculumTest\OraculumTest.csproj", "{0638F49B-CD93-47B0-8E2D-8B1C7CCDD8C0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OraculumCLI", "OraculumCLI\OraculumCLI.csproj", "{6F3CC483-69DC-497C-9CCC-25A5DB90FDAB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EEB1D86B-A59D-4958-A32A-7875C52F030A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEB1D86B-A59D-4958-A32A-7875C52F030A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEB1D86B-A59D-4958-A32A-7875C52F030A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEB1D86B-A59D-4958-A32A-7875C52F030A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0638F49B-CD93-47B0-8E2D-8B1C7CCDD8C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0638F49B-CD93-47B0-8E2D-8B1C7CCDD8C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0638F49B-CD93-47B0-8E2D-8B1C7CCDD8C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0638F49B-CD93-47B0-8E2D-8B1C7CCDD8C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F3CC483-69DC-497C-9CCC-25A5DB90FDAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F3CC483-69DC-497C-9CCC-25A5DB90FDAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F3CC483-69DC-497C-9CCC-25A5DB90FDAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F3CC483-69DC-497C-9CCC-25A5DB90FDAB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {68870EAB-FBB4-40D9-8656-C63B4094100C}
+	EndGlobalSection
+EndGlobal
