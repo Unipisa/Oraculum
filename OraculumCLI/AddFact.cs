@@ -12,7 +12,7 @@ namespace OraculumCLI
     public class AddFact : Cmdlet
     {
         [Parameter(Mandatory = true)]
-        public Oraculum.Oraculum? Sibylla { get; set; }
+        public Oraculum.Oraculum? Oraculum { get; set; }
 
         [Parameter(Mandatory = true)]
         public string? FactType { get; set; }
@@ -36,7 +36,7 @@ namespace OraculumCLI
         public string? Reference { get; set; }
 
         [Parameter]
-        public DateTime Expiration { get; set; }
+        public DateTime? Expiration { get; set; }
 
         protected override void ProcessRecord()
         {
@@ -52,7 +52,7 @@ namespace OraculumCLI
                 reference = Reference,
                 expiration = Expiration
             };
-            var j = Sibylla.AddFact(fact);
+            var j = Oraculum.AddFact(fact);
             j.Wait();
             WriteObject(true);
         }

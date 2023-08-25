@@ -36,9 +36,12 @@ namespace OraculumCLI
                 OpenAIApiKey = Config.OpenAIApiKey,
                 OpenAIOrgId = Config.OpenAIOrgId
             };
-            var sibylla = new Oraculum.Oraculum(config);
-            sibylla.Connect().Wait();
-            WriteObject(sibylla);
+            var oraculum = new Oraculum.Oraculum(config);
+            var j = oraculum.IsKBInitialized();
+            j.Wait();
+            if (j.Result)
+              oraculum.Connect().Wait();
+            WriteObject(oraculum);
         }
     }
 }

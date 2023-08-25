@@ -1,5 +1,4 @@
-﻿using Oraculum;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
@@ -8,21 +7,26 @@ using System.Threading.Tasks;
 
 namespace OraculumCLI
 {
-    [Cmdlet(VerbsCommon.Add, "Facts")]
-    public class AddFacts : Cmdlet
+    [Cmdlet(VerbsCommon.Remove, "Fact")]
+    public class DeleteFact : Cmdlet
     {
         [Parameter(Mandatory = true)]
         public Oraculum.Oraculum? Oraculum { get; set; }
 
         [Parameter(Mandatory = true)]
-        public Fact[]? Facts { get; set; }
+        public Guid? Id { get; set; }
 
         protected override void ProcessRecord()
         {
-            base.ProcessRecord();
-            var j = Oraculum.AddFact(Facts);
+            if (Oraculum == null || Id == null)
+            {
+                WriteObject(false);
+                return;
+            }
+            var j = Oraculum.DeleteFact(Id.Value);
             j.Wait();
             WriteObject(j.Result);
         }
+
     }
 }

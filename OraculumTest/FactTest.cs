@@ -11,7 +11,7 @@ namespace OraculumTest
     [TestClass]
     public class FactTest
     {
-        public Oraculum.Oraculum? sibylla;
+        public Oraculum.Oraculum? oraculum;
 
 
         [TestInitialize]
@@ -21,28 +21,39 @@ namespace OraculumTest
                 .AddUserSecrets<SchemaTest>();
             var conf = config.Build();
 
-            sibylla = new Oraculum.Oraculum(new Configuration()
+            oraculum = new Oraculum.Oraculum(new Configuration()
             {
                 WeaviateApiKey = conf["Weaviate:ApiKey"],
                 WeaviateEndpoint = conf["Weaviate:ServiceEndpoint"],
                 OpenAIApiKey = conf["OpenAI:ApiKey"],
                 OpenAIOrgId = conf["OpenAI:OrgId"]
             });
-            sibylla.Connect().Wait();
+            oraculum.Connect().Wait();
         }
 
         [TestMethod]
         public async Task AddFactTest()
         {
-            Assert.IsNotNull(sibylla);
-            await sibylla.AddFact(new Fact()
+            Assert.IsNotNull(oraculum);
+            var id = await oraculum.AddFact(new Fact()
             {
-                factType = "faq",
+                factType = "test",
                 category = "missioni",
                 title = "Question",
                 content = "This is a test fact.",
                 expiration = DateTime.Now.AddYears(100)
             });
+
+            Assert.IsNotNull(id);
+            Assert.IsTrue(await oraculum.DeleteFact(id.Value));
+        }
+
+        [TestMethod]
+        public async Task TestRelevantFacts()
+        {
+            Assert.IsNotNull(oraculum);
+            var facts = await oraculum.FindRelevantFacts("Cosa sono i codici PAST?", limit: 5, distance: 0.23, factTypeFilter: new[]{ "faq" });
+            Assert.IsNotNull(facts);
         }
 
     }

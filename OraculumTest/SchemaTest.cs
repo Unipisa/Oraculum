@@ -1,4 +1,4 @@
-#define CLEARDB
+//#define CLEARDB
 
 using Microsoft.Extensions.Configuration;
 using Oraculum;
