@@ -8,22 +8,19 @@ using System.Threading.Tasks;
 namespace OraculumCLI
 {
     [Cmdlet(VerbsCommon.Get, "Fact")]
-    public class GetFact : Cmdlet
+    public class GetFact : OraculumPSCmdlet
     {
-        [Parameter(Mandatory = true)]
-        public Oraculum.Oraculum? Oraculum { get; set; }
-
         [Parameter(Mandatory = true)]
         public Guid? Id { get; set; }
 
         protected override void ProcessRecord()
         {
-            if (Oraculum == null || Id == null)
+            if (Id == null)
             {
                 WriteObject(false);
                 return;
             }
-            var j = Oraculum.GetFact(Id.Value);
+            var j = Connection.GetFact(Id.Value);
             j.Wait();
             WriteObject(j.Result);
         }

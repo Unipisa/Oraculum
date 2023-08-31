@@ -12,18 +12,10 @@ using WeaviateNET;
 namespace OraculumCLI
 {
     [Cmdlet(VerbsCommon.Reset, "Schema")]
-    public class InitSchema : Cmdlet
+    public class InitSchema : OraculumPSCmdlet
     {
-        [Parameter(Mandatory = true)]
-        public Oraculum.Oraculum? Oraculum { get; set; }
         protected override void ProcessRecord()
         {
-            if (Oraculum == null)
-            {
-                WriteObject(false);
-                return;
-            }
-
             var otp = Random.Shared.Next(100000, 999999);
             var ret = this.CommandRuntime.Host.UI.Prompt("Schema reset", $"To reset the schema type in the code {otp}", new Collection<FieldDescription>() { new FieldDescription("otp") { IsMandatory = true, Label = "OTP code" } });
             if (ret["otp"].ToString() != otp.ToString())
@@ -31,8 +23,7 @@ namespace OraculumCLI
                 WriteObject(false);
                 return;
             }
-            var j = Oraculum.Init();
-            j.Wait();
+            Connection.Init().Wait();
             WriteObject(true);
         }
     }

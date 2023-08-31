@@ -10,7 +10,7 @@ namespace OraculumCLI
 {
     public class OraculumConfiguration
     {
-        public static OraculumConfiguration FromJson(string json)
+        public static OraculumConfiguration? FromJson(string json)
         {
             return System.Text.Json.JsonSerializer.Deserialize<OraculumConfiguration>(json);
         }
@@ -22,7 +22,7 @@ namespace OraculumCLI
     }
 
     [Cmdlet(VerbsCommunications.Connect, "Oraculum")]
-    public class ConnectOraculum : Cmdlet
+    public class ConnectOraculum : PSCmdlet
     {
         [Parameter(Mandatory = true)]
         public OraculumConfiguration Config { get; set; } = null!;
@@ -41,6 +41,8 @@ namespace OraculumCLI
             j.Wait();
             if (j.Result)
               oraculum.Connect().Wait();
+
+            SessionState.PSVariable.Set("Oraculum", oraculum);
             WriteObject(oraculum);
         }
     }

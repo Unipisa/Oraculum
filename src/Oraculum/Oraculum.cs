@@ -1,12 +1,17 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OpenAI;
+using OpenAI.Extensions;
 using OpenAI.Managers;
+using OpenAI.ObjectModels;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection.Metadata;
 using System.Text.Json.Nodes;
 using WeaviateNET;
+using WeaviateNET.Query;
+using WeaviateNET.Query.AdditionalProperty;
+using WeaviateNET.Query.ConditionalOperator;
 
 namespace Oraculum;
 
@@ -35,6 +40,8 @@ public class Fact
 {
     internal const int MajorVersion = 1;
     internal const int MinorVersion = 0;
+
+    [JsonIgnore]
     public const string ClassName = "Facts";
 
     [JsonIgnore]
@@ -234,13 +241,31 @@ public class Oraculum
         return ret;
     }
 
-    public async Task<ICollection<Fact>> FindRelevantFacts(string concept, int? limit = null, double? distance = null, int? autocut = null, string[]? factTypeFilter = null, string[]? categoryFilter = null, string[]? tagsFilter = null)
+    public async Task<ICollection<Fact>> FindRelevantFacts(string concept, int? limit = null, float? distance = null, int? autocut = null, string[]? factTypeFilter = null, string[]? categoryFilter = null, string[]? tagsFilter = null)
     {
         ensureConnection();
 
+        var qg = _facts.CreateGetQuery(selectall: true);
+        qg.Filter.NearText(concept, distance: distance);
+        if (limit.HasValue) qg.Filter.Limit(limit.Value);
+        if (autocut.HasValue) qg.Filter.Autocut(autocut.Value);
+        var andcond = new List<ConditionalAtom<Fact>>() { 
+            Conditional<Fact>.Or(
+                When<Fact, DateTime>.GreaterThanEqual(nameof(Fact.expiration), DateTime.Now),
+                When<Fact, DateTime>.IsNull(nameof(Fact.expiration))
+            )};
+        if (factTypeFilter != null)
+            andcond.Add(When<Fact, string[]>.ContainsAny(nameof(Fact.factType), factTypeFilter));
+        if (categoryFilter != null)
+            andcond.Add(When<Fact, string[]>.ContainsAny(nameof(Fact.category), categoryFilter));
+        if (tagsFilter != null)
+            andcond.Add(When<Fact, string[]>.ContainsAny(nameof(Fact.tags), tagsFilter));
+        qg.Filter.Where(Conditional<Fact>.And(andcond.ToArray()));
+        qg.Fields.Additional.Add(Additional.Id, Additional.Distance);
         var query = new GraphQLQuery();
-
-        query.Query = $@"{{
+        query.Query = qg.ToString();
+        #region handmade query
+        var goal = $@"{{
     Get{{
       {Fact.ClassName} (
         nearText: {{
@@ -297,6 +322,7 @@ public class Oraculum
       }}
     }}
 }}";
+        #endregion
         var res = await _kb.Schema.RawQuery(query);
         if (res.Errors != null && res.Errors.Count > 0)
         {

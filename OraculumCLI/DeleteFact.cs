@@ -8,22 +8,19 @@ using System.Threading.Tasks;
 namespace OraculumCLI
 {
     [Cmdlet(VerbsCommon.Remove, "Fact")]
-    public class DeleteFact : Cmdlet
+    public class DeleteFact : OraculumPSCmdlet
     {
-        [Parameter(Mandatory = true)]
-        public Oraculum.Oraculum? Oraculum { get; set; }
-
         [Parameter(Mandatory = true)]
         public Guid? Id { get; set; }
 
         protected override void ProcessRecord()
         {
-            if (Oraculum == null || Id == null)
+            if (Id == null)
             {
                 WriteObject(false);
                 return;
             }
-            var j = Oraculum.DeleteFact(Id.Value);
+            var j = Connection.DeleteFact(Id.Value);
             j.Wait();
             WriteObject(j.Result);
         }

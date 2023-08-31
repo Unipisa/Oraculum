@@ -8,11 +8,8 @@ using System.Threading.Tasks;
 namespace OraculumCLI
 {
     [Cmdlet(VerbsCommon.Get, "Facts")]
-    public class ListFacts : Cmdlet
+    public class ListFacts : OraculumPSCmdlet
     {
-        [Parameter(Mandatory = true)]
-        public Oraculum.Oraculum Oraculum { get; set; } = null!;
-
         [Parameter]
         public long Limit { get; set; } = 1024;
 
@@ -27,7 +24,7 @@ namespace OraculumCLI
 
         protected override void ProcessRecord()
         {
-            var j = Oraculum.ListFacts(limit: Limit, offset: Offset, sort: Sort, order: Order);
+            var j = Connection.ListFacts(limit: Limit, offset: Offset, sort: Sort, order: Order);
             j.Wait();
             foreach (var o in j.Result)
             {

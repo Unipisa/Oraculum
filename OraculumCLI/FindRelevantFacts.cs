@@ -8,16 +8,13 @@ using System.Threading.Tasks;
 namespace OraculumCLI
 {
     [Cmdlet(VerbsCommon.Find, "RelevantFacts")]
-    public class FindRelevantFacts : Cmdlet
+    public class FindRelevantFacts : OraculumPSCmdlet
     {
-        [Parameter(Mandatory = true)]
-        public Oraculum.Oraculum? Oraculum { get; set; }
-
         [Parameter(Mandatory = true)]
         public string? Query { get; set; }
 
         [Parameter]
-        public double? Distance { get; set; } = null;
+        public float? Distance { get; set; } = null;
 
         [Parameter]
         public int? Limit { get; set; } = null;
@@ -37,12 +34,12 @@ namespace OraculumCLI
         protected override void ProcessRecord()
         {
             base.ProcessRecord();
-            if (Oraculum == null || Query == null)
+            if (Query == null)
             {
                 WriteObject(false);
                 return;
             }
-            var facts = Oraculum.FindRelevantFacts(Query, Limit, Distance, AutoCut, FactTypeFilter, CategoryFilter, TagsFilter);
+            var facts = Connection.FindRelevantFacts(Query, Limit, Distance, AutoCut, FactTypeFilter, CategoryFilter, TagsFilter);
 
             facts.Wait();
             

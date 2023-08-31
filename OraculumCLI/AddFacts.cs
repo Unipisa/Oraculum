@@ -9,18 +9,15 @@ using System.Threading.Tasks;
 namespace OraculumCLI
 {
     [Cmdlet(VerbsCommon.Add, "Facts")]
-    public class AddFacts : Cmdlet
+    public class AddFacts : OraculumPSCmdlet
     {
-        [Parameter(Mandatory = true)]
-        public Oraculum.Oraculum? Oraculum { get; set; }
-
         [Parameter(Mandatory = true)]
         public Fact[]? Facts { get; set; }
 
         protected override void ProcessRecord()
         {
             base.ProcessRecord();
-            var j = Oraculum.AddFact(Facts);
+            var j = Connection.AddFact(Facts);
             j.Wait();
             WriteObject(j.Result);
         }

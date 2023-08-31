@@ -9,11 +9,8 @@ using System.Threading.Tasks;
 namespace OraculumCLI
 {
     [Cmdlet(VerbsCommon.Add, "Fact")]
-    public class AddFact : Cmdlet
+    public class AddFact : OraculumPSCmdlet
     {
-        [Parameter(Mandatory = true)]
-        public Oraculum.Oraculum? Oraculum { get; set; }
-
         [Parameter(Mandatory = true)]
         public string? FactType { get; set; }
 
@@ -52,9 +49,7 @@ namespace OraculumCLI
                 reference = Reference,
                 expiration = Expiration
             };
-            var j = Oraculum.AddFact(fact);
-            j.Wait();
-            WriteObject(true);
+            Connection.AddFact(fact).Wait();
         }
     }
 }

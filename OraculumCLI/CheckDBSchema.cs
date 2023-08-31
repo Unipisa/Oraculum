@@ -8,19 +8,12 @@ using System.Threading.Tasks;
 namespace OraculumCLI
 {
     [Cmdlet("Test", "Schema")]
-    public class CheckDBSchema : Cmdlet
+    public class CheckDBSchema : OraculumPSCmdlet
     {
-        [Parameter(Mandatory = true)]
-        public Oraculum.Oraculum? Oraculum { get; set; }
         protected override void ProcessRecord()
         {
            base.ProcessRecord();
-            if (Oraculum == null)
-            {
-                WriteObject(false);
-                return;
-            }
-            var j = Oraculum.IsKBInitialized();
+            var j = Connection.IsKBInitialized();
             j.Wait();
             WriteObject(j.Result);
         }
