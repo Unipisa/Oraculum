@@ -24,11 +24,23 @@ namespace OraculumCLI
     [Cmdlet(VerbsCommunications.Connect, "Oraculum")]
     public class ConnectOraculum : PSCmdlet
     {
-        [Parameter(Mandatory = true)]
+        [Parameter]
+        public string? ConfigFile { get; set; }
+
+        [Parameter]
         public OraculumConfiguration Config { get; set; } = null!;
 
         protected override void ProcessRecord()
         {
+            if (ConfigFile != null)
+            {
+                var json = System.IO.File.ReadAllText(ConfigFile);
+                Config = OraculumConfiguration.FromJson(json)!;
+            } else if (Config == null)
+            {
+                throw new Exception("Either ConfigFile or Config must be set");
+            }
+
             var config = new Configuration()
             {
                 WeaviateEndpoint = Config.WeaviateEndpoint,

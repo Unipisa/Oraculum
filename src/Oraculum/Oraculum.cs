@@ -71,6 +71,14 @@ public class Oraculum
     private WeaviateClass<OraculumConfig>? _oraculumConfigClass;
     private WeaviateObject<OraculumConfig>? _oraculumConfig;
 
+    public Configuration Configuration
+    {
+        get
+        {
+            return _configuration;
+        }
+    }
+
     public Oraculum(Configuration conf) { 
         _configuration = conf;
         if (conf == null || conf.WeaviateEndpoint == null || conf.OpenAIApiKey == null)

@@ -22,6 +22,9 @@ namespace Oraculum
         public float? TopP { get; set; } = 1.0f;
         public float? FrequencyPenalty { get; set; } = 0.0f;
         public float? PresencePenalty { get; set; } = 0.0f;
+        public string[]? FactFilter { get; set; } = null;
+        public string[]? CategoryFilter { get; set; } = null;
+        public string[]? TagFilter { get; set; } = null;
     }
 
     internal class Actor
@@ -69,9 +72,11 @@ namespace Oraculum
                 await _oraculum.Connect();
         }
 
+        public ICollection<ChatMessage> History => _chat.Messages.Where(m => m.Role == Actor.Assistant || m.Role == Actor.User).ToList();
+
         public async Task<string?> Answer(string message)
         {
-            var facts = await _oraculum.FindRelevantFacts(message, limit: 5);
+            var facts = await _oraculum.FindRelevantFacts(message, limit: 5, factTypeFilter: _conf.FactFilter, categoryFilter: _conf.CategoryFilter, tagsFilter: _conf.TagFilter);
             var newfacts = facts.Where(f => !_memory.ContainsKey(f.id!.Value)).ToList();
             if (newfacts.Count > 0)
             {
@@ -82,13 +87,13 @@ namespace Oraculum
                 {
                     var n = factsdata.CreateElement(f.factType!);
                     if (f.citation != null)
-                        n.SetAttribute("cit", f.citation!);
+                        n.SetAttribute("cit", f.citation);
                     if (f.reference != null)
-                        n.SetAttribute("ref", f.reference!);
+                        n.SetAttribute("ref", f.reference);
                     if (f.title != null)
-                        n.SetAttribute("title", f.title!);
+                        n.SetAttribute("title", f.title);
                     if (f.content != null)
-                        n.InnerText = f.content!;
+                        n.InnerText = f.content;
                     root!.AppendChild(n);
                     _memory.Add(f.id!.Value, f);
                 }
