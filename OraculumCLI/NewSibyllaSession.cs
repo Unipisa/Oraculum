@@ -47,9 +47,18 @@ namespace OraculumCLI
                 var user = this.CommandRuntime.Host.UI.ReadLine();
                 if (user == "#quit")
                     break;
-                var j = sibylla.Answer(user);
-                j.Wait();
-                this.CommandRuntime.Host.UI.WriteLine(ConsoleColor.Yellow, ConsoleColor.Black, $"Assistant: {j.Result}");
+                this.CommandRuntime.Host.UI.Write(ConsoleColor.Yellow, ConsoleColor.Black, $"Assistant: ");
+                var ena = sibylla.AnswerAsync(user);
+                var en = ena.GetAsyncEnumerator();
+                while(true)
+                {
+                    var j = en.MoveNextAsync();
+                    j.AsTask().Wait();
+                    if (!j.Result)
+                        break;
+                    this.CommandRuntime.Host.UI.Write(ConsoleColor.Yellow, ConsoleColor.Black, $"{en.Current}");
+                }
+                this.CommandRuntime.Host.UI.WriteLine();
             } while (true);
         }
     }

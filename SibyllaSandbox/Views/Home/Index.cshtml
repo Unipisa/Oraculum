@@ -1,0 +1,120 @@
+﻿@model Oraculum.Sibylla
+
+@{
+    ViewData["Title"] = "Home Page";
+    var messages = Model.History;
+}
+
+<link rel="stylesheet" href="~/css/ChatStyles.css" />
+<!-- Import this CDN to use icons -->
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css" />
+
+<script type="text/javascript">
+    function loadChunk(id) {
+        $.ajax({
+            type: "GET",
+            url: "/Home/GetAnswer",
+            data: { "answerid": id },
+            success: function (data) {
+                $("#"+id).append(data.replaceAll('\n', '<br/>'));
+                $("#chat").scrollTop($("#chat")[0].scrollHeight);
+                setTimeout(() => { loadChunk(id); }, 300);
+            }
+        });
+    }
+
+    function answer() {
+        var text = $("#userreq").val();
+        $("#chat").append('<div class="outgoing-chats"><div class= "outgoing-chats-img" ><img src="/img/User.png" /></div><div class= "outgoing-msg"><div class="outgoing-chats-msg"><p class="multi-msg">'+text+'</p></div></div></div>');
+        $("#chat").scrollTop($("#chat")[0].scrollHeight);
+        $.ajax({
+            type: "POST",
+            url: "/Home/Answer",
+            data: { "question": text },
+            success: function (data) {
+                $("#chat").append('<div class="received-chats"><div class="received-chats-img"><img src="/img/Logo.png" /></div><div class= "received-msg" ><div class="received-msg-inbox" ><p><span id="'+data+'"/></p></div></div></div>');
+                $("#userreq").val("");
+                $("#chat").scrollTop($("#chat")[0].scrollHeight);
+                loadChunk(data);
+            }
+        });
+    }
+</script>
+
+<!-- Main container -->
+<div class="container">
+    <!-- msg-header section starts -->
+    <div class="msg-header">
+        <div class="container1">
+            <img src="~/img/Logo.png" class="msgimg" />
+            <div class="active">
+                <p>Assistente di supporto alla procedura missioni</p>
+            </div>
+        </div>
+    </div>
+    <!-- msg-header section ends -->
+    <!-- Chat inbox  -->
+    <div class="chat-page">
+        <div class="msg-inbox">
+            <div class="chats">
+                <!-- Message container -->
+                <div class="msg-page" id="chat">
+                    <!-- Incoming messages -->
+                    @{
+                        foreach (var m in messages)
+                        {
+                            if (m.Role == "assistant")
+                            {
+                                    <div class="received-chats">
+                                        <div class="received-chats-img">
+                                            <img src="~/img/Logo.png" />
+                                        </div>
+                                        <div class="received-msg">
+                                            <div class="received-msg-inbox">
+                                                <p>
+                                                   @m.Content
+                                                </p>
+                                                <!-- <span class="time">18:06 PM | July 24</span> -->
+                                            </div>
+                                        </div>
+                                    </div>
+                            } else if (m.Role == "user")
+                            {
+                                    <div class="outgoing-chats">
+                                        <div class="outgoing-chats-img">
+                                            <img src="~/img/User.png" />
+                                        </div>
+                                        <div class="outgoing-msg">
+                                            <div class="outgoing-chats-msg">
+                                                <p class="multi-msg">
+                                                    @m.Content
+                                                </p>
+
+                                                <!-- <span class="time">18:30 PM | July 24</span> -->
+                                            </div>
+                                        </div>
+                                    </div>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- msg-bottom section -->
+
+            <div class="msg-bottom">
+                <div class="input-group">
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Write message..."
+                           id="userreq"/>
+
+                    <span class="input-group-text send-icon">
+                        <i class="bi bi-send" onclick="answer()"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

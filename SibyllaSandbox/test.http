@@ -1,0 +1,21 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+
+POST https://localhost:32770/Home/Answer HTTP/1.1
+Content-Type: application/json
+Accept: */*
+Accept-Encoding: gzip, deflate, br
+Accept-Language: it-IT,it;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+Cookie: .AspNetCore.Session=CfDJ8AjQeocXIAlEvnWFsPornzGkdZHrJvpcTTyIh%2BosrN5LJbgXYX4nI7V%2Bl0WvA7UnT0ss%2FH0hvgD1tSTTNJeHlNDG%2B6BZ8J0CUII3JWU7HltSPdqku3WikqUTxBUzovEgVtW2l28jluArY0UtqFR8cUwGWzEhgz4IwR417txZQIQS
+Origin: https://localhost:32770
+Referer: https://localhost:32770/
+Sec-Ch-Ua: "Chromium";v="116", "Not)A;Brand";v="24", "Microsoft Edge";v="116"
+Sec-Ch-Ua-Mobile: ?0
+Sec-Ch-Ua-Platform: "Windows"
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-origin
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.62
+X-Requested-With: XMLHttpRequest
+
+question=Tipi+missione%3F

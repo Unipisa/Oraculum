@@ -5,9 +5,11 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Oraculum", "src\Oraculum\Oraculum.csproj", "{EEB1D86B-A59D-4958-A32A-7875C52F030A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OraculumTest", "OraculumTest\OraculumTest.csproj", "{0638F49B-CD93-47B0-8E2D-8B1C7CCDD8C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OraculumTest", "OraculumTest\OraculumTest.csproj", "{0638F49B-CD93-47B0-8E2D-8B1C7CCDD8C0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OraculumCLI", "OraculumCLI\OraculumCLI.csproj", "{6F3CC483-69DC-497C-9CCC-25A5DB90FDAB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OraculumCLI", "OraculumCLI\OraculumCLI.csproj", "{6F3CC483-69DC-497C-9CCC-25A5DB90FDAB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SibyllaSandbox", "SibyllaSandbox\SibyllaSandbox.csproj", "{B4AC21A4-CE5F-4687-94B4-31718A7D97AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{6F3CC483-69DC-497C-9CCC-25A5DB90FDAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F3CC483-69DC-497C-9CCC-25A5DB90FDAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F3CC483-69DC-497C-9CCC-25A5DB90FDAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4AC21A4-CE5F-4687-94B4-31718A7D97AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4AC21A4-CE5F-4687-94B4-31718A7D97AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4AC21A4-CE5F-4687-94B4-31718A7D97AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4AC21A4-CE5F-4687-94B4-31718A7D97AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

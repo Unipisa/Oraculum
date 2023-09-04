@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using OpenAI.ObjectModels.RequestModels;
 using OpenAI.ObjectModels;
 using System.Xml;
+using WeaviateNET.Query;
+using OpenAI.Interfaces;
 
 namespace Oraculum
 {
@@ -74,14 +76,53 @@ namespace Oraculum
 
         public ICollection<ChatMessage> History => _chat.Messages.Where(m => m.Role == Actor.Assistant || m.Role == Actor.User).ToList();
 
+        public async IAsyncEnumerable<string> AnswerAsync(string message)
+        {
+            await PrepreAnswer(message);
+
+            var m = new StringBuilder();
+
+            await foreach (var fragment in _openAiService.ChatCompletion.CreateCompletionAsStream(_chat))
+            {
+                if (fragment.Successful)
+                {
+                    var txt = fragment.Choices.First().Message.Content;
+                    m.Append(txt);
+                    yield return txt;
+                }
+            }
+            if (m.Length > 0)
+            {
+                _chat.Messages.Add(new ChatMessage(Actor.Assistant, m.ToString()));
+            }
+        }
+
         public async Task<string?> Answer(string message)
+        {
+            await PrepreAnswer(message);
+
+            var result = await _openAiService.ChatCompletion.CreateCompletion(_chat);
+            if (result.Successful)
+            {
+                var ret = result.Choices.First().Message.Content;
+                _chat.Messages.Add(new ChatMessage(Actor.Assistant, ret));
+                return ret;
+            }
+            return null;
+        }
+
+        private async Task PrepreAnswer(string message)
         {
             var facts = await _oraculum.FindRelevantFacts(message, limit: 5, factTypeFilter: _conf.FactFilter, categoryFilter: _conf.CategoryFilter, tagsFilter: _conf.TagFilter);
             var newfacts = facts.Where(f => !_memory.ContainsKey(f.id!.Value)).ToList();
             if (newfacts.Count > 0)
             {
+                var msg = _chat.Messages.Where(m => m.Role == Actor.System && m.Content.StartsWith("<facts>")).FirstOrDefault();
                 var factsdata = new XmlDocument();
-                factsdata.LoadXml("<facts></facts>");
+
+                if (msg == null) factsdata.LoadXml("<facts></facts>");
+                else factsdata.LoadXml(msg.Content);
+
                 var root = factsdata.ChildNodes[0];
                 foreach (var f in newfacts)
                 {
@@ -97,18 +138,12 @@ namespace Oraculum
                     root!.AppendChild(n);
                     _memory.Add(f.id!.Value, f);
                 }
-                _chat.Messages.Add(new ChatMessage(Actor.System, factsdata.OuterXml));
+                if (msg == null)
+                    _chat.Messages.Add(new ChatMessage(Actor.System, factsdata.OuterXml));
+                else
+                    msg.Content = factsdata.OuterXml;
             }
             _chat.Messages.Add(new ChatMessage(Actor.User, message));
-
-            var result = await _openAiService.ChatCompletion.CreateCompletion(_chat);
-            if (result.Successful)
-            {
-                var ret = result.Choices.First().Message.Content;
-                _chat.Messages.Add(new ChatMessage(Actor.Assistant, ret));
-                return ret;
-            }
-            return null;
         }
     }
 }
