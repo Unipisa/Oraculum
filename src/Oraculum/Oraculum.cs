@@ -17,6 +17,11 @@ namespace Oraculum;
 
 public class Configuration
 {
+    public static Configuration FromJson(string json)
+    {
+        return System.Text.Json.JsonSerializer.Deserialize<Configuration>(json)!;
+    }
+
     public string? WeaviateEndpoint { get; set; }
     public string? WeaviateApiKey { get; set; }
     public string? OpenAIApiKey { get; set; }

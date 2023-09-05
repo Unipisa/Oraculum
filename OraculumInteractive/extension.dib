@@ -1,0 +1,2 @@
+﻿#!csharp
+OraculumInteractive.OraculumKernelExtension.LoadOraculum(Microsoft.DotNet.Interactive.KernelInvocationContext.Current.HandlingKernel.RootKernel);

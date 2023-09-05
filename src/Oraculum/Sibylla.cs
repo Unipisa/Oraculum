@@ -16,6 +16,11 @@ namespace Oraculum
 {
     public class SibyllaConf
     {
+        public static SibyllaConf FromJson(string json)
+        {
+            return System.Text.Json.JsonSerializer.Deserialize<SibyllaConf>(json)!;
+        }
+
         public string? BaseSystemPrompt { get; set; }
         public string? BaseAssistantPrompt { get; set; }
         public int MaxTokens { get; set; } = 150;
@@ -76,9 +81,9 @@ namespace Oraculum
 
         public ICollection<ChatMessage> History => _chat.Messages.Where(m => m.Role == Actor.Assistant || m.Role == Actor.User).ToList();
 
-        public async IAsyncEnumerable<string> AnswerAsync(string message)
+        public async IAsyncEnumerable<string> AnswerAsync(string message, string[]? factFilter = null, string[]? categoryFilter = null, string[]? tagFilter = null)
         {
-            await PrepreAnswer(message);
+            await PrepreAnswer(message, factFilter, categoryFilter, tagFilter);
 
             var m = new StringBuilder();
 
@@ -97,9 +102,9 @@ namespace Oraculum
             }
         }
 
-        public async Task<string?> Answer(string message)
+        public async Task<string?> Answer(string message, string[]? factFilter = null, string[]? categoryFilter = null, string[]? tagFilter = null)
         {
-            await PrepreAnswer(message);
+            await PrepreAnswer(message, factFilter, categoryFilter, tagFilter);
 
             var result = await _openAiService.ChatCompletion.CreateCompletion(_chat);
             if (result.Successful)
@@ -111,9 +116,9 @@ namespace Oraculum
             return null;
         }
 
-        private async Task PrepreAnswer(string message)
+        private async Task PrepreAnswer(string message, string[]? factFilter = null, string[]? categoryFilter = null, string[]? tagFilter = null)
         {
-            var facts = await _oraculum.FindRelevantFacts(message, limit: 5, factTypeFilter: _conf.FactFilter, categoryFilter: _conf.CategoryFilter, tagsFilter: _conf.TagFilter);
+            var facts = await _oraculum.FindRelevantFacts(message, limit: 5, factTypeFilter: factFilter ?? _conf.FactFilter, categoryFilter: categoryFilter ?? _conf.CategoryFilter, tagsFilter: tagFilter ?? _conf.TagFilter);
             var newfacts = facts.Where(f => !_memory.ContainsKey(f.id!.Value)).ToList();
             if (newfacts.Count > 0)
             {

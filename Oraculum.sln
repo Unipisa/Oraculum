@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OraculumTest", "OraculumTes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OraculumCLI", "OraculumCLI\OraculumCLI.csproj", "{6F3CC483-69DC-497C-9CCC-25A5DB90FDAB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SibyllaSandbox", "SibyllaSandbox\SibyllaSandbox.csproj", "{B4AC21A4-CE5F-4687-94B4-31718A7D97AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SibyllaSandbox", "SibyllaSandbox\SibyllaSandbox.csproj", "{B4AC21A4-CE5F-4687-94B4-31718A7D97AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OraculumInteractive", "OraculumInteractive\OraculumInteractive.csproj", "{A58821AF-F27F-4E05-B364-1499988A5EFB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{B4AC21A4-CE5F-4687-94B4-31718A7D97AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B4AC21A4-CE5F-4687-94B4-31718A7D97AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4AC21A4-CE5F-4687-94B4-31718A7D97AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A58821AF-F27F-4E05-B364-1499988A5EFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A58821AF-F27F-4E05-B364-1499988A5EFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A58821AF-F27F-4E05-B364-1499988A5EFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A58821AF-F27F-4E05-B364-1499988A5EFB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
