@@ -4,6 +4,8 @@ The aim of this project is to create a lightweight and easy to deploy AI assista
 
 Facts are small chunks of information with metadata (i.e. *category*, or a citation string) and are selected for engineering a prompt by the chat assistant named *Sibylla* for answering question about topics in the knowledge base. It is possible to have multiple Sibyllae accessing the *Oraculum* knowledge base whose behavior is affected by the specific prompt used to configure each of them.
 
+![System architecture](Architecture.png "System architecture")
+
 ## Why another one?
 When I started developing this project the main reasons are:
 

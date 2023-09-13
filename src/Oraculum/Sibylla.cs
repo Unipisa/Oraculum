@@ -11,6 +11,7 @@ using OpenAI.ObjectModels;
 using System.Xml;
 using WeaviateNET.Query;
 using OpenAI.Interfaces;
+using OpenAI.Tokenizer.GPT3;
 
 namespace Oraculum
 {
