@@ -1,8 +1,20 @@
 # Oraculum and Sibylla
 
-The aim of this project is to create a lightweight and easy to deploy AI assistant dedicated to answer to questions using a knowledge base expressed in facts. Relying on a vector database (Weaviate) the knowledge is "semantically" indexed using *embeddings* so that information expressed in a language can be queried using different languages.
+The aim of this project is to create a lightweight and easy to deploy AI assistant dedicated to answer
+to questions using a knowledge base expressed in facts. Relying on a vector database (Weaviate) the 
+knowledge is "semantically" indexed using *embeddings* so that information expressed in a language can 
+be queried using different languages.
 
-Facts are small chunks of information with metadata (i.e. *category*, or a citation string) and are selected for engineering a prompt by the chat assistant named *Sibylla* for answering question about topics in the knowledge base. It is possible to have multiple Sibyllae accessing the *Oraculum* knowledge base whose behavior is affected by the specific prompt used to configure each of them.
+Facts are small chunks of information with metadata (i.e. *category*, or a citation string) and are
+selected for engineering a prompt by the chat assistant named *Sibylla* for answering question about
+topics in the knowledge base. It is possible to have multiple Sibyllae accessing the *Oraculum* knowledge
+base whose behavior is affected by the specific prompt used to configure each of them.
+
+Knowledge is added to the system using a set of PowerShell cmdlets that can be used to spider and
+preprocess information from different sources (i.e. web pages, documents, etc.) and then add them to
+the knowledge base. To monitor the evolution of the knowledge and the behavior of the Sibyllae the project
+also includes a .NET Interactive notebook that can be used to inspect the knowledge base and instantiate
+multiple Sibyllae for testing.
 
 ![System architecture](Architecture.png "System architecture")
 
@@ -15,6 +27,12 @@ When I started developing this project the main reasons are:
 - Focus on tools for knowledge management, not on AI assistant
 
 The project it's still in his infancy but it can be used in production if you want to quickly start with AI in your systems.
+
+## What's new
+
+### Version 1.0.2
+- Exposed `Configuration` property in `Sibylla` class
+- Added `Title` property to `SibyllaConf`
 
 ## What you need to start
 In the jungle of models, companies, and tools of nowadays AI I decided for a set of tools, the overall system can be reasonably adapted to other tools but if you want to use it you need:
