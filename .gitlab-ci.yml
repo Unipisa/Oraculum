@@ -1,0 +1,12 @@
+include:
+  project: "cineca-toolkit/cicd/gitlab-ci"
+  ref: main # il branch/tag dal quale prendere la configurazione
+  file:
+     - /base.ci.yaml
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  DOCKERFILE_PATH: "SibyllaSandbox/Dockerfile"
+  CONTEXT_PATH: "${CI_PROJECT_DIR}/SibyllaSandbox"
+  IMAGE_NAME: "be-sibyllasandbox"
+  COMPRESSED_CACHING: "true"
