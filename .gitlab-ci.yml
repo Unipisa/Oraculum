@@ -5,6 +5,7 @@ include:
      - /base.ci.yaml
 
 variables:
+  CI_DOCKERFILE_PATH: "SibyllaSandbox/Dockerfile"
   DOCKERFILE_PATH: "SibyllaSandbox/Dockerfile"
   CONTEXT_PATH: "${CI_PROJECT_DIR}/SibyllaSandbox"
   IMAGE_NAME: "be-sibyllasandbox"
