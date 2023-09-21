@@ -5,7 +5,6 @@ include:
      - /base.ci.yaml
 
 variables:
-  GIT_SUBMODULE_STRATEGY: recursive
   DOCKERFILE_PATH: "SibyllaSandbox/Dockerfile"
   CONTEXT_PATH: "${CI_PROJECT_DIR}/SibyllaSandbox"
   IMAGE_NAME: "be-sibyllasandbox"
