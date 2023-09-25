@@ -7,8 +7,7 @@
 
 <link rel="stylesheet" href="~/css/ChatStyles.css" />
 <!-- Import this CDN to use icons -->
-<link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css" />
 
 <script type="text/javascript">
     function loadChunk(id) {
@@ -17,7 +16,7 @@
             url: "/Home/GetAnswer",
             data: { "answerid": id },
             success: function (data) {
-                $("#"+id).append(data.replaceAll('\n', '<br/>'));
+                $("#" + id).append(data.replaceAll('\n', '<br/>'));
                 $("#chat").scrollTop($("#chat")[0].scrollHeight);
                 setTimeout(() => { loadChunk(id); }, 300);
             }
@@ -26,14 +25,14 @@
 
     function answer() {
         var text = $("#userreq").val();
-        $("#chat").append('<div class="outgoing-chats"><div class= "outgoing-chats-img" ><img src="/img/User.png" /></div><div class= "outgoing-msg"><div class="outgoing-chats-msg"><p class="multi-msg">'+text+'</p></div></div></div>');
+        $("#chat").append('<div class="outgoing-chats"><div class= "outgoing-chats-img" ><img src="/img/User.png" /></div><div class= "outgoing-msg"><div class="outgoing-chats-msg"><p class="multi-msg">' + text + '</p></div></div></div>');
         $("#chat").scrollTop($("#chat")[0].scrollHeight);
         $.ajax({
             type: "POST",
             url: "/Home/Answer",
             data: { "question": text },
             success: function (data) {
-                $("#chat").append('<div class="received-chats"><div class="received-chats-img"><img src="/img/Logo.png" /></div><div class= "received-msg" ><div class="received-msg-inbox" ><p><span id="'+data+'"/></p></div></div></div>');
+                $("#chat").append('<div class="received-chats"><div class="received-chats-img"><img src="/img/Logo.png" /></div><div class= "received-msg" ><div class="received-msg-inbox" ><p><span id="' + data + '"/></p></div></div></div>');
                 $("#userreq").val("");
                 $("#chat").scrollTop($("#chat")[0].scrollHeight);
                 loadChunk(data);
@@ -49,7 +48,7 @@
         <div class="container1">
             <img src="~/img/Logo.png" class="msgimg" />
             <div class="active">
-                <p>Assistente di supporto alla procedura missioni</p>
+                <p>Assistente di Scienze delle costruzioni</p>
             </div>
         </div>
     </div>
@@ -66,35 +65,36 @@
                         {
                             if (m.Role == "assistant")
                             {
-                                    <div class="received-chats">
-                                        <div class="received-chats-img">
-                                            <img src="~/img/Logo.png" />
-                                        </div>
-                                        <div class="received-msg">
-                                            <div class="received-msg-inbox">
-                                                <p>
-                                                   @m.Content
-                                                </p>
-                                                <!-- <span class="time">18:06 PM | July 24</span> -->
-                                            </div>
+                                <div class="received-chats">
+                                    <div class="received-chats-img">
+                                        <img src="~/img/Logo.png" />
+                                    </div>
+                                    <div class="received-msg">
+                                        <div class="received-msg-inbox">
+                                            <p>
+                                                @m.Content
+                                            </p>
+                                            <!-- <span class="time">18:06 PM | July 24</span> -->
                                         </div>
                                     </div>
-                            } else if (m.Role == "user")
+                                </div>
+                            }
+                            else if (m.Role == "user")
                             {
-                                    <div class="outgoing-chats">
-                                        <div class="outgoing-chats-img">
-                                            <img src="~/img/User.png" />
-                                        </div>
-                                        <div class="outgoing-msg">
-                                            <div class="outgoing-chats-msg">
-                                                <p class="multi-msg">
-                                                    @m.Content
-                                                </p>
+                                <div class="outgoing-chats">
+                                    <div class="outgoing-chats-img">
+                                        <img src="~/img/User.png" />
+                                    </div>
+                                    <div class="outgoing-msg">
+                                        <div class="outgoing-chats-msg">
+                                            <p class="multi-msg">
+                                                @m.Content
+                                            </p>
 
-                                                <!-- <span class="time">18:30 PM | July 24</span> -->
-                                            </div>
+                                            <!-- <span class="time">18:30 PM | July 24</span> -->
                                         </div>
                                     </div>
+                                </div>
                             }
                         }
                     }
@@ -105,11 +105,8 @@
 
             <div class="msg-bottom">
                 <div class="input-group">
-                    <input type="text"
-                           class="form-control"
-                           placeholder="Write message..."
-                           id="userreq"/>
-
+                    <input type="text" class="form-control" placeholder="Write message..." id="userreq"
+                        onkeydown="if (event.keyCode == 13) answer()" />
                     <span class="input-group-text send-icon">
                         <i class="bi bi-send" onclick="answer()"></i>
                     </span>
