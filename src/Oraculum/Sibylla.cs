@@ -150,6 +150,8 @@ namespace Oraculum
                     msg.Content = factsdata.OuterXml;
             }
             _chat.Messages.Add(new ChatMessage(Actor.User, message));
+            // add base system prompt again to make sure the assistant responds to the user correctly
+            _chat.Messages.Add(new ChatMessage(Actor.System, _conf.BaseSystemPrompt!));
         }
     }
 }
