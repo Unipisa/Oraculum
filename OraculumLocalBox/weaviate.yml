@@ -1,0 +1,20 @@
+version: '3.4'
+
+services:
+  weaviate:
+    container_name: weaviate
+    image: semitechnologies/weaviate:1.21.3
+    restart: always
+    ports:
+            - "8080:8080"
+    environment:
+       QUERY_DEFAULT_LIMITS: 20
+       CLUSTER_HOSTNAME: 'weaviate-0'
+       #AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+       AUTHENTICATION_APIKEY_ENABLED: 'true'
+       AUTHENTICATION_APIKEY_ALLOWED_KEYS: 'b0fb1f2a-211f-4ced-8cdf-6564ebe6fac5'
+       AUTHENTICATION_APIKEY_USERS: 'myuser@email.it'
+       PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
+       DEFAULT_VECTORIZER_MODULE: text2vec-openai
+       ENABLE_MODULES: text2vec-openai
+       OPENAI_APIKEY: sk-<your-openai-api-key>
