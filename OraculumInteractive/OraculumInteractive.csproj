@@ -4,6 +4,14 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Version>1.0.0</Version>
+    <Company>Università di Pisa</Company>
+    <Description>Oraculum kernel for .NET interactive</Description>
+    <Copyright>(C) 2023</Copyright>
+    <PackageProjectUrl>https://github.com/Unipisa/Oraculum</PackageProjectUrl>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/Unipisa/Oraculum</RepositoryUrl>
+    <PackageReleaseNotes>First public release</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +32,10 @@
     <None Update="extension.dib">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>extension.cs</LastGenOutput>
+    </None>
+    <None Update="Readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
 	
