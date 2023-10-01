@@ -21,7 +21,7 @@ Edit the _secret_ files just copied and fill the OpenAI API key and Organization
 
 ## .NET Api
 
-Open the _dotnetplayground.ipynb_ notebook in Visual Studio code and run it.
+Open the _dotnetplayground.ipynb_ notebook in Visual Studio code and run it. You need _.NET Interactive_ and _Polyglot_ to interactively test the .NET API.
 
 ## PowerShell Api
 
