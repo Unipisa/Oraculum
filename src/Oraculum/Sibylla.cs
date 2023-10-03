@@ -22,6 +22,7 @@ namespace Oraculum
             return System.Text.Json.JsonSerializer.Deserialize<SibyllaConf>(json)!;
         }
 
+        public string? Title { get; set; }
         public string? BaseSystemPrompt { get; set; }
         public string? BaseAssistantPrompt { get; set; }
         public int MaxTokens { get; set; } = 150;
@@ -73,6 +74,8 @@ namespace Oraculum
             };
             _memory = new Dictionary<Guid, Fact>();
         }
+
+        public SibyllaConf Configuration { get { return _conf; } }
 
         public async Task Connect()
         {
