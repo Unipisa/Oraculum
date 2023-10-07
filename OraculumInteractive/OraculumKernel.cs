@@ -48,7 +48,10 @@ namespace OraculumInteractive
         async Task IKernelCommandHandler<SubmitCode>.HandleAsync(SubmitCode command, KernelInvocationContext context)
         {
             var client = await ConnectSibyllaAsync();
-            var answer = await client.Answer(command.Code, categoryFilter: categoryFilterOverride);
+            var answer = await client.Answer(command.Code, new KnowledgeFilter()
+            { 
+                CategoryFilter = categoryFilterOverride
+            });
             var formattedValues = FormattedValue.CreateManyFromObject(answer);
             var returnValueProduced = new ReturnValueProduced(answer, command, formattedValues);
             context.Publish(returnValueProduced);
