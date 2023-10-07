@@ -12,6 +12,7 @@ using System.Xml;
 using WeaviateNET.Query;
 using OpenAI.Interfaces;
 using OpenAI.Tokenizer.GPT3;
+using System.Runtime.CompilerServices;
 
 namespace Oraculum
 {
@@ -34,6 +35,9 @@ namespace Oraculum
         public string[]? FactFilter { get; set; } = null;
         public string[]? CategoryFilter { get; set; } = null;
         public string[]? TagFilter { get; set; } = null;
+        public int FactMemoryTTL { get; set; } = 5;
+        public int MemorySpan { get; set; } = 4;
+        public string? OutOfScopeTag = "*&oo&*";
     }
 
     internal class Actor
@@ -43,17 +47,22 @@ namespace Oraculum
         internal const string Assistant = "assistant";
     }
 
+    public class KnowledgeFilter
+    {
+        public string[]? FactTypeFilter = null;
+        public string[]? CategoryFilter = null;
+        public string[]? TagsFilter = null;
+    }
+
     public class Sibylla
     {
-        private Oraculum _oraculum;
         private OpenAIService _openAiService;
         private ChatCompletionCreateRequest _chat;
-        private Dictionary<Guid, Fact> _memory;
+        private Memory _memory;
         private SibyllaConf _conf;
 
         public Sibylla(Configuration conf, SibyllaConf sybillaConf)
         {
-            _oraculum = new Oraculum(conf);
             _conf = sybillaConf;
             _openAiService = new OpenAIService(new OpenAiOptions()
             {
@@ -72,22 +81,26 @@ namespace Oraculum
                 new ChatMessage(Actor.System, sybillaConf.BaseSystemPrompt!),
                 new ChatMessage(Actor.Assistant, sybillaConf.BaseAssistantPrompt!)
             };
-            _memory = new Dictionary<Guid, Fact>();
+            _memory = new Memory(new Oraculum(conf), _conf.FactMemoryTTL);
+            _memory.History.AddRange(new[]
+            {
+                new ChatMessage(Actor.Assistant, sybillaConf.BaseAssistantPrompt!)
+            });
         }
 
         public SibyllaConf Configuration { get { return _conf; } }
 
         public async Task Connect()
         {
-            if (!_oraculum.IsConnected)
-                await _oraculum.Connect();
+            if (!_memory.Oraculum.IsConnected)
+                await _memory.Oraculum.Connect();
         }
 
-        public ICollection<ChatMessage> History => _chat.Messages.Where(m => m.Role == Actor.Assistant || m.Role == Actor.User).ToList();
+        public ICollection<ChatMessage> History => _memory.History.ToList();
 
-        public async IAsyncEnumerable<string> AnswerAsync(string message, string[]? factFilter = null, string[]? categoryFilter = null, string[]? tagFilter = null)
+        public async IAsyncEnumerable<string> AnswerAsync(string message, KnowledgeFilter? filter = null)
         {
-            await PrepreAnswer(message, factFilter, categoryFilter, tagFilter);
+            await PrepreAnswer(message, filter);
 
             var m = new StringBuilder();
 
@@ -103,56 +116,39 @@ namespace Oraculum
             if (m.Length > 0)
             {
                 _chat.Messages.Add(new ChatMessage(Actor.Assistant, m.ToString()));
+                _memory.History.Add(new ChatMessage(Actor.Assistant, m.ToString()));
             }
         }
 
-        public async Task<string?> Answer(string message, string[]? factFilter = null, string[]? categoryFilter = null, string[]? tagFilter = null)
+        public async Task<string?> Answer(string message, KnowledgeFilter? filter = null)
         {
-            await PrepreAnswer(message, factFilter, categoryFilter, tagFilter);
+            await PrepreAnswer(message, filter);
 
             var result = await _openAiService.ChatCompletion.CreateCompletion(_chat);
             if (result.Successful)
             {
                 var ret = result.Choices.First().Message.Content;
                 _chat.Messages.Add(new ChatMessage(Actor.Assistant, ret));
+                _memory.History.Add(new ChatMessage(Actor.Assistant, ret));
                 return ret;
             }
             return null;
         }
 
-        private async Task PrepreAnswer(string message, string[]? factFilter = null, string[]? categoryFilter = null, string[]? tagFilter = null)
+        private async Task PrepreAnswer(string message, KnowledgeFilter? filter = null)
         {
-            var facts = await _oraculum.FindRelevantFacts(message, limit: 5, factTypeFilter: factFilter ?? _conf.FactFilter, categoryFilter: categoryFilter ?? _conf.CategoryFilter, tagsFilter: tagFilter ?? _conf.TagFilter);
-            var newfacts = facts.Where(f => !_memory.ContainsKey(f.id!.Value)).ToList();
-            if (newfacts.Count > 0)
-            {
-                var msg = _chat.Messages.Where(m => m.Role == Actor.System && m.Content.StartsWith("<facts>")).FirstOrDefault();
-                var factsdata = new XmlDocument();
+            if (filter == null)
+                filter = new KnowledgeFilter();
 
-                if (msg == null) factsdata.LoadXml("<facts></facts>");
-                else factsdata.LoadXml(msg.Content);
-
-                var root = factsdata.ChildNodes[0];
-                foreach (var f in newfacts)
-                {
-                    var n = factsdata.CreateElement(f.factType!);
-                    if (f.citation != null)
-                        n.SetAttribute("cit", f.citation);
-                    if (f.reference != null)
-                        n.SetAttribute("ref", f.reference);
-                    if (f.title != null)
-                        n.SetAttribute("title", f.title);
-                    if (f.content != null)
-                        n.InnerText = f.content;
-                    root!.AppendChild(n);
-                    _memory.Add(f.id!.Value, f);
-                }
-                if (msg == null)
-                    _chat.Messages.Add(new ChatMessage(Actor.System, factsdata.OuterXml));
-                else
-                    msg.Content = factsdata.OuterXml;
-            }
+            var (xml, msg) = await _memory.Recall(message, filter);
+            _chat.Messages.Clear();
+            _chat.Messages.Add(new ChatMessage(Actor.System, _conf.BaseSystemPrompt!));
+            _chat.Messages.Add(new ChatMessage(Actor.System, xml.OuterXml));
+            _chat.Messages.Add(new ChatMessage(Actor.Assistant, _conf.BaseAssistantPrompt!));
+            foreach (var m in msg)
+                _chat.Messages.Add(m);
             _chat.Messages.Add(new ChatMessage(Actor.User, message));
+            _memory.History.Add(new ChatMessage(Actor.User, message));
         }
     }
 }
