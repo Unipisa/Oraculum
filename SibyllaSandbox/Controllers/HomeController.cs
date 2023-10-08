@@ -13,48 +13,37 @@ namespace SibyllaSandbox.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly SibyllaManager _sibyllaManager;
-        private readonly IConfiguration _configuration;
 
-        public HomeController(ILogger<HomeController> logger, SibyllaManager sibyllaManager, IConfiguration configuration)
+        public HomeController(ILogger<HomeController> logger, SibyllaManager sibyllaManager)
         {
             _logger = logger;
             _sibyllaManager = sibyllaManager;
-            _configuration = configuration;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            Sibylla sibylla = ConnectSibylla();
+            Sibylla sibylla = await ConnectSibylla();
             return View(sibylla);
         }
 
-        private Sibylla ConnectSibylla()
+        private async Task<Sibylla> ConnectSibylla()
         {
             var sibyllaKey = HttpContext.Session.GetString("sibyllaRef");
             if (sibyllaKey == null)
             {
-                sibyllaKey = Guid.NewGuid().ToString();
-                HttpContext.Session.SetString("sibyllaRef", sibyllaKey);
-                var oc = new Oraculum.Configuration()
-                {
-                    WeaviateEndpoint = _configuration["Weaviate:ServiceEndpoint"],
-                    WeaviateApiKey = _configuration["Weaviate:ApiKey"],
-                    OpenAIApiKey = _configuration["OpenAI:ApiKey"],
-                    OpenAIOrgId = _configuration["OpenAI:OrgId"]
-                };
-                var sc = _configuration.GetSection("Sibylla").Get<SibyllaConf>();
-                var ns = new Sibylla(oc, sc);
-                ns.Connect().Wait();
-                _sibyllaManager.Sibyllae.Add(sibyllaKey, ns);
+                // It would be nice to align the expiration of the Sibylla with the expiration of the session.
+                var (id, _) = await _sibyllaManager.AddSibylla("Demo", expiration: DateTime.Now.AddMinutes(60));
+                HttpContext.Session.SetString("sibyllaRef", id.ToString());
+                sibyllaKey = id.ToString();
             }
-            var sibylla = _sibyllaManager.Sibyllae[sibyllaKey];
+            var sibylla = _sibyllaManager.GetSibylla("Demo", Guid.Parse(sibyllaKey));
             return sibylla;
         }
 
         [HttpPost]
-        public string Answer(string question)
+        public async Task<string> Answer(string question)
         {
-            var Sibylla = ConnectSibylla();
+            var Sibylla = await ConnectSibylla();
             var answerid = Guid.NewGuid().ToString();
             _sibyllaManager.Response.Add(answerid, new List<string>());
             var t = Task.Run(() => {
