@@ -15,7 +15,15 @@ builder.Services.AddSession(builder =>
     builder.Cookie.IsEssential = true;
 });
 
-builder.Services.AddSingleton<SibyllaManager>();
+var _configuration = builder.Configuration;
+var _env = builder.Environment;
+builder.Services.AddSingleton<SibyllaManager>(new SibyllaManager(new Oraculum.Configuration()
+{
+    WeaviateEndpoint = _configuration["Weaviate:ServiceEndpoint"],
+    WeaviateApiKey = _configuration["Weaviate:ApiKey"],
+    OpenAIApiKey = _configuration["OpenAI:ApiKey"],
+    OpenAIOrgId = _configuration["OpenAI:OrgId"]
+}, Path.Combine(_env.ContentRootPath, "SibyllaeConf")));
 
 var app = builder.Build();
 
