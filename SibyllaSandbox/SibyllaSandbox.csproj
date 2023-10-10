@@ -9,11 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="SibyllaeConf\Demo.json" />
+    <Content Remove="SibyllaeConf\sdc.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="SibyllaeConf\Demo.json">
+    <None Include="SibyllaeConf\sdc.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

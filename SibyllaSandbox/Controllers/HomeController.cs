@@ -32,11 +32,11 @@ namespace SibyllaSandbox.Controllers
             if (sibyllaKey == null)
             {
                 // It would be nice to align the expiration of the Sibylla with the expiration of the session.
-                var (id, _) = await _sibyllaManager.AddSibylla("Demo", expiration: DateTime.Now.AddMinutes(60));
+                var (id, _) = await _sibyllaManager.AddSibylla("sdc", expiration: DateTime.Now.AddMinutes(60));
                 HttpContext.Session.SetString("sibyllaRef", id.ToString());
                 sibyllaKey = id.ToString();
             }
-            var sibylla = _sibyllaManager.GetSibylla("Demo", Guid.Parse(sibyllaKey));
+            var sibylla = _sibyllaManager.GetSibylla("sdc", Guid.Parse(sibyllaKey));
             return sibylla;
         }
 
@@ -46,7 +46,8 @@ namespace SibyllaSandbox.Controllers
             var Sibylla = await ConnectSibylla();
             var answerid = Guid.NewGuid().ToString();
             _sibyllaManager.Response.Add(answerid, new List<string>());
-            var t = Task.Run(() => {
+            var t = Task.Run(() =>
+            {
                 var ena = Sibylla.AnswerAsync(question);
                 var en = ena.GetAsyncEnumerator();
                 while (true)
