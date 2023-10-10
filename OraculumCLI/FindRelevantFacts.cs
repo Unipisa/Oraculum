@@ -39,7 +39,15 @@ namespace OraculumCLI
                 WriteObject(false);
                 return;
             }
-            var facts = Connection.FindRelevantFacts(Query, Limit, Distance, AutoCut, FactTypeFilter, CategoryFilter, TagsFilter);
+            var facts = Connection.FindRelevantFacts(Query, new Oraculum.FactFilter() 
+            {
+                Limit = Limit,
+                Distance = Distance,
+                Autocut = AutoCut,
+                FactTypeFilter = FactTypeFilter,
+                CategoryFilter = CategoryFilter,
+                TagsFilter = TagsFilter
+            });
 
             facts.Wait();
             

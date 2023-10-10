@@ -52,7 +52,12 @@ namespace OraculumTest
         public async Task TestRelevantFacts()
         {
             Assert.IsNotNull(oraculum);
-            var facts = await oraculum.FindRelevantFacts("Cosa sono i codici PAST?", limit: 5, distance: 0.23f, factTypeFilter: new[]{ "faq" });
+            var facts = await oraculum.FindRelevantFacts("Cosa sono i codici PAST?", new FactFilter()
+            {
+                Limit = 5,
+                Distance = 0.23f,
+                FactTypeFilter = new[] { "faq" }
+            });
             Assert.IsNotNull(facts);
         }
 

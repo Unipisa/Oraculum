@@ -40,6 +40,16 @@ public class OraculumConfig
     public int schemaMinorVersion;
 }
 
+public class FactFilter
+{
+    public int? Limit = null;
+    public float? Distance = null;
+    public int? Autocut = null;
+    public string[]? FactTypeFilter = null;
+    public string[]? CategoryFilter = null;
+    public string[]? TagsFilter = null;
+}
+
 [IndexNullState]
 public class Fact
 {
@@ -62,9 +72,15 @@ public class Fact
     public string? citation;
     public string? reference;
     public DateTime? expiration;
+    //public GeoCoordinates? location;
+    //public string? locationName;
+    //public string[]? editPrincipals;
+    //public DateTime? validFrom;
+    //public DateTime? validTo;
+    //public WeaviateRef[]? references;
 }
 
-public class Oraculum
+    public class Oraculum
 {
     internal const int MajorVersion = 1;
     internal const int MinorVersion = 0;
@@ -254,88 +270,32 @@ public class Oraculum
         return ret;
     }
 
-    public async Task<ICollection<Fact>> FindRelevantFacts(string concept, int? limit = null, float? distance = null, int? autocut = null, string[]? factTypeFilter = null, string[]? categoryFilter = null, string[]? tagsFilter = null)
+    public async Task<ICollection<Fact>> FindRelevantFacts(string concept, FactFilter? factFilter = null)
     {
         ensureConnection();
 
+        if (factFilter == null)
+            factFilter = new FactFilter();
+
         var qg = _facts.CreateGetQuery(selectall: true);
-        qg.Filter.NearText(concept, distance: distance);
-        if (limit.HasValue) qg.Filter.Limit(limit.Value);
-        if (autocut.HasValue) qg.Filter.Autocut(autocut.Value);
+        qg.Filter.NearText(concept, distance: factFilter.Distance);
+        if (factFilter.Limit.HasValue) qg.Filter.Limit(factFilter.Limit.Value);
+        if (factFilter.Autocut.HasValue) qg.Filter.Autocut(factFilter.Autocut.Value);
         var andcond = new List<ConditionalAtom<Fact>>() { 
             Conditional<Fact>.Or(
                 When<Fact, DateTime>.GreaterThanEqual(nameof(Fact.expiration), DateTime.Now),
                 When<Fact, DateTime>.IsNull(nameof(Fact.expiration))
             )};
-        if (factTypeFilter != null)
-            andcond.Add(When<Fact, string[]>.ContainsAny(nameof(Fact.factType), factTypeFilter));
-        if (categoryFilter != null)
-            andcond.Add(When<Fact, string[]>.ContainsAny(nameof(Fact.category), categoryFilter));
-        if (tagsFilter != null)
-            andcond.Add(When<Fact, string[]>.ContainsAny(nameof(Fact.tags), tagsFilter));
+        if (factFilter.FactTypeFilter != null)
+            andcond.Add(When<Fact, string[]>.ContainsAny(nameof(Fact.factType), factFilter.FactTypeFilter));
+        if (factFilter.CategoryFilter != null)
+            andcond.Add(When<Fact, string[]>.ContainsAny(nameof(Fact.category), factFilter.CategoryFilter));
+        if (factFilter.TagsFilter != null)
+            andcond.Add(When<Fact, string[]>.ContainsAny(nameof(Fact.tags), factFilter.TagsFilter));
         qg.Filter.Where(Conditional<Fact>.And(andcond.ToArray()));
         qg.Fields.Additional.Add(Additional.Id, Additional.Distance);
         var query = new GraphQLQuery();
         query.Query = qg.ToString();
-        #region handmade query
-        var goal = $@"{{
-    Get{{
-      {Fact.ClassName} (
-        nearText: {{
-          concepts: [""{concept}""]{(distance.HasValue ? $",\n          distance: {distance.Value.ToString(CultureInfo.InvariantCulture)}\n" : "")}
-        }}{(limit.HasValue ? $"\n        limit: {limit}\n" : "")}{(autocut.HasValue ? $"\n        autocut: {autocut}\n" : "")}
-        where: {{
-            operator: And,
-            operands: [
-             {{
-              operator: Or,
-              operands: [
-                {{
-                  operator: LessThanEqual,
-                  path: [""expiration""],
-                  valueDate: {JsonConvert.SerializeObject(DateTime.Now)}
-                 }}
-                 {{
-                   operator: IsNull,
-                   valueBoolean: true,
-                   path: [""expiration""]
-                 }}
-              ]
-             }}{(factTypeFilter != null ? $@",
-             {{
-                operator: ContainsAny,
-                path: [""factType""],
-                valueText: {JsonConvert.SerializeObject(factTypeFilter)}
-             }}" : "")}{(categoryFilter != null ? $@",
-             {{
-                operator: ContainsAny,
-                path: [""category""],
-                valueText: {JsonConvert.SerializeObject(categoryFilter)}
-             }}" : "")}{(tagsFilter != null ? $@",
-             {{
-                operator: ContainsAny,
-                path: [""tags""],
-                valueText: {JsonConvert.SerializeObject(tagsFilter)}
-             }}" : "")}
-            ]
-        }}
-      ){{
-        title
-        content
-        factType
-        category
-        tags
-        citation
-        reference
-        expiration
-        _additional {{
-           id
-           distance
-        }}
-      }}
-    }}
-}}";
-        #endregion
         var res = await _kb.Schema.RawQuery(query);
         if (res.Errors != null && res.Errors.Count > 0)
         {
