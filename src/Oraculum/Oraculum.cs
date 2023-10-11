@@ -26,7 +26,6 @@ public class Configuration
     public string? WeaviateApiKey { get; set; }
     public string? OpenAIApiKey { get; set; }
     public string? OpenAIOrgId { get; set; }
-    public string? SibyllaName { get; set; }
 }
 
 public class OraculumConfig
