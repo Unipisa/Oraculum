@@ -38,6 +38,7 @@ namespace Oraculum
         public int FactMemoryTTL { get; set; } = 5;
         public int MemorySpan { get; set; } = 4;
         public string? OutOfScopeTag = "*&oo&*";
+        public int? Limit { get; set; } = null;
     }
 
     internal class Actor
@@ -52,6 +53,7 @@ namespace Oraculum
         public string[]? FactTypeFilter = null;
         public string[]? CategoryFilter = null;
         public string[]? TagsFilter = null;
+        public int? Limit = null;
     }
 
     public class Sibylla
@@ -138,7 +140,9 @@ namespace Oraculum
         private async Task PrepreAnswer(string message, KnowledgeFilter? filter = null)
         {
             if (filter == null)
-                filter = new KnowledgeFilter();
+                filter = new KnowledgeFilter(){
+                    Limit = _conf.Limit
+                };
 
             var (xml, msg) = await _memory.Recall(message, filter);
             _chat.Messages.Clear();

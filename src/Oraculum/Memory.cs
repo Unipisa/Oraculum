@@ -53,7 +53,7 @@ namespace Oraculum
                 FactTypeFilter = filter.FactTypeFilter,
                 CategoryFilter = filter.CategoryFilter,
                 TagsFilter = filter.TagsFilter,
-                Limit = 5
+                Limit = filter.Limit
             });
 
             var n = 0;
