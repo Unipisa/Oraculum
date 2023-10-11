@@ -42,7 +42,10 @@ namespace OraculumTest
         public async Task TestQuestion1()
         {
             Assert.IsNotNull(sibylla);
-            var answer = await sibylla.Answer("Cosa sono i codici PAST?");
+            var answer = await sibylla.Answer("Cosa sono i codici PAST?", new KnowledgeFilter()
+            {
+                CategoryFilter = new[] { "missioni" }
+            });
             //var answer = await sibylla.Answer("What are PAST codes and which one should I use?");
             Assert.IsNotNull(answer);
         }
