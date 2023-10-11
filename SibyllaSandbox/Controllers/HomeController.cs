@@ -13,11 +13,14 @@ namespace SibyllaSandbox.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly SibyllaManager _sibyllaManager;
+        private readonly IConfiguration _configuration;
 
-        public HomeController(ILogger<HomeController> logger, SibyllaManager sibyllaManager)
+
+        public HomeController(ILogger<HomeController> logger, SibyllaManager sibyllaManager, IConfiguration configuration)
         {
             _logger = logger;
             _sibyllaManager = sibyllaManager;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Index()
@@ -28,15 +31,20 @@ namespace SibyllaSandbox.Controllers
 
         private async Task<Sibylla> ConnectSibylla()
         {
+            var sibyllaName = _configuration["SibyllaConf"];
+            if (sibyllaName == null)
+            {
+                throw new Exception("SibyllaConf name not set in appsettings.json");
+            }
             var sibyllaKey = HttpContext.Session.GetString("sibyllaRef");
             if (sibyllaKey == null)
             {
                 // It would be nice to align the expiration of the Sibylla with the expiration of the session.
-                var (id, _) = await _sibyllaManager.AddSibylla("sdc", expiration: DateTime.Now.AddMinutes(60));
+                var (id, _) = await _sibyllaManager.AddSibylla(sibyllaName, expiration: DateTime.Now.AddMinutes(60));
                 HttpContext.Session.SetString("sibyllaRef", id.ToString());
                 sibyllaKey = id.ToString();
             }
-            var sibylla = _sibyllaManager.GetSibylla("sdc", Guid.Parse(sibyllaKey));
+            var sibylla = _sibyllaManager.GetSibylla(sibyllaName, Guid.Parse(sibyllaKey));
             return sibylla;
         }
 
