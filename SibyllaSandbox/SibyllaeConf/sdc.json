@@ -9,5 +9,6 @@
   "PresencePenalty": 0.0,
   "FactFilter": null,
   "CategoryFilter": null,
-  "TagFilter": null
+  "TagFilter": null,
+  "Limit": 5
 }
