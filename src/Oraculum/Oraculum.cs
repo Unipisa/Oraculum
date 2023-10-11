@@ -26,6 +26,7 @@ public class Configuration
     public string? WeaviateApiKey { get; set; }
     public string? OpenAIApiKey { get; set; }
     public string? OpenAIOrgId { get; set; }
+    public string? SibyllaName { get; set; }
 }
 
 public class OraculumConfig
@@ -80,7 +81,7 @@ public class Fact
     //public WeaviateRef[]? references;
 }
 
-    public class Oraculum
+public class Oraculum
 {
     internal const int MajorVersion = 1;
     internal const int MinorVersion = 0;
@@ -100,7 +101,8 @@ public class Fact
         }
     }
 
-    public Oraculum(Configuration conf) { 
+    public Oraculum(Configuration conf)
+    {
         _configuration = conf;
         if (conf == null || conf.WeaviateEndpoint == null || conf.OpenAIApiKey == null)
             throw new ArgumentNullException(nameof(conf));
@@ -174,7 +176,7 @@ public class Fact
         {
             _facts = _kb.Schema.GetClass<Fact>(Fact.ClassName);
             if (_facts == null)
-                throw new Exception("Internal error: cannot get Facts class!"); 
+                throw new Exception("Internal error: cannot get Facts class!");
             await _facts.Delete();
             await _kb.Schema.Update();
         }
@@ -214,7 +216,8 @@ public class Fact
     {
         ensureConnection();
         var toadd = new List<WeaviateObject<Fact>>();
-        foreach (var fact in facts) {
+        foreach (var fact in facts)
+        {
             var f = _facts.Create();
             f.Properties = fact;
             toadd.Add(f);
@@ -255,11 +258,11 @@ public class Fact
         //await facts.Add(bk);
     }
 
-    public async Task<ICollection<Fact>> ListFacts(long limit=1024, long offset=0, string? sort=null, string? order=null)
+    public async Task<ICollection<Fact>> ListFacts(long limit = 1024, long offset = 0, string? sort = null, string? order = null)
     {
         ensureConnection();
 
-        var facts = await _facts.ListObjects(limit,offset: offset, sort: sort, order: order);
+        var facts = await _facts.ListObjects(limit, offset: offset, sort: sort, order: order);
         if (facts == null) return new List<Fact>();
         var ret = new List<Fact>();
         foreach (var fact in facts.Objects)
@@ -281,7 +284,7 @@ public class Fact
         qg.Filter.NearText(concept, distance: factFilter.Distance);
         if (factFilter.Limit.HasValue) qg.Filter.Limit(factFilter.Limit.Value);
         if (factFilter.Autocut.HasValue) qg.Filter.Autocut(factFilter.Autocut.Value);
-        var andcond = new List<ConditionalAtom<Fact>>() { 
+        var andcond = new List<ConditionalAtom<Fact>>() {
             Conditional<Fact>.Or(
                 When<Fact, DateTime>.GreaterThanEqual(nameof(Fact.expiration), DateTime.Now),
                 When<Fact, DateTime>.IsNull(nameof(Fact.expiration))

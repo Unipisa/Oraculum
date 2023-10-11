@@ -34,7 +34,8 @@ namespace Oraculum
 
         public int Count => _sibyllae.Count;
 
-        public List<string> AvailableConfigurations {
+        public List<string> AvailableConfigurations
+        {
             get
             {
                 var files = Directory.GetFiles(_dataDir, "*.json");
@@ -58,7 +59,7 @@ namespace Oraculum
                     var (s, e) = _sibyllae[key];
                     if (e.HasValue && e.Value > DateTime.Now)
 
-                    yield return (id, s);
+                        yield return (id, s);
                 }
             }
         }
@@ -66,7 +67,7 @@ namespace Oraculum
 
         public async Task<(Guid, Sibylla)> AddSibylla(string name, Configuration? oraculumConf = null, DateTime? expiration = null, bool connect = true)
         {
-            var conf = SibyllaConf.FromJson(File.ReadAllText(ConfFile(name)));
+            var conf = SibyllaConf.FromJson(File.ReadAllText(ConfFile(name))) ?? throw new Exception($"Configuration file {ConfFile(name)} is not valid.");
             var s = new Sibylla(oraculumConf ?? _oraculumConf, conf);
             var id = Guid.NewGuid();
             _sibyllae.Add((name, id), (s, expiration));
