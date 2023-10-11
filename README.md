@@ -1,5 +1,7 @@
 # Oraculum and Sibylla
 
+**New:** Checkout OraclumLocalBox for a self-contained sandbox for trying the system.
+
 The aim of this project is to create a lightweight and easy to deploy AI assistant dedicated to answer
 to questions using a knowledge base expressed in facts. Relying on a vector database (Weaviate) the 
 knowledge is "semantically" indexed using *embeddings* so that information expressed in a language can 

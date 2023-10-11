@@ -25,6 +25,7 @@
 
     function answer() {
         var text = $("#userreq").val();
+        if (text == "") return;
         $("#chat").append('<div class="outgoing-chats"><div class= "outgoing-chats-img" ><img src="/img/User.png" /></div><div class= "outgoing-msg"><div class="outgoing-chats-msg"><p class="multi-msg">' + text + '</p></div></div></div>');
         $("#chat").scrollTop($("#chat")[0].scrollHeight);
         $.ajax({
@@ -48,7 +49,7 @@
         <div class="container1">
             <img src="~/img/Logo.png" class="msgimg" />
             <div class="active">
-                <p>Assistente di Scienze delle costruzioni</p>
+                <p>Assistente virtuale</p>
             </div>
         </div>
     </div>
