@@ -22,8 +22,7 @@ builder.Services.AddSingleton<SibyllaManager>(new SibyllaManager(new Oraculum.Co
     WeaviateEndpoint = _configuration["Weaviate:ServiceEndpoint"],
     WeaviateApiKey = _configuration["Weaviate:ApiKey"],
     OpenAIApiKey = _configuration["OpenAI:ApiKey"],
-    OpenAIOrgId = _configuration["OpenAI:OrgId"],
-    SibyllaName = _configuration["SibyllaConf"]
+    OpenAIOrgId = _configuration["OpenAI:OrgId"]
 }, Path.Combine(_env.ContentRootPath, "SibyllaeConf")));
 
 var app = builder.Build();

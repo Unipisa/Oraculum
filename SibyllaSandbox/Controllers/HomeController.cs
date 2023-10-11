@@ -31,11 +31,7 @@ namespace SibyllaSandbox.Controllers
 
         private async Task<Sibylla> ConnectSibylla()
         {
-            var sibyllaName = _configuration["SibyllaConf"];
-            if (sibyllaName == null)
-            {
-                throw new Exception("SibyllaConf name not set in appsettings.json");
-            }
+            var sibyllaName = _configuration["SibyllaConf"] ?? "Demo";
             var sibyllaKey = HttpContext.Session.GetString("sibyllaRef");
             if (sibyllaKey == null)
             {

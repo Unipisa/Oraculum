@@ -14,6 +14,9 @@
   <ItemGroup>
     <Content Remove="SibyllaeConf\polimi.json" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Remove="SibyllaeConf\Demo.json" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="SibyllaeConf\sdc.json">
@@ -22,6 +25,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="SibyllaeConf\polimi.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SibyllaeConf\Demo.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
