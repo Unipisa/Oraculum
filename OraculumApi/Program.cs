@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using System.Text.Json.Serialization;
+using Oraculum;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,8 +24,22 @@ builder.Services.AddVersionedApiExplorer(s =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSingleton<SibyllaManager>();
+
+
+var _configuration = builder.Configuration;
+var _env = builder.Environment;
+builder.Services.AddSingleton<SibyllaManager>(new SibyllaManager(new Oraculum.Configuration()
+{
+    WeaviateEndpoint = _configuration["Weaviate:ServiceEndpoint"],
+    WeaviateApiKey = _configuration["Weaviate:ApiKey"],
+    OpenAIApiKey = _configuration["OpenAI:ApiKey"],
+    OpenAIOrgId = _configuration["OpenAI:OrgId"]
+}, Path.Combine(_env.ContentRootPath, "SibyllaeConf")));
+
 var app = builder.Build();
 var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
