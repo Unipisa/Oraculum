@@ -6,6 +6,7 @@ using OraculumApi.Attributes;
 using OraculumApi.Models.FrontOffice;
 using Oraculum;
 using System.Text;
+using System.Threading.Channels;
 
 namespace OraculumApi.Controllers;
 
@@ -135,37 +136,42 @@ public class FrontOfficeController : Controller
         throw new NotImplementedException();
     }
 
-    //only to temporarily make the apis work
     [HttpPost]
     [Route("/answer/{question}")]
-    public async Task<string> Answer([FromRoute][Required] string question)
+    public async Task<IActionResult> Answer([FromRoute][Required] string question)
     {
         var Sibylla = await ConnectSibylla();
         var answerid = Guid.NewGuid().ToString();
-        _sibyllaManager.Response.Add(answerid, new List<string>());
-        var t = Task.Run(() =>
-        {
-            var ena = Sibylla.AnswerAsync(question);
-            var en = ena.GetAsyncEnumerator();
-            while (true)
+
+        var channel = Channel.CreateUnbounded<string>();
+
+        _ = WriteToChannel(Sibylla, question, answerid, channel.Writer);
+
+        // Stream the response as Server-Sent Events
+        return new PushStreamResult(
+            async (stream, _, cancellationToken) =>
             {
-                var j = en.MoveNextAsync();
-                j.AsTask().Wait();
-                if (!j.Result)
-                    break;
-                lock (_sibyllaManager.Response)
+                var writer = new StreamWriter(stream);
+                await foreach (var chunk in channel.Reader.ReadAllAsync(cancellationToken))
                 {
-                    _sibyllaManager.Response[answerid].Add(en.Current);
+                    if (!string.IsNullOrEmpty(chunk))
+                    {
+                        await writer.WriteAsync($"data: {chunk}\n\n");
+                        await writer.FlushAsync();
+                    }
                 }
-            }
-            lock (_sibyllaManager.Completed)
-            {
-                _sibyllaManager.Completed.Add(answerid);
-            }
-        }
-        );
-        return answerid;
+            }, "text/event-stream");
     }
+
+    private async Task WriteToChannel(Sibylla sibylla, string question, string answerid, ChannelWriter<string> writer)
+    {
+        await foreach (var fragment in sibylla.AnswerAsync(question))
+        {
+            await writer.WriteAsync(fragment);
+        }
+        writer.TryComplete();
+    }
+
 
     //only to temporarily make the apis work
     [HttpGet]
@@ -197,3 +203,31 @@ public class FrontOfficeController : Controller
         }
     }
 }
+public class PushStreamResult : IActionResult
+{
+    private readonly Func<Stream, Action<Exception>, CancellationToken, Task> _onStreamAvailable;
+    private readonly string _contentType;
+
+    public PushStreamResult(Func<Stream, Action<Exception>, CancellationToken, Task> onStreamAvailable, string contentType = null)
+    {
+        _onStreamAvailable = onStreamAvailable ?? throw new ArgumentNullException(nameof(onStreamAvailable));
+        _contentType = contentType ?? "text/event-stream";
+    }
+
+    public async Task ExecuteResultAsync(ActionContext context)
+    {
+        if (context == null)
+            throw new ArgumentNullException(nameof(context));
+
+        var response = context.HttpContext.Response;
+        response.ContentType = _contentType;
+        response.Headers["Cache-Control"] = "no-store, no-cache";
+        response.Headers["Connection"] = "keep-alive";
+
+        await _onStreamAvailable(response.Body, ex =>
+        {
+            context.HttpContext.Abort();
+        }, context.HttpContext.RequestAborted);
+    }
+}
+
