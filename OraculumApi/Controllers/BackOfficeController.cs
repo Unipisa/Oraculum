@@ -1,21 +1,11 @@
-using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using OraculumApi.Attributes;
-
-using Microsoft.AspNetCore.Authorization;
 using OraculumApi.Models.BackOffice;
 using Oraculum;
-using System.Diagnostics;
-using System.Text.Json;
-using System.Net.Http;
 using System.Text;
-using static OpenAI.ObjectModels.SharedModels.IOpenAiModels;
-using OraculumApi.Models.BackOffice;
 
 namespace OraculumApi.Controllers;
 
@@ -182,7 +172,7 @@ public class BackOfficeController : Controller
 
         //TODO: Uncomment the next line to return response 500 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
         // return StatusCode(500);
-        string exampleJson = null;
+        string? exampleJson = null;
         exampleJson = "[ {\n  \"reference\" : \"reference\",\n  \"citation\" : \"citation\",\n  \"factType\" : \"factType\",\n  \"expiration\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"id\" : \"id\",\n  \"category\" : \"category\",\n  \"title\" : \"title\",\n  \"content\" : \"content\",\n  \"tags\" : [ \"tags\", \"tags\" ]\n}, {\n  \"reference\" : \"reference\",\n  \"citation\" : \"citation\",\n  \"factType\" : \"factType\",\n  \"expiration\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"id\" : \"id\",\n  \"category\" : \"category\",\n  \"title\" : \"title\",\n  \"content\" : \"content\",\n  \"tags\" : [ \"tags\", \"tags\" ]\n} ]";
 
         var example = exampleJson != null
@@ -213,7 +203,7 @@ public class BackOfficeController : Controller
 
         //TODO: Uncomment the next line to return response 500 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
         // return StatusCode(500);
-        string exampleJson = null;
+        string? exampleJson = null;
         exampleJson = "[ {\n  \"reference\" : \"reference\",\n  \"citation\" : \"citation\",\n  \"factType\" : \"factType\",\n  \"expiration\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"id\" : \"id\",\n  \"category\" : \"category\",\n  \"title\" : \"title\",\n  \"content\" : \"content\",\n  \"tags\" : [ \"tags\", \"tags\" ]\n}, {\n  \"reference\" : \"reference\",\n  \"citation\" : \"citation\",\n  \"factType\" : \"factType\",\n  \"expiration\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"id\" : \"id\",\n  \"category\" : \"category\",\n  \"title\" : \"title\",\n  \"content\" : \"content\",\n  \"tags\" : [ \"tags\", \"tags\" ]\n} ]";
 
         var example = exampleJson != null
@@ -252,7 +242,7 @@ public class BackOfficeController : Controller
 
         //TODO: Uncomment the next line to return response 500 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
         // return StatusCode(500);
-        string exampleJson = null;
+        string? exampleJson = null;
         exampleJson = "[ {\n  \"systemPrompt\" : \"systemPrompt\",\n  \"presencePenalty\" : 5.637377,\n  \"assistantPrompt\" : \"assistantPrompt\",\n  \"file\" : \"file\",\n  \"maxTokens\" : 0,\n  \"temperature\" : 6.0274563,\n  \"model\" : \"gpt-3.5-turbo\",\n  \"id\" : \"id\",\n  \"topP\" : 1.4658129,\n  \"frequencyPenalty\" : 5.962134\n}, {\n  \"systemPrompt\" : \"systemPrompt\",\n  \"presencePenalty\" : 5.637377,\n  \"assistantPrompt\" : \"assistantPrompt\",\n  \"file\" : \"file\",\n  \"maxTokens\" : 0,\n  \"temperature\" : 6.0274563,\n  \"model\" : \"gpt-3.5-turbo\",\n  \"id\" : \"id\",\n  \"topP\" : 1.4658129,\n  \"frequencyPenalty\" : 5.962134\n} ]";
 
         var example = exampleJson != null
@@ -284,7 +274,7 @@ public class BackOfficeController : Controller
 
         //TODO: Uncomment the next line to return response 500 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
         // return StatusCode(500);
-        string exampleJson = null;
+        string? exampleJson = null;
         exampleJson = "{\n  \"reference\" : \"reference\",\n  \"citation\" : \"citation\",\n  \"factType\" : \"factType\",\n  \"expiration\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"id\" : \"id\",\n  \"category\" : \"category\",\n  \"title\" : \"title\",\n  \"content\" : \"content\",\n  \"tags\" : [ \"tags\", \"tags\" ]\n}";
 
         var example = exampleJson != null
@@ -316,7 +306,7 @@ public class BackOfficeController : Controller
 
         //TODO: Uncomment the next line to return response 500 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
         // return StatusCode(500);
-        string exampleJson = null;
+        string? exampleJson = null;
         exampleJson = "{\n  \"systemPrompt\" : \"systemPrompt\",\n  \"presencePenalty\" : 5.637377,\n  \"assistantPrompt\" : \"assistantPrompt\",\n  \"file\" : \"file\",\n  \"maxTokens\" : 0,\n  \"temperature\" : 6.0274563,\n  \"model\" : \"gpt-3.5-turbo\",\n  \"id\" : \"id\",\n  \"topP\" : 1.4658129,\n  \"frequencyPenalty\" : 5.962134\n}";
 
         var example = exampleJson != null

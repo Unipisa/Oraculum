@@ -31,7 +31,7 @@ namespace OraculumApi.Models.BackOffice
         /// </summary>
 
         [DataMember(Name = "id")]
-        public string Id { get; set; }
+        public required string Id { get; set; }
 
         /// <summary>
         /// Type of the fact
@@ -40,7 +40,7 @@ namespace OraculumApi.Models.BackOffice
         [Required]
 
         [DataMember(Name = "factType")]
-        public string FactType { get; set; }
+        public required string FactType { get; set; }
 
         /// <summary>
         /// Category of the fact
@@ -48,7 +48,7 @@ namespace OraculumApi.Models.BackOffice
         /// <value>Category of the fact</value>
 
         [DataMember(Name = "category")]
-        public string Category { get; set; }
+        public required string Category { get; set; }
 
         /// <summary>
         /// Tags associated with the fact
@@ -56,7 +56,7 @@ namespace OraculumApi.Models.BackOffice
         /// <value>Tags associated with the fact</value>
 
         [DataMember(Name = "tags")]
-        public List<string> Tags { get; set; }
+        public required List<string> Tags { get; set; }
 
         /// <summary>
         /// Title of the fact
@@ -64,7 +64,7 @@ namespace OraculumApi.Models.BackOffice
         /// <value>Title of the fact</value>
 
         [DataMember(Name = "title")]
-        public string Title { get; set; }
+        public required string Title { get; set; }
 
         /// <summary>
         /// Main content or body of the fact
@@ -73,7 +73,7 @@ namespace OraculumApi.Models.BackOffice
         [Required]
 
         [DataMember(Name = "content")]
-        public string Content { get; set; }
+        public required string Content { get; set; }
 
         /// <summary>
         /// Citation associated with the fact
@@ -81,7 +81,7 @@ namespace OraculumApi.Models.BackOffice
         /// <value>Citation associated with the fact</value>
 
         [DataMember(Name = "citation")]
-        public string Citation { get; set; }
+        public required string Citation { get; set; }
 
         /// <summary>
         /// Reference for the fact
@@ -89,7 +89,7 @@ namespace OraculumApi.Models.BackOffice
         /// <value>Reference for the fact</value>
 
         [DataMember(Name = "reference")]
-        public string Reference { get; set; }
+        public required string Reference { get; set; }
 
         /// <summary>
         /// Expiration date of the fact

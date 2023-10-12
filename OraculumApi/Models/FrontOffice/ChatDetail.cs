@@ -32,35 +32,35 @@ namespace OraculumApi.Models.FrontOffice
         [Required]
 
         [DataMember(Name = "id")]
-        public string Id { get; set; }
+        public required string Id { get; set; }
 
         /// <summary>
         /// Gets or Sets Name
         /// </summary>
 
         [DataMember(Name = "name")]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         /// <summary>
         /// Gets or Sets SibyllaId
         /// </summary>
 
         [DataMember(Name = "sibyllaId")]
-        public string SibyllaId { get; set; }
+        public required string SibyllaId { get; set; }
 
         /// <summary>
         /// Gets or Sets ReferenceIds
         /// </summary>
 
         [DataMember(Name = "referenceIds")]
-        public ReferenceIds ReferenceIds { get; set; }
+        public required ReferenceIds ReferenceIds { get; set; }
 
         /// <summary>
         /// Gets or Sets Messages
         /// </summary>
 
         [DataMember(Name = "messages")]
-        public List<Message> Messages { get; set; }
+        public required List<Message> Messages { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

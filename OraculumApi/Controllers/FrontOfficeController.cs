@@ -1,20 +1,11 @@
-using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using OraculumApi.Attributes;
-
-using Microsoft.AspNetCore.Authorization;
 using OraculumApi.Models.FrontOffice;
 using Oraculum;
-using System.Diagnostics;
-using System.Text.Json;
-using System.Net.Http;
 using System.Text;
-using static OpenAI.ObjectModels.SharedModels.IOpenAiModels;
 
 namespace OraculumApi.Controllers;
 
@@ -35,6 +26,8 @@ public class FrontOfficeController : Controller
     }
 
     //TODO: simply copied from the SibyllaSandbox controller, need to investigating on how it works
+    //only to temporarily make the apis work
+    //TODO: simply copied from the SibyllaSandbox controller, need to investigating on how it works
     [ApiExplorerSettings(IgnoreApi = true)]
     public async Task<IActionResult> Index()
     {
@@ -42,6 +35,8 @@ public class FrontOfficeController : Controller
         return View(sibylla);
     }
 
+    //only to temporarily make the apis work
+    //TODO: simply copied from the SibyllaSandbox controller, need to investigating on how it works
     [ApiExplorerSettings(IgnoreApi = true)]
     private async Task<Sibylla> ConnectSibylla()
     {
@@ -137,6 +132,8 @@ public class FrontOfficeController : Controller
         // Your logic here...
         throw new NotImplementedException();
     }
+
+    //only to temporarily make the apis work
     [HttpPost]
     [Route("/answer/{question}")]
     public async Task<string> Answer([FromRoute][Required] string question)
@@ -168,6 +165,7 @@ public class FrontOfficeController : Controller
         return answerid;
     }
 
+    //only to temporarily make the apis work
     [HttpGet]
     [Route("/getanswer/{answerId}")]
     public string GetAnswer([FromRoute][Required] string answerid)

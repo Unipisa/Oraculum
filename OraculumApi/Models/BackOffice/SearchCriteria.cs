@@ -33,7 +33,7 @@ namespace OraculumApi.Models.BackOffice
         [Required]
 
         [DataMember(Name = "query")]
-        public string Query { get; set; }
+        public required string Query { get; set; }
 
         /// <summary>
         /// Distance criterion for search.
@@ -65,7 +65,7 @@ namespace OraculumApi.Models.BackOffice
         /// <value>Filter facts by type.</value>
 
         [DataMember(Name = "factTypeFilter")]
-        public List<string> FactTypeFilter { get; set; }
+        public required List<string> FactTypeFilter { get; set; }
 
         /// <summary>
         /// Filter facts by category.
@@ -73,7 +73,7 @@ namespace OraculumApi.Models.BackOffice
         /// <value>Filter facts by category.</value>
 
         [DataMember(Name = "categoryFilter")]
-        public List<string> CategoryFilter { get; set; }
+        public required List<string> CategoryFilter { get; set; }
 
         /// <summary>
         /// Filter facts by tags.
@@ -81,7 +81,7 @@ namespace OraculumApi.Models.BackOffice
         /// <value>Filter facts by tags.</value>
 
         [DataMember(Name = "tagsFilter")]
-        public List<string> TagsFilter { get; set; }
+        public required List<string> TagsFilter { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
