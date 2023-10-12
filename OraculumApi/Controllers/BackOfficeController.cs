@@ -10,7 +10,9 @@ using System.Text;
 namespace OraculumApi.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
+[ApiVersion("1")]
+[ApiVersion("2")]
 public class BackOfficeController : Controller
 {
 
@@ -58,7 +60,7 @@ public class BackOfficeController : Controller
     /// <response code="409">A Sibylla with the same name already exists</response>
     /// <response code="500">Internal server error</response>
     [HttpPost]
-    [Route("/sibylla-configs")]
+    [Route("sibylla-configs")]
     [ValidateModelState]
     [SwaggerOperation("AddSibyllaConfig")]
     public virtual IActionResult AddSibyllaConfig([FromBody] List<SibyllaConfig> body)
@@ -87,7 +89,7 @@ public class BackOfficeController : Controller
     /// <response code="404">Fact not found</response>
     /// <response code="500">Internal server error</response>
     [HttpDelete]
-    [Route("/facts/{id}")]
+    [Route("facts/{id}")]
     [ValidateModelState]
     [SwaggerOperation("DeleteFactById")]
     public virtual IActionResult DeleteFactById([FromRoute][Required] string id)
@@ -112,7 +114,7 @@ public class BackOfficeController : Controller
     /// <param name="expired"></param>
     /// <response code="200">OK</response>
     [HttpDelete]
-    [Route("/facts")]
+    [Route("facts")]
     [ValidateModelState]
     [SwaggerOperation("DeleteFacts")]
     public virtual IActionResult DeleteFacts([FromQuery] string factType, [FromQuery] string category, [FromQuery] bool? expired)
@@ -132,7 +134,7 @@ public class BackOfficeController : Controller
     /// <response code="404">Configuration not found</response>
     /// <response code="500">Internal server error</response>
     [HttpDelete]
-    [Route("/sibylla-configs/{id}")]
+    [Route("sibylla-configs/{id}")]
     [ValidateModelState]
     [SwaggerOperation("DeleteSibyllaConfigById")]
     public virtual IActionResult DeleteSibyllaConfigById([FromRoute][Required] string id)
@@ -158,7 +160,7 @@ public class BackOfficeController : Controller
     /// <response code="400">Invalid input</response>
     /// <response code="500">Internal server error</response>
     [HttpPost]
-    [Route("/facts/query")]
+    [Route("facts/query")]
     [ValidateModelState]
     [SwaggerOperation("FindRelevantFacts")]
     [SwaggerResponse(statusCode: 200, type: typeof(List<Models.BackOffice.Fact>), description: "List of relevant facts")]
@@ -192,7 +194,7 @@ public class BackOfficeController : Controller
     /// <response code="200">A list of facts</response>
     /// <response code="500">Internal server error</response>
     [HttpGet]
-    [Route("/facts")]
+    [Route("facts")]
     [ValidateModelState]
     [SwaggerOperation("GetAllFacts")]
     [SwaggerResponse(statusCode: 200, type: typeof(List<Models.BackOffice.Fact>), description: "A list of facts")]
@@ -225,7 +227,7 @@ public class BackOfficeController : Controller
     /// <response code="404">Not Found</response>
     /// <response code="500">Internal server error</response>
     [HttpGet]
-    [Route("/sibylla-configs")]
+    [Route("sibylla-configs")]
     [ValidateModelState]
     [SwaggerOperation("GetAllSibyllaConfigs")]
     [SwaggerResponse(statusCode: 200, type: typeof(List<SibyllaConfig>), description: "List of Sibylla configurations")]
@@ -260,7 +262,7 @@ public class BackOfficeController : Controller
     /// <response code="404">Fact not found</response>
     /// <response code="500">Internal server error</response>
     [HttpGet]
-    [Route("/facts/{id}")]
+    [Route("facts/{id}")]
     [ValidateModelState]
     [SwaggerOperation("GetFactById")]
     [SwaggerResponse(statusCode: 200, type: typeof(Models.BackOffice.Fact), description: "Specific fact data")]
@@ -292,7 +294,7 @@ public class BackOfficeController : Controller
     /// <response code="404">Configuration not found</response>
     /// <response code="500">Internal server error</response>
     [HttpGet]
-    [Route("/sibylla-configs/{id}")]
+    [Route("sibylla-configs/{id}")]
     [ValidateModelState]
     [SwaggerOperation("GetSibyllaConfigById")]
     [SwaggerResponse(statusCode: 200, type: typeof(SibyllaConfig), description: "Specific Sibylla configuration data")]
@@ -324,7 +326,7 @@ public class BackOfficeController : Controller
     /// <response code="400">Bad Request</response>
     /// <response code="500">Internal Server Error</response>
     [HttpPost]
-    [Route("/facts")]
+    [Route("facts")]
     [ValidateModelState]
     [SwaggerOperation("PostFacts")]
     public virtual IActionResult PostFacts([FromBody] List<Models.BackOffice.Fact> body)
@@ -351,7 +353,7 @@ public class BackOfficeController : Controller
     /// <response code="404">Not Found</response>
     /// <response code="500">Internal Server Error</response>
     [HttpPut]
-    [Route("/facts")]
+    [Route("facts")]
     [ValidateModelState]
     [SwaggerOperation("PutFacts")]
     public virtual IActionResult PutFacts([FromBody] List<Models.BackOffice.Fact> body)
@@ -381,7 +383,7 @@ public class BackOfficeController : Controller
     /// <response code="404">Not Found</response>
     /// <response code="500">Internal Server Error</response>
     [HttpPut]
-    [Route("/sibylla-configs")]
+    [Route("sibylla-configs")]
     [ValidateModelState]
     [SwaggerOperation("PutSibyllaConfigs")]
     public virtual IActionResult PutSibyllaConfigs([FromBody] List<SibyllaConfig> body)

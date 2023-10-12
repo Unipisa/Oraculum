@@ -63,8 +63,8 @@ public class FrontOfficeController : Controller
     /// <response code="200">OK</response>
     /// <response code="404">Not Found</response>
     /// <response code="500">Internal Server Error</response>
-    [HttpDelete("sibylla/{sibyllaId}/chat/{chatId}")]
-    // [Route("/sibylla/{sibyllaId}/chat/{chatId}")]
+    [HttpDelete]
+    [Route("sibylla/{sibyllaId}/chat/{chatId}")]
     [ValidateModelState]
     [SwaggerOperation("DeleteChatsChatId")]
     public virtual IActionResult DeleteChatsChatId([FromRoute][Required] string chatId, [FromRoute][Required] string sibyllaId)
@@ -81,7 +81,7 @@ public class FrontOfficeController : Controller
         throw new NotImplementedException();
     }
     [HttpGet]
-    [Route("/sibylla")]
+    [Route("sibylla")]
     public IActionResult GetAllSibyllae()
     {
         // Your logic here...
@@ -89,7 +89,7 @@ public class FrontOfficeController : Controller
     }
 
     [HttpGet]
-    [Route("/sibylla/{sibyllaId}/chat")]
+    [Route("sibylla/{sibyllaId}/chat")]
     public IActionResult GetChats([FromRoute] string sibyllaId)
     {
         // Your logic here...
@@ -97,7 +97,7 @@ public class FrontOfficeController : Controller
     }
 
     [HttpPost]
-    [Route("/sibylla/{sibyllaId}/chat")]
+    [Route("sibylla/{sibyllaId}/chat")]
     public IActionResult PostChat([FromRoute] string sibyllaId, [FromBody] Message message)
     {
         // Your logic here...
@@ -105,7 +105,7 @@ public class FrontOfficeController : Controller
     }
 
     [HttpGet]
-    [Route("/sibylla/{sibyllaId}/chat/{chatId}")]
+    [Route("sibylla/{sibyllaId}/chat/{chatId}")]
     public IActionResult GetChatById([FromRoute] string sibyllaId, [FromRoute] string chatId)
     {
         // Your logic here...
@@ -113,7 +113,7 @@ public class FrontOfficeController : Controller
     }
 
     [HttpPost]
-    [Route("/sibylla/{sibyllaId}/chat/{chatId}/message")]
+    [Route("sibylla/{sibyllaId}/chat/{chatId}/message")]
     public IActionResult PostMessage([FromRoute] string sibyllaId, [FromRoute] string chatId, [FromBody] Message message)
     {
         // Your logic here...
@@ -121,7 +121,7 @@ public class FrontOfficeController : Controller
     }
 
     [HttpPost]
-    [Route("/sibylla/{sibyllaId}/chat/{chatId}/feedback")]
+    [Route("sibylla/{sibyllaId}/chat/{chatId}/feedback")]
     public IActionResult PostFeedback([FromRoute] string sibyllaId, [FromRoute] string chatId, [FromBody] Feedback feedback)
     {
         // Your logic here...
@@ -129,7 +129,7 @@ public class FrontOfficeController : Controller
     }
 
     [HttpGet]
-    [Route("/reference/{id}")]
+    [Route("reference/{id}")]
     public IActionResult GetReferenceById([FromRoute] string id)
     {
         // Your logic here...
@@ -137,7 +137,7 @@ public class FrontOfficeController : Controller
     }
 
     [HttpPost]
-    [Route("/answer/{question}")]
+    [Route("answer/{question}")]
     public async Task<IActionResult> Answer([FromRoute][Required] string question)
     {
         var Sibylla = await ConnectSibylla();
