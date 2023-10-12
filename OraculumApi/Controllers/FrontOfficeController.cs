@@ -1,20 +1,12 @@
-using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using OraculumApi.Attributes;
-
-using Microsoft.AspNetCore.Authorization;
 using OraculumApi.Models.FrontOffice;
 using Oraculum;
-using System.Diagnostics;
-using System.Text.Json;
-using System.Net.Http;
 using System.Text;
-using static OpenAI.ObjectModels.SharedModels.IOpenAiModels;
+using System.Threading.Channels;
 
 namespace OraculumApi.Controllers;
 
@@ -37,6 +29,8 @@ public class FrontOfficeController : Controller
     }
 
     //TODO: simply copied from the SibyllaSandbox controller, need to investigating on how it works
+    //only to temporarily make the apis work
+    //TODO: simply copied from the SibyllaSandbox controller, need to investigating on how it works
     [ApiExplorerSettings(IgnoreApi = true)]
     public async Task<IActionResult> Index()
     {
@@ -44,6 +38,8 @@ public class FrontOfficeController : Controller
         return View(sibylla);
     }
 
+    //only to temporarily make the apis work
+    //TODO: simply copied from the SibyllaSandbox controller, need to investigating on how it works
     [ApiExplorerSettings(IgnoreApi = true)]
     private async Task<Sibylla> ConnectSibylla()
     {
@@ -139,63 +135,68 @@ public class FrontOfficeController : Controller
         // Your logic here...
         throw new NotImplementedException();
     }
+
     [HttpPost]
     [Route("/answer/{question}")]
-    public async Task<string> Answer([FromRoute][Required] string question)
+    public async Task<IActionResult> Answer([FromRoute][Required] string question)
     {
         var Sibylla = await ConnectSibylla();
         var answerid = Guid.NewGuid().ToString();
-        _sibyllaManager.Response.Add(answerid, new List<string>());
-        var t = Task.Run(() =>
-        {
-            var ena = Sibylla.AnswerAsync(question);
-            var en = ena.GetAsyncEnumerator();
-            while (true)
+
+        var channel = Channel.CreateUnbounded<string>();
+
+        _ = WriteToChannel(Sibylla, question, answerid, channel.Writer);
+
+        // Stream the response as Server-Sent Events
+        return new PushStreamResult(
+            async (stream, _, cancellationToken) =>
             {
-                var j = en.MoveNextAsync();
-                j.AsTask().Wait();
-                if (!j.Result)
-                    break;
-                lock (_sibyllaManager.Response)
+                var writer = new StreamWriter(stream);
+                await foreach (var chunk in channel.Reader.ReadAllAsync(cancellationToken))
                 {
-                    _sibyllaManager.Response[answerid].Add(en.Current);
+                    if (!string.IsNullOrEmpty(chunk))
+                    {
+                        await writer.WriteAsync($"data: {chunk}\n\n");
+                        await writer.FlushAsync();
+                    }
                 }
-            }
-            lock (_sibyllaManager.Completed)
-            {
-                _sibyllaManager.Completed.Add(answerid);
-            }
-        }
-        );
-        return answerid;
+            }, "text/event-stream");
     }
 
-    [HttpGet]
-    [Route("/getanswer/{answerId}")]
-    public string GetAnswer([FromRoute][Required] string answerid)
+    private async Task WriteToChannel(Sibylla sibylla, string question, string answerid, ChannelWriter<string> writer)
     {
-        lock (_sibyllaManager.Response)
+        await foreach (var fragment in sibylla.AnswerAsync(question))
         {
-            if (!_sibyllaManager.Response.ContainsKey(answerid))
-            {
-                HttpContext.Response.StatusCode = 204;
-                return "";
-            }
-            var r = _sibyllaManager.Response[answerid];
-            if (r.Count == 0 && _sibyllaManager.Completed.Contains(answerid))
-            {
-                _sibyllaManager.Response.Remove(answerid);
-                _sibyllaManager.Completed.Remove(answerid);
-                HttpContext.Response.StatusCode = 204;
-                return "";
-            }
-            var ret = new StringBuilder();
-            foreach (var s in r)
-            {
-                ret.Append(s);
-            }
-            r.Clear();
-            return ret.ToString();
+            await writer.WriteAsync(fragment);
         }
+        writer.TryComplete();
     }
 }
+public class PushStreamResult : IActionResult
+{
+    private readonly Func<Stream, Action<Exception>, CancellationToken, Task> _onStreamAvailable;
+    private readonly string _contentType;
+
+    public PushStreamResult(Func<Stream, Action<Exception>, CancellationToken, Task> onStreamAvailable, string contentType = null)
+    {
+        _onStreamAvailable = onStreamAvailable ?? throw new ArgumentNullException(nameof(onStreamAvailable));
+        _contentType = contentType ?? "text/event-stream";
+    }
+
+    public async Task ExecuteResultAsync(ActionContext context)
+    {
+        if (context == null)
+            throw new ArgumentNullException(nameof(context));
+
+        var response = context.HttpContext.Response;
+        response.ContentType = _contentType;
+        response.Headers["Cache-Control"] = "no-store, no-cache";
+        response.Headers["Connection"] = "keep-alive";
+
+        await _onStreamAvailable(response.Body, ex =>
+        {
+            context.HttpContext.Abort();
+        }, context.HttpContext.RequestAborted);
+    }
+}
+

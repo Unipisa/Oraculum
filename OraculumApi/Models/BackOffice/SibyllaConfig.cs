@@ -32,7 +32,7 @@ namespace OraculumApi.Models.BackOffice
         [Required]
 
         [DataMember(Name = "id")]
-        public string Id { get; set; }
+        public required string Id { get; set; }
 
         /// <summary>
         /// System prompt for the configuration
@@ -41,7 +41,7 @@ namespace OraculumApi.Models.BackOffice
         [Required]
 
         [DataMember(Name = "systemPrompt")]
-        public string SystemPrompt { get; set; }
+        public required string SystemPrompt { get; set; }
 
         /// <summary>
         /// Assistant prompt for the configuration
@@ -50,7 +50,7 @@ namespace OraculumApi.Models.BackOffice
         [Required]
 
         [DataMember(Name = "assistantPrompt")]
-        public string AssistantPrompt { get; set; }
+        public required string AssistantPrompt { get; set; }
 
         /// <summary>
         /// Maximum number of tokens
@@ -66,7 +66,7 @@ namespace OraculumApi.Models.BackOffice
         /// <value>Model used</value>
 
         [DataMember(Name = "model")]
-        public string Model { get; set; }
+        public required string Model { get; set; }
 
         /// <summary>
         /// Temperature for response generation
@@ -106,7 +106,7 @@ namespace OraculumApi.Models.BackOffice
         /// <value>Associated file with the configuration</value>
 
         [DataMember(Name = "file")]
-        public string File { get; set; }
+        public required string File { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

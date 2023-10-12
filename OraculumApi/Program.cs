@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers()
 .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+builder.Services.AddDistributedMemoryCache();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddApiVersioning(x =>
@@ -17,6 +18,14 @@ builder.Services.AddApiVersioning(x =>
     x.ReportApiVersions = true;
     x.ApiVersionReader = ApiVersionReader.Combine(new UrlSegmentApiVersionReader());
 });
+
+builder.Services.AddSession(builder =>
+{
+    builder.IdleTimeout = TimeSpan.FromMinutes(20);
+    builder.Cookie.HttpOnly = true;
+    builder.Cookie.IsEssential = true;
+});
+
 builder.Services.AddVersionedApiExplorer(s =>
 {
     s.GroupNameFormat = "'v'VVV";
@@ -51,11 +60,18 @@ if (app.Environment.IsDevelopment())
          options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
      }
  });
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseSession();
 
 app.MapControllers();
 
