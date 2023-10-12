@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 using OraculumApi.Attributes;
 
 using Microsoft.AspNetCore.Authorization;
-using OraculumApi.Models;
+using OraculumApi.Models.FrontOffice;
 using Oraculum;
 using System.Diagnostics;
 using System.Text.Json;
@@ -42,7 +42,7 @@ public class FrontOfficeController : Controller
         return View(sibylla);
     }
 
-[ApiExplorerSettings(IgnoreApi = true)]
+    [ApiExplorerSettings(IgnoreApi = true)]
     private async Task<Sibylla> ConnectSibylla()
     {
         var sibyllaName = _configuration["SibyllaConf"] ?? "Demo";
