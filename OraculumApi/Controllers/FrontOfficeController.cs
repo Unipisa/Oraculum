@@ -35,12 +35,14 @@ public class FrontOfficeController : Controller
     }
 
     //TODO: simply copied from the SibyllaSandbox controller, need to investigating on how it works
+    [ApiExplorerSettings(IgnoreApi = true)]
     public async Task<IActionResult> Index()
     {
         Sibylla sibylla = await ConnectSibylla();
         return View(sibylla);
     }
 
+[ApiExplorerSettings(IgnoreApi = true)]
     private async Task<Sibylla> ConnectSibylla()
     {
         var sibyllaName = _configuration["SibyllaConf"] ?? "Demo";
