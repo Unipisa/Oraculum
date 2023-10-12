@@ -15,6 +15,7 @@ builder.Services.AddApiVersioning(x =>
     x.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
     x.AssumeDefaultVersionWhenUnspecified = true;
     x.ReportApiVersions = true;
+    x.ApiVersionReader = ApiVersionReader.Combine(new UrlSegmentApiVersionReader());
 });
 builder.Services.AddVersionedApiExplorer(s =>
 {
@@ -22,6 +23,7 @@ builder.Services.AddVersionedApiExplorer(s =>
     s.SubstituteApiVersionInUrl = true;
 });
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen();
 
 var _configuration = builder.Configuration;

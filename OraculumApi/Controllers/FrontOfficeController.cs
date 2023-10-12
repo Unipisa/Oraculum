@@ -18,10 +18,10 @@ using static OpenAI.ObjectModels.SharedModels.IOpenAiModels;
 
 namespace OraculumApi.Controllers;
 
+[ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1")]
 [ApiVersion("2")]
-[ApiController]
 public class FrontOfficeController : Controller
 {
 
@@ -67,8 +67,8 @@ public class FrontOfficeController : Controller
     /// <response code="200">OK</response>
     /// <response code="404">Not Found</response>
     /// <response code="500">Internal Server Error</response>
-    [HttpDelete]
-    [Route("/sibylla/{sibyllaId}/chat/{chatId}")]
+    [HttpDelete("sibylla/{sibyllaId}/chat/{chatId}")]
+    // [Route("/sibylla/{sibyllaId}/chat/{chatId}")]
     [ValidateModelState]
     [SwaggerOperation("DeleteChatsChatId")]
     public virtual IActionResult DeleteChatsChatId([FromRoute][Required] string chatId, [FromRoute][Required] string sibyllaId)
