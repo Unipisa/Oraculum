@@ -171,37 +171,6 @@ public class FrontOfficeController : Controller
         }
         writer.TryComplete();
     }
-
-
-    //only to temporarily make the apis work
-    [HttpGet]
-    [Route("/getanswer/{answerId}")]
-    public string GetAnswer([FromRoute][Required] string answerid)
-    {
-        lock (_sibyllaManager.Response)
-        {
-            if (!_sibyllaManager.Response.ContainsKey(answerid))
-            {
-                HttpContext.Response.StatusCode = 204;
-                return "";
-            }
-            var r = _sibyllaManager.Response[answerid];
-            if (r.Count == 0 && _sibyllaManager.Completed.Contains(answerid))
-            {
-                _sibyllaManager.Response.Remove(answerid);
-                _sibyllaManager.Completed.Remove(answerid);
-                HttpContext.Response.StatusCode = 204;
-                return "";
-            }
-            var ret = new StringBuilder();
-            foreach (var s in r)
-            {
-                ret.Append(s);
-            }
-            r.Clear();
-            return ret.ToString();
-        }
-    }
 }
 public class PushStreamResult : IActionResult
 {
