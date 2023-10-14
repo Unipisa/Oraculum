@@ -1,4 +1,5 @@
 using Oraculum;
+using Lib.AspNetCore.ServerSentEvents;
 using SibyllaSandbox;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,7 +26,23 @@ builder.Services.AddSingleton<SibyllaManager>(new SibyllaManager(new Oraculum.Co
     OpenAIOrgId = _configuration["OpenAI:OrgId"]
 }, Path.Combine(_env.ContentRootPath, "SibyllaeConf")));
 
+builder.Services.AddServerSentEvents();
+
 var app = builder.Build();
+
+var sses = app.Services.GetService<ServerSentEventsService>();
+if (sses != null)
+{
+    sses.ClientConnected += (sender, e) =>
+     {
+         var session = e.Request.HttpContext.Session;
+         if (session.IsAvailable && !session.Keys.Contains("SSEId"))
+         {
+             session.SetString("SSEId", e.Client.Id.ToString());
+             session.CommitAsync().Wait();
+         }
+     };
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -47,5 +64,7 @@ app.UseSession();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapServerSentEvents("/MessagesStream");
 
 app.Run();
