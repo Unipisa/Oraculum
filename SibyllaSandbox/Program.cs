@@ -31,6 +31,7 @@ builder.Services.AddServerSentEvents();
 var app = builder.Build();
 
 var sses = app.Services.GetService<ServerSentEventsService>();
+// This is a hack to get the SSE client id into the session.
 if (sses != null)
 {
     sses.ClientConnected += (sender, e) =>

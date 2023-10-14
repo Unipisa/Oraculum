@@ -1,6 +1,6 @@
 # Oraculum and Sibylla
 
-**New:** Checkout OraclumLocalBox for a self-contained sandbox for trying the system.
+**New:** Checkout `OraclumLocalBox` for a self-contained sandbox for trying the system.
 
 The aim of this project is to create a lightweight and easy to deploy AI assistant dedicated to answer
 to questions using a knowledge base expressed in facts. Relying on a vector database (Weaviate) the 
@@ -21,7 +21,7 @@ multiple Sibyllae for testing.
 ![System architecture](Architecture.png "System architecture")
 
 ## Why another one?
-When I started developing this project the main reasons are:
+When I started developing this project the main reasons were:
 
 - Easy integration with existing software
 - Easy to deploy and understand (small codebase)
@@ -31,6 +31,12 @@ When I started developing this project the main reasons are:
 The project it's still in his infancy but it can be used in production if you want to quickly start with AI in your systems.
 
 ## What's new
+
+### Version 1.1.0
+- Completely rewritten memory for Sibylla
+- Introduced support to avoid persistance of unrelated messages into prompt
+- Added `ILogger` support
+- Changed Weaviate schema
 
 ### Version 1.0.2
 - Exposed `Configuration` property in `Sibylla` class
