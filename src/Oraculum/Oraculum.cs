@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OpenAI;
 using OpenAI.Extensions;
@@ -7,6 +9,7 @@ using OpenAI.ObjectModels;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection.Metadata;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using WeaviateNET;
 using WeaviateNET.Query;
@@ -75,8 +78,8 @@ public class Fact
     //public GeoCoordinates? location;
     //public string? locationName;
     //public string[]? editPrincipals;
-    //public DateTime? validFrom;
-    //public DateTime? validTo;
+    //public string? validFrom;
+    //public string? validTo;
     //public WeaviateRef[]? references;
 }
 
@@ -91,6 +94,7 @@ public class Fact
     private WeaviateClass<Fact>? _facts;
     private WeaviateClass<OraculumConfig>? _oraculumConfigClass;
     private WeaviateObject<OraculumConfig>? _oraculumConfig;
+    private ILogger _logger;
 
     public Configuration Configuration
     {
@@ -100,10 +104,14 @@ public class Fact
         }
     }
 
-    public Oraculum(Configuration conf) { 
+    public Oraculum(Configuration conf, ILogger? logger = null) {
+        _logger = logger ?? NullLogger.Instance;
         _configuration = conf;
         if (conf == null || conf.WeaviateEndpoint == null || conf.OpenAIApiKey == null)
+        {
+            _logger.Log(LogLevel.Critical, "Oraculum: configuration not provided");
             throw new ArgumentNullException(nameof(conf));
+        }
         _kb = new WeaviateDB(conf.WeaviateEndpoint, conf.WeaviateApiKey);
         _gpt = new OpenAIService(new OpenAiOptions() { ApiKey = conf.OpenAIApiKey, Organization = conf.OpenAIOrgId });
         _facts = null;
@@ -112,7 +120,8 @@ public class Fact
     [MemberNotNull(nameof(_kb), nameof(_facts))]
     private void ensureConnection()
     {
-        if (_kb == null || _facts == null) throw new Exception("Knowledge base not connected");
+        if (_kb == null || _facts == null)
+            throw new Exception("Knowledge base not connected");
     }
 
     public async Task<bool> IsKBInitialized()
@@ -132,6 +141,7 @@ public class Fact
 
     public async Task Connect()
     {
+        _logger.Log(LogLevel.Trace, "Connect: Loading Weaviate schema and checking whether contains OraculumConfig and Facts classes");
         await _kb.Schema.Update();
         if (!_kb.Schema.Classes.Where(c => c.Name == Fact.ClassName).Any() || !_kb.Schema.Classes.Where(c => c.Name == OraculumConfig.ClassName).Any())
         {
@@ -147,18 +157,23 @@ public class Fact
 
     public async Task Init()
     {
+        _logger.Log(LogLevel.Information, "Init DB Schema");
         await _kb.Schema.Update();
         if (_kb.Schema.Classes.Where(c => c.Name == OraculumConfig.ClassName).Any())
         {
             _oraculumConfigClass = _kb.Schema.GetClass<OraculumConfig>(OraculumConfig.ClassName);
             if (_oraculumConfigClass == null)
+            {
+                _logger.Log(LogLevel.Critical, "Init: cannot get OraculumConfig class, aborting initialization");
                 throw new Exception("Internal error: cannot get OraculumConfig class!");
+            }
             await _oraculumConfigClass.Delete();
             await _kb.Schema.Update();
         }
 
         if (!_kb.Schema.Classes.Where(c => c.Name == OraculumConfig.ClassName).Any())
         {
+            _logger.Log(LogLevel.Trace, "Init: creating OraculumConfig class");
             _oraculumConfigClass = await _kb.Schema.NewClass<OraculumConfig>(OraculumConfig.ClassName);
             _oraculumConfig = _oraculumConfigClass.Create();
             _oraculumConfig.Id = OraculumConfig.ConfigID;
@@ -168,16 +183,23 @@ public class Fact
             _oraculumConfig.Properties.schemaMajorVersion = Fact.MajorVersion;
             _oraculumConfig.Properties.schemaMinorVersion = Fact.MinorVersion;
             await _oraculumConfigClass.Add(_oraculumConfig);
+            _logger.Log(LogLevel.Trace, "Init: Saved oraculum configuration");
         }
 
         if (_kb.Schema.Classes.Where(c => c.Name == Fact.ClassName).Any())
         {
+            _logger.Log(LogLevel.Trace, "Init: fetching Facts class for deletion");
             _facts = _kb.Schema.GetClass<Fact>(Fact.ClassName);
             if (_facts == null)
-                throw new Exception("Internal error: cannot get Facts class!"); 
+            {
+                _logger.Log(LogLevel.Critical, "Init: error accessing Facts class");
+                throw new Exception("Internal error: cannot get Facts class!");
+            }
+            _logger.Log(LogLevel.Trace, "Init: deleting Facts class");
             await _facts.Delete();
             await _kb.Schema.Update();
         }
+        _logger.Log(LogLevel.Trace, "Init: creating Facts class");
         _facts = await _kb.Schema.NewClass<Fact>(Fact.ClassName);
         await _kb.Schema.Update();
         _facts.Properties.Where(p => p.Name == nameof(Fact.expiration)).First().IndexSearchable = true;
@@ -187,21 +209,21 @@ public class Fact
     public async Task<int> TotalFacts()
     {
         ensureConnection();
-
+        _logger.Log(LogLevel.Trace, "TotalFacts: counting facts");
         return await _facts.CountObjects();
     }
 
     public async Task<int> TotalFactsByCategory(string category)
     {
         ensureConnection();
-
+        _logger.Log(LogLevel.Trace, $"TotalFactsByCategory: counting facts by category '{category}'");
         return await _facts.CountObjectsByProperty(nameof(Fact.category), category);
     }
 
     public async Task<Guid?> AddFact(Fact fact)
     {
         ensureConnection();
-
+        _logger.Log(LogLevel.Information, "AddFact: adding fact");
         var f = _facts.Create();
         f.Properties = fact;
 
@@ -213,6 +235,7 @@ public class Fact
     public async Task<int> AddFact(ICollection<Fact> facts)
     {
         ensureConnection();
+        _logger.Log(LogLevel.Information, "AddFact: adding a collection of facts");
         var toadd = new List<WeaviateObject<Fact>>();
         foreach (var fact in facts) {
             var f = _facts.Create();
@@ -226,7 +249,7 @@ public class Fact
     public async Task<Fact?> GetFact(Guid id)
     {
         ensureConnection();
-
+        _logger.Log(LogLevel.Trace, $"GetFact: fetching fact {id}");
         var fact = await _facts.Get(id);
         if (fact == null) return null;
         fact.Properties.id = fact.Id;
@@ -236,6 +259,7 @@ public class Fact
     public async Task<bool> DeleteFact(Guid id)
     {
         ensureConnection();
+        _logger.Log(LogLevel.Information, $"DeleteFact: deleting fact {id}");
         var fact = await _facts.Get(id);
         if (fact == null) return false;
 
@@ -259,6 +283,7 @@ public class Fact
     {
         ensureConnection();
 
+        _logger.Log(LogLevel.Trace, $"ListFacts: listing facts with limit {limit}, offset {offset}, sort {sort}, order {order}");
         var facts = await _facts.ListObjects(limit,offset: offset, sort: sort, order: order);
         if (facts == null) return new List<Fact>();
         var ret = new List<Fact>();
@@ -273,9 +298,10 @@ public class Fact
     public async Task<ICollection<Fact>> FindRelevantFacts(string concept, FactFilter? factFilter = null)
     {
         ensureConnection();
-
+        _logger.Log(LogLevel.Information, $"FindRelevantFacts: finding facts relevant to '{concept}'");
         if (factFilter == null)
             factFilter = new FactFilter();
+        _logger.Log(LogLevel.Trace, $"FindRelevantFacts: finding facts relevant to '{concept}' with Filter '{JsonConvert.SerializeObject(factFilter)}'");
 
         var qg = _facts.CreateGetQuery(selectall: true);
         qg.Filter.NearText(concept, distance: factFilter.Distance);
@@ -296,11 +322,15 @@ public class Fact
         qg.Fields.Additional.Add(Additional.Id, Additional.Distance);
         var query = new GraphQLQuery();
         query.Query = qg.ToString();
+
+        _logger.Log(LogLevel.Trace, $"FindRelevantFacts: query to Weaviate {query.Query}");
+
         var res = await _kb.Schema.RawQuery(query);
         if (res.Errors != null && res.Errors.Count > 0)
         {
             throw new Exception($"Error querying Weaviate");
         }
+        _logger.Log(LogLevel.Trace, $"FindRelevantFacts: Query result {res.Data["Get"].ToString()}");
         var ret = new List<Fact>();
 #pragma warning disable CS8602 // Disable warning for derefernce potentially null value since I know it should be ok.
         foreach (var f in res.Data["Get"]["Facts"])

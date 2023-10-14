@@ -1,4 +1,7 @@
-﻿using OpenAI.ObjectModels.RequestModels;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Newtonsoft.Json;
+using OpenAI.ObjectModels.RequestModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,13 +18,15 @@ namespace Oraculum
         private int _ttl;
         private int _span;
         private Oraculum _oraculum;
+        private ILogger _logger;
 
         internal List<ChatMessage> History => _history;
 
         internal Oraculum Oraculum => _oraculum;
 
-        internal Memory(Oraculum oraculum, int ttl=5, int memorySpan = 4)
+        internal Memory(Oraculum oraculum, int ttl=5, int memorySpan = 4, ILogger? logger = null)
         {
+            _logger = logger ?? NullLogger.Instance;
             _memory = new Dictionary<Guid, (Fact, int, DateTime)>();
             _history = new List<ChatMessage>();
             _ttl = ttl;
@@ -34,6 +39,9 @@ namespace Oraculum
             if (filter == null)
                 filter = new KnowledgeFilter();
 
+            _logger.Log(LogLevel.Trace, $"Recall: recall from memory related to '{message}' with knowledge filter {JsonConvert.SerializeObject(filter)}");
+
+            _logger.Log(LogLevel.Trace, $"Recall: memory before {JsonConvert.SerializeObject(_memory)}");
             var toremove = new List<Guid>();
             foreach (var id in _memory.Keys)
             {
@@ -47,6 +55,8 @@ namespace Oraculum
 
             foreach (var id in toremove)
                 _memory.Remove(id);
+
+            _logger.Log(LogLevel.Trace, $"Recall: memory after cleanup {JsonConvert.SerializeObject(_memory)}");
 
             var facts = await _oraculum.FindRelevantFacts(message, new FactFilter()
             {
@@ -67,6 +77,8 @@ namespace Oraculum
                     _memory[fact.id!.Value] = (fact, Math.Max(ttl, Math.Min(ttl + 1, _ttl - n)), d);
                 }
             }
+
+            _logger.Log(LogLevel.Trace, $"Recall: memory after RAG access {JsonConvert.SerializeObject(_memory)}");
 
             var factsdata = new XmlDocument();
 

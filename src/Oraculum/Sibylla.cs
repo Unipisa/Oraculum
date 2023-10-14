@@ -13,6 +13,9 @@ using WeaviateNET.Query;
 using OpenAI.Interfaces;
 using OpenAI.Tokenizer.GPT3;
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Newtonsoft.Json;
 
 namespace Oraculum
 {
@@ -60,15 +63,19 @@ namespace Oraculum
         private ChatCompletionCreateRequest _chat;
         private Memory _memory;
         private SibyllaConf _conf;
+        private ILogger _logger;
 
-        public Sibylla(Configuration conf, SibyllaConf sybillaConf)
+        public Sibylla(Configuration conf, SibyllaConf sybillaConf, ILogger? logger = null)
         {
+            _logger = logger ?? NullLogger.Instance;
+
             _conf = sybillaConf;
             _openAiService = new OpenAIService(new OpenAiOptions()
             {
                 ApiKey = conf.OpenAIApiKey!,
                 Organization = conf.OpenAIOrgId
             });
+            _logger.Log(LogLevel.Trace, $"Sibylla: Oraculum conf {JsonConvert.SerializeObject(conf)} Sibylla conf {JsonConvert.SerializeObject(_conf)}");
             _chat = new ChatCompletionCreateRequest();
             _chat.MaxTokens = sybillaConf.MaxTokens;
             _chat.Temperature = sybillaConf.Temperature;
@@ -81,7 +88,7 @@ namespace Oraculum
                 new ChatMessage(Actor.System, sybillaConf.BaseSystemPrompt!),
                 new ChatMessage(Actor.Assistant, sybillaConf.BaseAssistantPrompt!)
             };
-            _memory = new Memory(new Oraculum(conf), _conf.FactMemoryTTL);
+            _memory = new Memory(new Oraculum(conf), _conf.FactMemoryTTL, logger: _logger);
             _memory.History.AddRange(new[]
             {
                 new ChatMessage(Actor.Assistant, sybillaConf.BaseAssistantPrompt!)
@@ -92,6 +99,7 @@ namespace Oraculum
 
         public async Task Connect()
         {
+            _logger.Log(LogLevel.Trace, $"Sibylla: Connect");
             if (!_memory.Oraculum.IsConnected)
                 await _memory.Oraculum.Connect();
         }
@@ -113,10 +121,15 @@ namespace Oraculum
                     yield return txt;
                 }
             }
+            _logger.Log(LogLevel.Trace, $"Sibylla: message '{message}' with answer '{m}'");
             if (m.Length > 0)
             {
                 _chat.Messages.Add(new ChatMessage(Actor.Assistant, m.ToString()));
                 _memory.History.Add(new ChatMessage(Actor.Assistant, m.ToString()));
+            }
+            else
+            {
+                _logger.Log(LogLevel.Trace, $"Sibylla: message '{message}' with no answer");
             }
         }
 
@@ -128,9 +141,12 @@ namespace Oraculum
             if (result.Successful)
             {
                 var ret = result.Choices.First().Message.Content;
+                _logger.Log(LogLevel.Trace, $"Sibylla: message '{message}' with answer '{ret}'");
                 _chat.Messages.Add(new ChatMessage(Actor.Assistant, ret));
                 _memory.History.Add(new ChatMessage(Actor.Assistant, ret));
                 return ret;
+            } else {
+                _logger.Log(LogLevel.Trace, $"Sibylla: message '{message}' with no answer");
             }
             return null;
         }
@@ -140,7 +156,10 @@ namespace Oraculum
             if (filter == null)
                 filter = new KnowledgeFilter();
 
+            _logger.Log(LogLevel.Trace, $"PrepareAnswer: knowledge filtere is '{JsonConvert.SerializeObject(filter)}'");
+
             var (xml, msg) = await _memory.Recall(message, filter);
+            _logger.Log(LogLevel.Trace, $"PrepareAnswer: fact xml is '{xml.OuterXml}' and messages are '{JsonConvert.SerializeObject(msg)}'");
             _chat.Messages.Clear();
             _chat.Messages.Add(new ChatMessage(Actor.System, _conf.BaseSystemPrompt!));
             _chat.Messages.Add(new ChatMessage(Actor.System, xml.OuterXml));

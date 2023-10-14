@@ -1,5 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Oraculum
 {
@@ -13,9 +13,12 @@ namespace Oraculum
         private List<string> completed = new List<string>();
         private string _dataDir;
         private Configuration _oraculumConf;
+        private ILogger _logger;
 
-        public SibyllaManager(Configuration oraculumConf, string configurationsPath)
+        public SibyllaManager(Configuration oraculumConf, string configurationsPath, ILogger? logger = null)
         {
+            _logger = logger ?? NullLogger.Instance;
+
             if (!Directory.Exists(configurationsPath))
                 throw new DirectoryNotFoundException($"Configuration directory {configurationsPath} not found.");
 
@@ -34,7 +37,8 @@ namespace Oraculum
 
         public int Count => _sibyllae.Count;
 
-        public List<string> AvailableConfigurations {
+        public List<string> AvailableConfigurations
+        {
             get
             {
                 var files = Directory.GetFiles(_dataDir, "*.json");
@@ -42,13 +46,14 @@ namespace Oraculum
                 foreach (var file in files)
                 {
                     var name = Path.GetFileNameWithoutExtension(file);
+                    _logger.Log(LogLevel.Debug, $"AvailableConfigurations: found {name} in {file}");
                     confs.Add(name);
                 }
                 return confs;
             }
         }
 
-        IEnumerable<(Guid, Sibylla)> GetActiveSibyllae(string name)
+        public IEnumerable<(Guid, Sibylla)> GetActiveSibyllae(string name)
         {
             foreach (var key in _sibyllae.Keys)
             {
@@ -58,7 +63,7 @@ namespace Oraculum
                     var (s, e) = _sibyllae[key];
                     if (e.HasValue && e.Value > DateTime.Now)
 
-                    yield return (id, s);
+                        yield return (id, s);
                 }
             }
         }
@@ -67,7 +72,7 @@ namespace Oraculum
         public async Task<(Guid, Sibylla)> AddSibylla(string name, Configuration? oraculumConf = null, DateTime? expiration = null, bool connect = true)
         {
             var conf = SibyllaConf.FromJson(File.ReadAllText(ConfFile(name)));
-            var s = new Sibylla(oraculumConf ?? _oraculumConf, conf);
+            var s = new Sibylla(oraculumConf ?? _oraculumConf, conf, logger: _logger);
             var id = Guid.NewGuid();
             _sibyllae.Add((name, id), (s, expiration));
             if (connect)
