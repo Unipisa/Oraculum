@@ -13,6 +13,7 @@ namespace Oraculum
         private List<string> completed = new List<string>();
         private string _dataDir;
         private Configuration _oraculumConf;
+        private Oraculum _oraculum;
 
         public SibyllaManager(Configuration oraculumConf, string configurationsPath)
         {
@@ -21,6 +22,7 @@ namespace Oraculum
 
             _dataDir = configurationsPath;
             _oraculumConf = oraculumConf;
+            _oraculum = new Oraculum(oraculumConf);
         }
 
         private string ConfFile(string name)
@@ -93,6 +95,23 @@ namespace Oraculum
         public void RemoveSibylla(string name, Guid id)
         {
             _sibyllae.Remove((name, id));
+        }
+
+        public async Task<Fact?> GetFactById(Guid id)
+        {
+            // check Oraculum connection
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
+            //try catch keynotfound, return null
+            try
+            {
+                Fact? fact = await _oraculum.GetFact(id) ?? throw new KeyNotFoundException($"Fact with id {id} not found.");
+                return fact;
+            }
+            catch (KeyNotFoundException)
+            {
+                return null;
+            }
         }
 
         public Sibylla GetSibylla(string name, Guid id)
