@@ -8,6 +8,7 @@ using Oraculum;
 using System.Text;
 using System.Runtime.CompilerServices;
 using Microsoft.OpenApi.Any;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace OraculumApi.Controllers;
 
@@ -277,7 +278,7 @@ public class BackOfficeController : Controller
             // return 404
             return NotFound();
         }
-        return Content(JsonConvert.SerializeObject(fact), "application/json");
+        return Ok(fact);
     }
 
     /// <summary>
