@@ -16,11 +16,11 @@ namespace OraculumApi.Controllers;
 public class BackOfficeController : Controller
 {
 
-    private readonly ILogger<FrontOfficeController> _logger;
+    private readonly ILogger<BackOfficeController> _logger;
     private readonly SibyllaManager _sibyllaManager;
     private readonly IConfiguration _configuration;
 
-    public BackOfficeController(ILogger<FrontOfficeController> logger, SibyllaManager sibyllaManager, IConfiguration configuration)
+    public BackOfficeController(ILogger<BackOfficeController> logger, SibyllaManager sibyllaManager, IConfiguration configuration)
     {
         _logger = logger;
         _sibyllaManager = sibyllaManager;

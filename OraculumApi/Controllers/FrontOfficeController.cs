@@ -136,6 +136,7 @@ public class FrontOfficeController : Controller
         throw new NotImplementedException();
     }
 
+
     [HttpPost]
     [Route("answer/{question}")]
     public async Task<IActionResult> Answer([FromRoute][Required] string question)
@@ -161,6 +162,66 @@ public class FrontOfficeController : Controller
                     }
                 }
             }, "text/event-stream");
+    }
+
+    [HttpPost]
+    [Route("answer1/{question}")]
+    public async Task<string> Answer1(string question)
+    {
+        var Sibylla = await ConnectSibylla();
+        var answerid = Guid.NewGuid().ToString();
+        _sibyllaManager.Response.Add(answerid, new List<string>());
+        var t = Task.Run(() =>
+        {
+            var ena = Sibylla.AnswerAsync(question);
+            var en = ena.GetAsyncEnumerator();
+            while (true)
+            {
+                var j = en.MoveNextAsync();
+                j.AsTask().Wait();
+                if (!j.Result)
+                    break;
+                lock (_sibyllaManager.Response)
+                {
+                    _sibyllaManager.Response[answerid].Add(en.Current);
+                }
+            }
+            lock (_sibyllaManager.Completed)
+            {
+                _sibyllaManager.Completed.Add(answerid);
+            }
+        }
+        );
+        return answerid;
+    }
+
+    [HttpGet]
+    [Route("getanswer/{answerid}")]
+    public string GetAnswer(string answerid)
+    {
+        lock (_sibyllaManager.Response)
+        {
+            if (!_sibyllaManager.Response.ContainsKey(answerid))
+            {
+                HttpContext.Response.StatusCode = 204;
+                return "";
+            }
+            var r = _sibyllaManager.Response[answerid];
+            if (r.Count == 0 && _sibyllaManager.Completed.Contains(answerid))
+            {
+                _sibyllaManager.Response.Remove(answerid);
+                _sibyllaManager.Completed.Remove(answerid);
+                HttpContext.Response.StatusCode = 204;
+                return "";
+            }
+            var ret = new StringBuilder();
+            foreach (var s in r)
+            {
+                ret.Append(s);
+            }
+            r.Clear();
+            return ret.ToString();
+        }
     }
 
     private async Task WriteToChannel(Sibylla sibylla, string question, string answerid, ChannelWriter<string> writer)
