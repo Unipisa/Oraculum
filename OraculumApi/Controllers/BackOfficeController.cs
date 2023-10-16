@@ -6,6 +6,8 @@ using OraculumApi.Attributes;
 using OraculumApi.Models.BackOffice;
 using Oraculum;
 using System.Text;
+using System.Runtime.CompilerServices;
+using Microsoft.OpenApi.Any;
 
 namespace OraculumApi.Controllers;
 
@@ -50,6 +52,7 @@ public class BackOfficeController : Controller
         var sibylla = _sibyllaManager.GetSibylla(sibyllaName, Guid.Parse(sibyllaKey));
         return sibylla;
     }
+
     /// <summary>
     /// Create a new Sibylla configuration
     /// </summary>
@@ -265,24 +268,19 @@ public class BackOfficeController : Controller
     [Route("facts/{id}")]
     [ValidateModelState]
     [SwaggerOperation("GetFactById")]
-    [SwaggerResponse(statusCode: 200, type: typeof(Models.BackOffice.Fact), description: "Specific fact data")]
-    public virtual IActionResult GetFactById([FromRoute][Required] string id)
+    [SwaggerResponse(statusCode: 200, type: typeof(AnyType), description: "Specific fact data")]
+    public virtual async Task<IActionResult> GetFactByIdAsync([FromRoute][Required] string id)
     {
-        //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(200, default(Fact));
-
-        //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(404);
-
-        //TODO: Uncomment the next line to return response 500 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(500);
-        string? exampleJson = null;
-        exampleJson = "{\n  \"reference\" : \"reference\",\n  \"citation\" : \"citation\",\n  \"factType\" : \"factType\",\n  \"expiration\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"id\" : \"id\",\n  \"category\" : \"category\",\n  \"title\" : \"title\",\n  \"content\" : \"content\",\n  \"tags\" : [ \"tags\", \"tags\" ]\n}";
-
-        var example = exampleJson != null
-        ? JsonConvert.DeserializeObject<Models.BackOffice.Fact>(exampleJson)
-        : default(Models.BackOffice.Fact);            //TODO: Change the data returned
-        return new ObjectResult(example);
+        // get Fact from Oraculum and return it
+        var fact = await _sibyllaManager.GetFactById(Guid.Parse(id));
+        // check if fact is null
+        if (fact == null)
+        {
+            // return 404
+            return StatusCode(404);
+        }
+        // return 200
+        return StatusCode(200, fact);
     }
 
     /// <summary>
