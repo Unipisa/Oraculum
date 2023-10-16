@@ -165,7 +165,7 @@ public class BackOfficeController : Controller
     [Route("facts/query")]
     [ValidateModelState]
     [SwaggerOperation("FindRelevantFacts")]
-    [SwaggerResponse(statusCode: 200, type: typeof(List<Models.BackOffice.Fact>), description: "List of relevant facts")]
+    [SwaggerResponse(statusCode: 200, type: typeof(List<Oraculum.Fact>), description: "List of relevant facts")]
     public virtual IActionResult FindRelevantFacts([FromBody] SearchCriteria body)
     {
         //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -180,8 +180,8 @@ public class BackOfficeController : Controller
         exampleJson = "[ {\n  \"reference\" : \"reference\",\n  \"citation\" : \"citation\",\n  \"factType\" : \"factType\",\n  \"expiration\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"id\" : \"id\",\n  \"category\" : \"category\",\n  \"title\" : \"title\",\n  \"content\" : \"content\",\n  \"tags\" : [ \"tags\", \"tags\" ]\n}, {\n  \"reference\" : \"reference\",\n  \"citation\" : \"citation\",\n  \"factType\" : \"factType\",\n  \"expiration\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"id\" : \"id\",\n  \"category\" : \"category\",\n  \"title\" : \"title\",\n  \"content\" : \"content\",\n  \"tags\" : [ \"tags\", \"tags\" ]\n} ]";
 
         var example = exampleJson != null
-        ? JsonConvert.DeserializeObject<List<Models.BackOffice.Fact>>(exampleJson)
-        : default(List<Models.BackOffice.Fact>);            //TODO: Change the data returned
+        ? JsonConvert.DeserializeObject<List<Oraculum.Fact>>(exampleJson)
+        : default(List<Oraculum.Fact>);            //TODO: Change the data returned
         return new ObjectResult(example);
     }
 
@@ -199,7 +199,7 @@ public class BackOfficeController : Controller
     [Route("facts")]
     [ValidateModelState]
     [SwaggerOperation("GetAllFacts")]
-    [SwaggerResponse(statusCode: 200, type: typeof(List<Models.BackOffice.Fact>), description: "A list of facts")]
+    [SwaggerResponse(statusCode: 200, type: typeof(List<Oraculum.Fact>), description: "A list of facts")]
     public virtual IActionResult GetAllFacts([FromQuery] int? perPage, [FromQuery] int? page, [FromQuery] string sort, [FromQuery] string order)
     {
         //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
@@ -211,8 +211,8 @@ public class BackOfficeController : Controller
         exampleJson = "[ {\n  \"reference\" : \"reference\",\n  \"citation\" : \"citation\",\n  \"factType\" : \"factType\",\n  \"expiration\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"id\" : \"id\",\n  \"category\" : \"category\",\n  \"title\" : \"title\",\n  \"content\" : \"content\",\n  \"tags\" : [ \"tags\", \"tags\" ]\n}, {\n  \"reference\" : \"reference\",\n  \"citation\" : \"citation\",\n  \"factType\" : \"factType\",\n  \"expiration\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"id\" : \"id\",\n  \"category\" : \"category\",\n  \"title\" : \"title\",\n  \"content\" : \"content\",\n  \"tags\" : [ \"tags\", \"tags\" ]\n} ]";
 
         var example = exampleJson != null
-        ? JsonConvert.DeserializeObject<List<Models.BackOffice.Fact>>(exampleJson)
-        : default(List<Models.BackOffice.Fact>);            //TODO: Change the data returned
+        ? JsonConvert.DeserializeObject<List<Oraculum.Fact>>(exampleJson)
+        : default(List<Oraculum.Fact>);            //TODO: Change the data returned
         return new ObjectResult(example);
     }
 
@@ -265,10 +265,9 @@ public class BackOfficeController : Controller
     /// <response code="500">Internal server error</response>
     [HttpGet]
     [Route("facts/{id}")]
-    [ValidateModelState]
     [SwaggerOperation("GetFactById")]
-    [SwaggerResponse(statusCode: 200, type: typeof(AnyType), description: "Specific fact data")]
-    public virtual async Task<IActionResult> GetFactByIdAsync([FromRoute][Required] string id)
+    [SwaggerResponse(statusCode: 200, type: typeof(Oraculum.Fact), description: "Specific fact data")]
+    public async Task<IActionResult> GetFactByIdAsync([FromRoute][Required] string id)
     {
         // get Fact from Oraculum and return it
         var fact = await _sibyllaManager.GetFactById(Guid.Parse(id));
@@ -276,10 +275,9 @@ public class BackOfficeController : Controller
         if (fact == null)
         {
             // return 404
-            return StatusCode(404);
+            return NotFound();
         }
-        // return 200
-        return StatusCode(200, fact);
+        return Content(JsonConvert.SerializeObject(fact), "application/json");
     }
 
     /// <summary>
@@ -326,7 +324,7 @@ public class BackOfficeController : Controller
     [Route("facts")]
     [ValidateModelState]
     [SwaggerOperation("PostFacts")]
-    public virtual IActionResult PostFacts([FromBody] List<Models.BackOffice.Fact> body)
+    public virtual IActionResult PostFacts([FromBody] List<Oraculum.Fact> body)
     {
         //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
         // return StatusCode(200);
@@ -353,7 +351,7 @@ public class BackOfficeController : Controller
     [Route("facts")]
     [ValidateModelState]
     [SwaggerOperation("PutFacts")]
-    public virtual IActionResult PutFacts([FromBody] List<Models.BackOffice.Fact> body)
+    public virtual IActionResult PutFacts([FromBody] List<Oraculum.Fact> body)
     {
         //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
         // return StatusCode(200);
