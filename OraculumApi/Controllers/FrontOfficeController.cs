@@ -28,7 +28,6 @@ public class FrontOfficeController : Controller
         _configuration = configuration;
     }
 
-    //TODO: simply copied from the SibyllaSandbox controller, need to investigating on how it works
     //only to temporarily make the apis work
     //TODO: simply copied from the SibyllaSandbox controller, need to investigating on how it works
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -55,6 +54,7 @@ public class FrontOfficeController : Controller
         var sibylla = _sibyllaManager.GetSibylla(sibyllaName, Guid.Parse(sibyllaKey));
         return sibylla;
     }
+
     /// <summary>
     /// Delete a chat by id
     /// </summary>
@@ -80,6 +80,7 @@ public class FrontOfficeController : Controller
 
         throw new NotImplementedException();
     }
+
     [HttpGet]
     [Route("sibylla")]
     public IActionResult GetAllSibyllae()
@@ -172,6 +173,7 @@ public class FrontOfficeController : Controller
         writer.TryComplete();
     }
 }
+
 public class PushStreamResult : IActionResult
 {
     private readonly Func<Stream, Action<Exception>, CancellationToken, Task> _onStreamAvailable;
