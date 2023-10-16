@@ -29,7 +29,6 @@ public class BackOfficeController : Controller
         _configuration = configuration;
     }
 
-    //TODO: simply copied from the SibyllaSandbox controller, need to investigating on how it works
     [ApiExplorerSettings(IgnoreApi = true)]
     public async Task<IActionResult> Index()
     {
