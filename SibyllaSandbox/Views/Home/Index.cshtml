@@ -13,6 +13,16 @@
 <script type="text/javascript">
     var evt = new EventSource("/MessagesStream");
     evt.addEventListener('message', (e) => {
+        @if (Model.Configuration.OutOfScopePrefix != null)
+        {
+        <text>
+        var txt = $("#" + e.lastEventId)[0].innerHTML;
+        var pfx = '@(Model.Configuration.OutOfScopePrefix!)';
+        if (txt.startsWith(pfx)) {
+            $("#" + e.lastEventId)[0].innerHTML = txt.substring(pfx.length);
+        }
+        </text>
+        }
         $("#" + e.lastEventId).append(e.data.replaceAll('\n', '<br/>'));
         $("#chat").scrollTop($("#chat")[0].scrollHeight);
     });
@@ -56,37 +66,38 @@
                     @{
                         foreach (var m in messages)
                         {
-                            if (m.Role == "assistant")
+                            if (m.Role == "assistant" || m.Role == "assistantOT")
                             {
-                                        <div class="received-chats">
-                                            <div class="received-chats-img">
-                                                <img src="~/img/Logo.png" />
-                                            </div>
-                                            <div class="received-msg">
-                                                <div class="received-msg-inbox">
-                                                    <p>
-                                                       @m.Content
-                                                    </p>
-                                                    <!-- <span class="time">18:06 PM | July 24</span> -->
+                                                <div class="received-chats">
+                                                    <div class="received-chats-img">
+                                                        <img src="~/img/Logo.png" />
+                                                    </div>
+                                                    <div class="received-msg">
+                                                        <div class="received-msg-inbox">
+                                                            <p>
+                                                               @m.Content
+                                                            </p>
+                                                            <!-- <span class="time">18:06 PM | July 24</span> -->
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </div>
-                            } else if (m.Role == "user")
+                            }
+                            else if (m.Role == "user" || m.Role == "userOT")
                             {
-                                        <div class="outgoing-chats">
-                                            <div class="outgoing-chats-img">
-                                                <img src="~/img/User.png" />
-                                            </div>
-                                            <div class="outgoing-msg">
-                                                <div class="outgoing-chats-msg">
-                                                    <p class="multi-msg">
-                                                        @m.Content
-                                                    </p>
+                                                <div class="outgoing-chats">
+                                                    <div class="outgoing-chats-img">
+                                                        <img src="~/img/User.png" />
+                                                    </div>
+                                                    <div class="outgoing-msg">
+                                                        <div class="outgoing-chats-msg">
+                                                            <p class="multi-msg">
+                                                                @m.Content
+                                                            </p>
 
-                                                    <!-- <span class="time">18:30 PM | July 24</span> -->
+                                                            <!-- <span class="time">18:30 PM | July 24</span> -->
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </div>
                             }
                         }
                     }

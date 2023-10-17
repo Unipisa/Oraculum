@@ -38,9 +38,9 @@ namespace Oraculum
         public string[]? FactFilter { get; set; } = null;
         public string[]? CategoryFilter { get; set; } = null;
         public string[]? TagFilter { get; set; } = null;
-        public int FactMemoryTTL { get; set; } = 5;
+        public int FactMemoryTTL { get; set; } = 4; // 4 turns implies a maximum of 11 facts in memory
         public int MemorySpan { get; set; } = 4;
-        public string? OutOfScopeTag = "*&oo&*";
+        public string? OutOfScopePrefix = "*&oo&* ";
     }
 
     internal class Actor
@@ -48,6 +48,8 @@ namespace Oraculum
         internal const string System = "system";
         internal const string User = "user";
         internal const string Assistant = "assistant";
+        internal const string UserOT = "userOT";
+        internal const string AssistantOT = "assistantOT";
     }
 
     public class KnowledgeFilter
@@ -106,13 +108,13 @@ namespace Oraculum
 
         public ICollection<ChatMessage> History => _memory.History.ToList();
 
-        public async IAsyncEnumerable<string> AnswerAsync(string message, KnowledgeFilter? filter = null)
+        public async IAsyncEnumerable<string> AnswerAsync(string message, KnowledgeFilter? filter = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             await PrepreAnswer(message, filter);
 
             var m = new StringBuilder();
 
-            await foreach (var fragment in _openAiService.ChatCompletion.CreateCompletionAsStream(_chat))
+            await foreach (var fragment in _openAiService.ChatCompletion.CreateCompletionAsStream(_chat, cancellationToken: cancellationToken))
             {
                 if (fragment.Successful)
                 {
@@ -124,8 +126,15 @@ namespace Oraculum
             _logger.Log(LogLevel.Trace, $"Sibylla: message '{message}' with answer '{m}'");
             if (m.Length > 0)
             {
-                _chat.Messages.Add(new ChatMessage(Actor.Assistant, m.ToString()));
-                _memory.History.Add(new ChatMessage(Actor.Assistant, m.ToString()));
+                var msg = m.ToString();
+                var actor = Actor.Assistant;
+                if (_conf.OutOfScopePrefix != null && msg.StartsWith(_conf.OutOfScopePrefix))
+                {
+                    actor = Actor.AssistantOT;
+                    _memory.MarkLastHistoryMessageAsOT();
+                    msg = msg.Replace(_conf.OutOfScopePrefix, "");
+                }
+                _memory.History.Add(new ChatMessage(actor, msg));
             }
             else
             {
@@ -140,11 +149,18 @@ namespace Oraculum
             var result = await _openAiService.ChatCompletion.CreateCompletion(_chat);
             if (result.Successful)
             {
-                var ret = result.Choices.First().Message.Content;
-                _logger.Log(LogLevel.Trace, $"Sibylla: message '{message}' with answer '{ret}'");
-                _chat.Messages.Add(new ChatMessage(Actor.Assistant, ret));
-                _memory.History.Add(new ChatMessage(Actor.Assistant, ret));
-                return ret;
+                var msg = result.Choices.First().Message.Content;
+                _logger.Log(LogLevel.Trace, $"Sibylla: message '{message}' with answer '{msg}'");
+                var actor = Actor.Assistant;
+                if (_conf.OutOfScopePrefix != null && msg.StartsWith(_conf.OutOfScopePrefix))
+                {
+                    actor = Actor.AssistantOT;
+                    _memory.MarkLastHistoryMessageAsOT();
+                    msg.Replace(_conf.OutOfScopePrefix, "");
+                }
+
+                _memory.History.Add(new ChatMessage(actor, msg));
+                return msg;
             } else {
                 _logger.Log(LogLevel.Trace, $"Sibylla: message '{message}' with no answer");
             }
