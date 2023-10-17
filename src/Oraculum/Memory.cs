@@ -88,7 +88,9 @@ namespace Oraculum
             }
 
             var msg = _history.Skip(1).TakeLast(_span).ToList();
-
+            Console.WriteLine("*** ----- FACTS ----- ***\n\n");
+            Console.WriteLine(factsdata.OuterXml);
+            Console.WriteLine("\n*** ----- END FACTS ----- ***\n\n");
             return (factsdata, msg);
         }
     }
