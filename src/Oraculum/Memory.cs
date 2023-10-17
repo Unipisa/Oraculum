@@ -70,12 +70,13 @@ namespace Oraculum
             foreach (var fact in facts)
             {
                 if (!_memory.ContainsKey(fact.id!.Value))
-                    _memory.Add(fact.id!.Value, (fact, Math.Min(1, _ttl - n), DateTime.Now));
+                    _memory.Add(fact.id!.Value, (fact, Math.Max(1, _ttl - n), DateTime.Now));
                 else
                 {
                     var (f, ttl, d) = _memory[fact.id!.Value];
-                    _memory[fact.id!.Value] = (fact, Math.Max(ttl, Math.Min(ttl + 1, _ttl - n)), d);
+                    _memory[fact.id!.Value] = (fact, Math.Max(ttl + 1, _ttl - n), d);
                 }
+                ++n;
             }
 
             _logger.Log(LogLevel.Trace, $"Recall: memory after RAG access {JsonConvert.SerializeObject(_memory)}");
@@ -99,9 +100,21 @@ namespace Oraculum
                 root!.AppendChild(nf);
             }
 
-            var msg = _history.Skip(1).TakeLast(_span).ToList();
+            var msg = _history.Where(m => m.Role != Actor.UserOT && m.Role != Actor.AssistantOT).Skip(1).TakeLast(_span).ToList();
 
             return (factsdata, msg);
+        }
+
+        public void MarkLastHistoryMessageAsOT()
+        {
+            if (_history.Count > 0)
+            {
+                var last = _history.Last();
+                if (last.Role == Actor.User)
+                    last.Role = Actor.UserOT;
+                else if (last.Role == Actor.Assistant)
+                    last.Role = Actor.AssistantOT;
+            }
         }
     }
 }
