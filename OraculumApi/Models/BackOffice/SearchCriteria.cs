@@ -65,7 +65,7 @@ namespace OraculumApi.Models.BackOffice
         /// <value>Filter facts by type.</value>
 
         [DataMember(Name = "factTypeFilter")]
-        public required string[] FactTypeFilter { get; set; }
+        public string[]? FactTypeFilter { get; set; }
 
         /// <summary>
         /// Filter facts by category.
@@ -73,7 +73,7 @@ namespace OraculumApi.Models.BackOffice
         /// <value>Filter facts by category.</value>
 
         [DataMember(Name = "categoryFilter")]
-        public required string[] CategoryFilter { get; set; }
+        public string[]? CategoryFilter { get; set; }
 
         /// <summary>
         /// Filter facts by tags.
@@ -81,7 +81,7 @@ namespace OraculumApi.Models.BackOffice
         /// <value>Filter facts by tags.</value>
 
         [DataMember(Name = "tagsFilter")]
-        public required string[] TagsFilter { get; set; }
+        public string[]? TagsFilter { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

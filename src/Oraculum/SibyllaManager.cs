@@ -132,8 +132,11 @@ namespace Oraculum
         }
 
         // find relevant facts
-        public async Task<IEnumerable<Fact>> FindRelevantFacts(string query, float? distance = null, int? limit = null, int? autoCut = null, string[] factTypeFilter = null, string[] categoryFilter = null, string[] tagsFilter = null)
+        public async Task<ICollection<Fact>> FindRelevantFacts(string query, float? distance = null, int? limit = null, int? autoCut = null, string[]? factTypeFilter = null, string[]? categoryFilter = null, string[]? tagsFilter = null)
         {
+            // check Oraculum connection
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
             if (string.IsNullOrEmpty(query))
             {
                 return new List<Fact>();
@@ -149,9 +152,33 @@ namespace Oraculum
                 TagsFilter = tagsFilter
             };
 
-            var facts = await _oraculum.FindRelevantFacts(query, factFilter);
+            var facts = await _oraculum.FindRelevantFacts(query, null);
 
             return facts;
+        }
+
+        // Get all facts
+        public async Task<ICollection<Fact>> GetAllFacts(int limit = 0, int offset = 0, string? sort = null, string? order = null)
+        {
+            // check Oraculum connection
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
+
+            var facts = await _oraculum.ListFacts(limit: limit, offset: offset, sort: sort, order: order);
+
+            return facts;
+        }
+
+        // Add List of facts
+        public async Task<int> AddFacts(ICollection<Fact> facts)
+        {
+            // check Oraculum connection
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
+
+            var newFacts = await _oraculum.AddFact(facts);
+
+            return newFacts;
         }
 
         public Sibylla GetSibylla(string name, Guid id)
