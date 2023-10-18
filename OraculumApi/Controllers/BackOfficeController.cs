@@ -207,26 +207,14 @@ public class BackOfficeController : Controller
     [ValidateModelState]
     [SwaggerOperation("GetAllSibyllaConfigs")]
     [SwaggerResponse(statusCode: 200, type: typeof(List<SibyllaConfig>), description: "List of Sibylla configurations")]
-    public virtual IActionResult GetAllSibyllaConfigs([FromQuery] int? perPage, [FromQuery] int? page, [FromQuery] string sort, [FromQuery] string order)
+    public async Task<IActionResult> GetAllSibyllaConfigs([FromQuery] int? perPage, [FromQuery] int? page, [FromQuery] string sort, [FromQuery] string order)
     {
-        //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(200, default(List<SibyllaConfig>));
+        var sibyllae = await _sibyllaManager.GetSibillae();
+        if (sibyllae == null)
+            return StatusCode(500);
 
-        //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(400);
-
-        //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(404);
-
-        //TODO: Uncomment the next line to return response 500 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(500);
-        string? exampleJson = null;
-        exampleJson = "[ {\n  \"systemPrompt\" : \"systemPrompt\",\n  \"presencePenalty\" : 5.637377,\n  \"assistantPrompt\" : \"assistantPrompt\",\n  \"file\" : \"file\",\n  \"maxTokens\" : 0,\n  \"temperature\" : 6.0274563,\n  \"model\" : \"gpt-3.5-turbo\",\n  \"id\" : \"id\",\n  \"topP\" : 1.4658129,\n  \"frequencyPenalty\" : 5.962134\n}, {\n  \"systemPrompt\" : \"systemPrompt\",\n  \"presencePenalty\" : 5.637377,\n  \"assistantPrompt\" : \"assistantPrompt\",\n  \"file\" : \"file\",\n  \"maxTokens\" : 0,\n  \"temperature\" : 6.0274563,\n  \"model\" : \"gpt-3.5-turbo\",\n  \"id\" : \"id\",\n  \"topP\" : 1.4658129,\n  \"frequencyPenalty\" : 5.962134\n} ]";
-
-        var example = exampleJson != null
-        ? JsonConvert.DeserializeObject<List<SibyllaConfig>>(exampleJson)
-        : default(List<SibyllaConfig>);            //TODO: Change the data returned
-        return new ObjectResult(example);
+        // return Ok(sibyllae);
+        return StatusCode(200, sibyllae);
     }
 
     /// <summary>
