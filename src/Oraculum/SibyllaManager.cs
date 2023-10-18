@@ -115,6 +115,74 @@ namespace Oraculum
             }
         }
 
+        //delete fact by id
+        public async Task DeleteFactById(Guid id)
+        {
+            // check Oraculum connection
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
+            //try catch keynotfound, return null
+            try
+            {
+                await _oraculum.DeleteFact(id);
+            }
+            catch (KeyNotFoundException)
+            {
+                return;
+            }
+        }
+
+        // find relevant facts
+        public async Task<ICollection<Fact>> FindRelevantFacts(string query, float? distance = null, int? limit = null, int? autoCut = null, string[]? factTypeFilter = null, string[]? categoryFilter = null, string[]? tagsFilter = null)
+        {
+            // check Oraculum connection
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
+            if (string.IsNullOrEmpty(query))
+            {
+                return new List<Fact>();
+            }
+
+            var factFilter = new FactFilter()
+            {
+                Limit = limit,
+                Distance = distance,
+                Autocut = autoCut,
+                FactTypeFilter = factTypeFilter,
+                CategoryFilter = categoryFilter,
+                TagsFilter = tagsFilter
+            };
+
+            var facts = await _oraculum.FindRelevantFacts(query, null);
+
+            return facts;
+        }
+
+        // Get all facts
+        public async Task<ICollection<Fact>> GetAllFacts(int limit = 0, int offset = 0, string? sort = null, string? order = null)
+        {
+            // check Oraculum connection
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
+
+            var facts = await _oraculum.ListFacts(limit: limit, offset: offset, sort: sort, order: order);
+
+            return facts;
+        }
+
+        // Add List of facts
+        public async Task<int> AddFacts(ICollection<Fact> facts)
+        {
+            // check Oraculum connection
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
+
+            var newFacts = await _oraculum.AddFact(facts);
+
+            return newFacts;
+        }
+
+        // get all Sibyllae Configurations
         public Task<List<SibyllaConf>> GetSibillae()
         {
             var sibyllaeConfigs = new List<SibyllaConf>();
