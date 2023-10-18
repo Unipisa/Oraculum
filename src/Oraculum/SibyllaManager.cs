@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Microsoft.Extensions.Logging;
 
 namespace Oraculum
 {
@@ -112,6 +113,29 @@ namespace Oraculum
             {
                 return null;
             }
+        }
+
+        public async Task<List<SibyllaConf>> GetSibillae()
+        {
+            var sibyllaeConfigs = new List<SibyllaConf>();
+            DirectoryInfo di = new DirectoryInfo(_dataDir);
+            FileInfo[] confFiles = di.GetFiles("*.json");
+            if (confFiles.Length != 0)
+            {
+                foreach (FileInfo fi in confFiles)
+                {
+                    var name = Path.GetFileNameWithoutExtension(fi.Name);
+                    try
+                    {
+                        sibyllaeConfigs.Add(SibyllaConf.FromJson(File.ReadAllText(ConfFile(name))) ?? throw new Exception($"Configuration file {ConfFile(name)} is not valid."));
+                    }
+                    catch (System.Text.Json.JsonException)
+                    {
+                        return null;
+                    }
+                }
+            }
+            return sibyllaeConfigs;
         }
 
         public Sibylla GetSibylla(string name, Guid id)
