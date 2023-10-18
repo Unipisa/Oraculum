@@ -115,7 +115,7 @@ namespace Oraculum
             }
         }
 
-        public async Task<List<SibyllaConf>> GetSibillae()
+        public Task<List<SibyllaConf>> GetSibillae()
         {
             var sibyllaeConfigs = new List<SibyllaConf>();
             DirectoryInfo di = new DirectoryInfo(_dataDir);
@@ -135,7 +135,7 @@ namespace Oraculum
                     }
                 }
             }
-            return sibyllaeConfigs;
+            return Task.FromResult(sibyllaeConfigs);
         }
 
         public Sibylla GetSibylla(string name, Guid id)
