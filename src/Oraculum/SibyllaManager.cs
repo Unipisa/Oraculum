@@ -182,7 +182,7 @@ namespace Oraculum
             return newFacts;
         }
 
-        public async Task<List<SibyllaConf>> GetSibillae()
+        public List<SibyllaConf>? GetSibillae()
         {
             var sibyllaeConfigs = new List<SibyllaConf>();
             DirectoryInfo di = new DirectoryInfo(_dataDir);

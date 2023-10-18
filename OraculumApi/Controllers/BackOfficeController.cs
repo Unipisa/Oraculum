@@ -207,9 +207,9 @@ public class BackOfficeController : Controller
     [ValidateModelState]
     [SwaggerOperation("GetAllSibyllaConfigs")]
     [SwaggerResponse(statusCode: 200, type: typeof(List<SibyllaConfig>), description: "List of Sibylla configurations")]
-    public async Task<IActionResult> GetAllSibyllaConfigs([FromQuery] int? perPage, [FromQuery] int? page, [FromQuery] string sort, [FromQuery] string order)
+    public IActionResult GetAllSibyllaConfigs([FromQuery] int? perPage, [FromQuery] int? page, [FromQuery] string sort, [FromQuery] string order)
     {
-        var sibyllae = await _sibyllaManager.GetSibillae();
+        var sibyllae = _sibyllaManager.GetSibillae();
         if (sibyllae == null)
             return StatusCode(500);
 
