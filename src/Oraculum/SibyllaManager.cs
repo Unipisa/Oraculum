@@ -114,6 +114,46 @@ namespace Oraculum
             }
         }
 
+        //delete fact by id
+        public async Task DeleteFactById(Guid id)
+        {
+            // check Oraculum connection
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
+            //try catch keynotfound, return null
+            try
+            {
+                await _oraculum.DeleteFact(id);
+            }
+            catch (KeyNotFoundException)
+            {
+                return;
+            }
+        }
+
+        // find relevant facts
+        public async Task<IEnumerable<Fact>> FindRelevantFacts(string query, float? distance = null, int? limit = null, int? autoCut = null, string[] factTypeFilter = null, string[] categoryFilter = null, string[] tagsFilter = null)
+        {
+            if (string.IsNullOrEmpty(query))
+            {
+                return new List<Fact>();
+            }
+
+            var factFilter = new FactFilter()
+            {
+                Limit = limit,
+                Distance = distance,
+                Autocut = autoCut,
+                FactTypeFilter = factTypeFilter,
+                CategoryFilter = categoryFilter,
+                TagsFilter = tagsFilter
+            };
+
+            var facts = await _oraculum.FindRelevantFacts(query, factFilter);
+
+            return facts;
+        }
+
         public Sibylla GetSibylla(string name, Guid id)
         {
             if (!_sibyllae.ContainsKey((name, id)))
