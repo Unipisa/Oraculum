@@ -193,11 +193,7 @@ public class BackOfficeController : Controller
     /// <summary>
     /// Retrieve all Sibylla configurations
     /// </summary>
-    /// <remarks>Retrive a list of Sibylla configs using pagination (default max 10 elements)</remarks>
-    /// <param name="perPage">Limit the number of facts returned.</param>
-    /// <param name="page">Offset to start the facts list from.</param>
-    /// <param name="sort">Attribute to sort the facts by.</param>
-    /// <param name="order">Order of sorting (asc or desc).</param>
+    /// <remarks>Retrive a list of Sibylla configs </remarks>
     /// <response code="200">List of Sibylla configurations</response>
     /// <response code="400">Bad Request</response>
     /// <response code="404">Not Found</response>
@@ -207,14 +203,13 @@ public class BackOfficeController : Controller
     [ValidateModelState]
     [SwaggerOperation("GetAllSibyllaConfigs")]
     [SwaggerResponse(statusCode: 200, type: typeof(List<SibyllaConfig>), description: "List of Sibylla configurations")]
-    public IActionResult GetAllSibyllaConfigs([FromQuery] int? perPage, [FromQuery] int? page, [FromQuery] string sort, [FromQuery] string order)
+    public async Task<IActionResult> GetAllSibyllaeConfigs()
     {
-        var sibyllae = _sibyllaManager.GetSibillae();
-        if (sibyllae == null)
+        List<SibyllaConf> sibyllaeConfs = await Task.Run(() => _sibyllaManager.GetSibillae());
+        if (sibyllaeConfs == null)
             return StatusCode(500);
-
         // return Ok(sibyllae);
-        return StatusCode(200, sibyllae);
+        return StatusCode(200, sibyllaeConfs);
     }
 
     /// <summary>
