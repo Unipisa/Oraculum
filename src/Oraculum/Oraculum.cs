@@ -60,18 +60,18 @@ public class Fact
     public const string ClassName = "Facts";
 
     [JsonIgnore]
-    public Guid? id { get; set; }
+    public Guid? id;
     [JsonIgnore]
     public double? distance;
 
-    public string? factType { get; set; }
-    public string? category { get; set; }
-    public string[]? tags { get; set; }
-    public string? title { get; set; }
-    public string? content { get; set; }
-    public string? citation { get; set; }
-    public string? reference { get; set; }
-    public DateTime? expiration { get; set; }
+    public string? factType;
+    public string? category;
+    public string[]? tags;
+    public string? title;
+    public string? content;
+    public string? citation;
+    public string? reference;
+    public DateTime? expiration;
     //public GeoCoordinates? location;
     //public string? locationName;
     //public string[]? editPrincipals;

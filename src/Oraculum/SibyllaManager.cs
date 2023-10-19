@@ -153,8 +153,7 @@ namespace Oraculum
                 TagsFilter = tagsFilter
             };
 
-            var facts = await _oraculum.FindRelevantFacts(query, null);
-
+            var facts = await _oraculum.FindRelevantFacts(query, factFilter);
             return facts;
         }
 

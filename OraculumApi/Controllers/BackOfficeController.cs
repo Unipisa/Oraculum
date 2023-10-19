@@ -163,8 +163,19 @@ public class BackOfficeController : Controller
     {
         // find relevant facts with sibyllamanager method
         var facts = await _sibyllaManager.FindRelevantFacts(body.Query, body.Distance, body.Limit, body.AutoCut, body.FactTypeFilter, body.CategoryFilter, body.TagsFilter);
-        // return facts
-        return Ok(facts);
+        var factsList = facts.Select(f => new Models.BackOffice.Fact
+        {
+            Id = f.id ?? Guid.Empty,
+            FactType = f.factType ?? "",
+            Category = f.category ?? "",
+            Tags = f.tags != null ? f.tags.ToList() : new List<string>(),
+            Title = f.title ?? "",
+            Content = f.content ?? "",
+            Citation = f.citation ?? "",
+            Reference = f.reference ?? "",
+            Expiration = f.expiration
+        }).ToList();
+        return Ok(factsList);
     }
 
     /// <summary>
@@ -186,8 +197,20 @@ public class BackOfficeController : Controller
     {
         // get all facts from sibyllamanager
         var facts = await _sibyllaManager.GetAllFacts(limit ?? 10, offset ?? 0, sort, order);
-        // return facts
-        return Ok(facts);
+        // build a new list of facts of type Models.BackOffice.Fact from facts
+        var factsList = facts.Select(f => new Models.BackOffice.Fact
+        {
+            Id = f.id ?? Guid.Empty,
+            FactType = f.factType ?? "",
+            Category = f.category ?? "",
+            Tags = f.tags != null ? f.tags.ToList() : new List<string>(),
+            Title = f.title ?? "",
+            Content = f.content ?? "",
+            Citation = f.citation ?? "",
+            Reference = f.reference ?? "",
+            Expiration = f.expiration
+        }).ToList();
+        return Ok(factsList);
     }
 
     /// <summary>
@@ -290,7 +313,7 @@ public class BackOfficeController : Controller
     {
         await _sibyllaManager.AddFacts(body.Select(f => new Oraculum.Fact
         {
-            id = Guid.TryParse(f.Id, out Guid id) ? id : (Guid?)null,
+            id = f.Id,
             factType = f.FactType,
             category = f.Category,
             tags = f.Tags.ToArray(),
