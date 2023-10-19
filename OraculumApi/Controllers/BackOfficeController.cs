@@ -65,8 +65,8 @@ public class BackOfficeController : Controller
     [HttpPost]
     [Route("sibylla-configs")]
     [ValidateModelState]
-    [SwaggerOperation("AddSibyllaConfig")]
-    public virtual IActionResult AddSibyllaConfig([FromBody] List<SibyllaConfig> body)
+    [SwaggerOperation("AddSibyllaConfigDto")]
+    public virtual IActionResult AddSibyllaConfigDto([FromBody] List<SibyllaConfigDto> body)
     {
         //TODO: Uncomment the next line to return response 201 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
         // return StatusCode(201);
@@ -131,8 +131,8 @@ public class BackOfficeController : Controller
     [HttpDelete]
     [Route("sibylla-configs/{id}")]
     [ValidateModelState]
-    [SwaggerOperation("DeleteSibyllaConfigById")]
-    public virtual IActionResult DeleteSibyllaConfigById([FromRoute][Required] string id)
+    [SwaggerOperation("DeleteSibyllaConfigDtoById")]
+    public virtual IActionResult DeleteSibyllaConfigDtoById([FromRoute][Required] string id)
     {
         //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
         // return StatusCode(200);
@@ -224,15 +224,20 @@ public class BackOfficeController : Controller
     [HttpGet]
     [Route("sibylla-configs")]
     [ValidateModelState]
-    [SwaggerOperation("GetAllSibyllaConfigs")]
-    [SwaggerResponse(statusCode: 200, type: typeof(List<SibyllaConfig>), description: "List of Sibylla configurations")]
+    [SwaggerOperation("GetAllSibyllaConfigDtos")]
+    [SwaggerResponse(statusCode: 200, type: typeof(List<SibyllaConfigDto>), description: "List of Sibylla configurations")]
     public async Task<IActionResult> GetAllSibyllaeConfigs()
     {
         List<SibyllaConf> sibyllaeConfs = await Task.Run(() => _sibyllaManager.GetSibillae());
         if (sibyllaeConfs == null)
             return StatusCode(500);
+        var result = getAllSibyllaeConfigs(sibyllaeConfs);
+        if (result == null)
+        {
+            return StatusCode(500);
+        }
         // return Ok(sibyllae);
-        return StatusCode(200, sibyllaeConfs);
+        return StatusCode(200, result);
     }
 
     /// <summary>
@@ -271,12 +276,12 @@ public class BackOfficeController : Controller
     [HttpGet]
     [Route("sibylla-configs/{id}")]
     [ValidateModelState]
-    [SwaggerOperation("GetSibyllaConfigById")]
-    [SwaggerResponse(statusCode: 200, type: typeof(SibyllaConfig), description: "Specific Sibylla configuration data")]
-    public virtual IActionResult GetSibyllaConfigById([FromRoute][Required] string id)
+    [SwaggerOperation("GetSibyllaConfigDtoById")]
+    [SwaggerResponse(statusCode: 200, type: typeof(SibyllaConfigDto), description: "Specific Sibylla configuration data")]
+    public virtual IActionResult GetSibyllaConfigDtoById([FromRoute][Required] string id)
     {
         //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(200, default(SibyllaConfig));
+        // return StatusCode(200, default(SibyllaConfigDto));
 
         //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
         // return StatusCode(404);
@@ -287,8 +292,8 @@ public class BackOfficeController : Controller
         exampleJson = "{\n  \"systemPrompt\" : \"systemPrompt\",\n  \"presencePenalty\" : 5.637377,\n  \"assistantPrompt\" : \"assistantPrompt\",\n  \"file\" : \"file\",\n  \"maxTokens\" : 0,\n  \"temperature\" : 6.0274563,\n  \"model\" : \"gpt-3.5-turbo\",\n  \"id\" : \"id\",\n  \"topP\" : 1.4658129,\n  \"frequencyPenalty\" : 5.962134\n}";
 
         var example = exampleJson != null
-        ? JsonConvert.DeserializeObject<SibyllaConfig>(exampleJson)
-        : default(SibyllaConfig);            //TODO: Change the data returned
+        ? JsonConvert.DeserializeObject<SibyllaConfigDto>(exampleJson)
+        : default(SibyllaConfigDto);            //TODO: Change the data returned
         return new ObjectResult(example);
     }
 
@@ -364,8 +369,8 @@ public class BackOfficeController : Controller
     [HttpPut]
     [Route("sibylla-configs")]
     [ValidateModelState]
-    [SwaggerOperation("PutSibyllaConfigs")]
-    public virtual IActionResult PutSibyllaConfigs([FromBody] List<SibyllaConfig> body)
+    [SwaggerOperation("PutSibyllaConfigDtos")]
+    public virtual IActionResult PutSibyllaConfigDtos([FromBody] List<SibyllaConfigDto> body)
     {
         //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
         // return StatusCode(200);
@@ -380,5 +385,21 @@ public class BackOfficeController : Controller
         // return StatusCode(500);
 
         throw new NotImplementedException();
+    }
+
+    // TODO 
+    // temporary method waiting to have a real database with real IDs
+    // Call this for obtaining a list of configurations with an Id based on the name of the json file from the configurations  folder
+    private List<SibyllaConfigDto> getAllSibyllaeConfigs(List<SibyllaConf> sibyllaeConfs)
+    {
+        List<SibyllaConfigDto> result = new List<SibyllaConfigDto>();
+        foreach (SibyllaConf s in sibyllaeConfs)
+        {
+            if (s.Title != null)
+            {
+                result.Add(SibyllaConfigDto.ToSibyllaConfigDto(s));
+            }
+        }
+        return result;
     }
 }
