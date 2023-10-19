@@ -31,7 +31,7 @@ namespace OraculumApi.Models.BackOffice
         /// </summary>
 
         [DataMember(Name = "id")]
-        public required string Id { get; set; }
+        public required Guid Id { get; set; }
 
         /// <summary>
         /// Type of the fact
