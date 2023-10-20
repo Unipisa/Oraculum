@@ -7,6 +7,7 @@ using OraculumApi.Models.FrontOffice;
 using Oraculum;
 using System.Text;
 using System.Threading.Channels;
+using Microsoft.OpenApi.Any;
 
 namespace OraculumApi.Controllers;
 
@@ -223,6 +224,32 @@ public class FrontOfficeController : Controller
             r.Clear();
             return ret.ToString();
         }
+    }
+
+    //api di debug per fare le metriche, metodo sincrono
+    [HttpGet]
+    [Route("getanswer/debug/{query}")]
+    public async Task<IActionResult> GetAnswerDebugAsync(string query)
+    {
+        var Sibylla = await ConnectSibylla();
+        var answer = await Sibylla.Answer(query);
+        var prompt = Sibylla.Configuration.BaseSystemPrompt;
+        var facts = await _sibyllaManager.FindRelevantFacts(query, null, Sibylla.Configuration.Limit);
+        var factsList = facts.Select(f => new Models.BackOffice.Fact
+        {
+            Id = f.id ?? Guid.Empty,
+            FactType = f.factType ?? "",
+            Category = f.category ?? "",
+            Tags = f.tags != null ? f.tags.ToList() : new List<string>(),
+            Title = f.title ?? "",
+            Content = f.content ?? "",
+            Citation = f.citation ?? "",
+            Reference = f.reference ?? "",
+            Expiration = f.expiration
+        }).ToList();
+
+        // return a json with field "answer" and "prompt" "facts"
+        return Ok(new { answer, prompt, factsList });
     }
 
     private async Task WriteToChannel(Sibylla sibylla, string question, string answerid, ChannelWriter<string> writer)
