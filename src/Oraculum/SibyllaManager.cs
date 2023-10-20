@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using Microsoft.Extensions.Logging;
 
 namespace Oraculum
@@ -194,7 +195,9 @@ namespace Oraculum
                     var name = Path.GetFileNameWithoutExtension(fi.Name);
                     try
                     {
-                        sibyllaeConfigs.Add(SibyllaConf.FromJson(File.ReadAllText(ConfFile(name))) ?? throw new Exception($"Configuration file {ConfFile(name)} is not valid."));
+                        var s = SibyllaConf.FromJson(File.ReadAllText(ConfFile(name))) ?? throw new Exception($"Configuration file {ConfFile(name)} is not valid.");
+                        s.Title = name;
+                        sibyllaeConfigs.Add(s);
                     }
                     catch (System.Text.Json.JsonException)
                     {
