@@ -12,7 +12,7 @@
 RootModule = 'lib/net7.0/OraculumCLI.dll'
 
 # Version number of this module.
-ModuleVersion = '1.0.2'
+ModuleVersion = '1.1.0.1'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
