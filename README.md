@@ -37,6 +37,7 @@ The project it's still in his infancy but it can be used in production if you wa
 - Introduced support to avoid persistance of unrelated messages into prompt
 - Added `ILogger` support
 - Changed Weaviate schema
+- The upgrade procedure should be automatic though I suggest a `Get-Facts | ConvertTo-Json > backup.json` before upgrading.
 
 ### Version 1.0.2
 - Exposed `Configuration` property in `Sibylla` class

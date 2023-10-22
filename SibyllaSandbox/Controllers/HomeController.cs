@@ -65,13 +65,16 @@ namespace SibyllaSandbox.Controllers
                     if (!j.Result)
                         break;
 
-                    var ev = new ServerSentEvent()
+                    if (en.Current != null)
                     {
-                        Id = answerid,
-                        Data = new List<string>() { en.Current }
-                    };
-                    var jj = _serverSentEventsService.SendEventAsync(ev, c => c.Id.ToString() == clientid);
-                    jj.Wait();
+                        var ev = new ServerSentEvent()
+                        {
+                            Id = answerid,
+                            Data = new List<string>() { en.Current.Replace("\n", "<br/>") }
+                        };
+                        var jj = _serverSentEventsService.SendEventAsync(ev, c => c.Id.ToString() == clientid);
+                        jj.Wait();
+                    }
                 }
             });
             return answerid;

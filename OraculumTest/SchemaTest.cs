@@ -43,6 +43,13 @@ namespace OraculumTest
         }
 
         [TestMethod]
+        public async Task TestUpgradeDB()
+        {
+            Assert.IsNotNull(oraculum);
+            await oraculum.UpgradeDB();
+        }
+
+        [TestMethod]
         public async Task TestConnectAndInit()
         {
             Assert.IsNotNull(oraculum);

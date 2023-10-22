@@ -54,7 +54,7 @@ public class FactFilter
 }
 
 [IndexNullState]
-public class Fact
+public class Fact_1_0
 {
     internal const int MajorVersion = 1;
     internal const int MinorVersion = 0;
@@ -75,12 +75,38 @@ public class Fact
     public string? citation;
     public string? reference;
     public DateTime? expiration;
-    //public GeoCoordinates? location;
-    //public string? locationName;
-    //public string[]? editPrincipals;
-    //public string? validFrom;
-    //public string? validTo;
+}
+
+[IndexNullState]
+public class Fact
+{
+    internal const int MajorVersion = 1;
+    internal const int MinorVersion = 1;
+
+    [JsonIgnore]
+    public const string ClassName = "Facts";
+
+    [JsonIgnore]
+    public Guid? id;
+    [JsonIgnore]
+    public double? distance;
+
+    public string? factType;
+    public string? category;
+    public string[]? tags;
+    public string? title;
+    public string? content;
+    public string? citation;
+    public string? reference;
+    public DateTime? expiration;
+    public GeoCoordinates? location;
+    public double? locationDistance;
+    public string? locationName;
+    public string[]? editPrincipals;
+    public string? validFrom;
+    public string? validTo;
     //public WeaviateRef[]? references;
+    public DateTime? factAdded;
 }
 
     public class Oraculum
@@ -148,11 +174,26 @@ public class Fact
             throw new Exception($"Weaviate instance has not been configured for Oraculum, you must initialize the DB first");
         }
 
+        await ReadSchemaMetadata();
+
+        if (_oraculumConfig!.Properties.schemaMajorVersion != Fact.MajorVersion || _oraculumConfig.Properties.schemaMinorVersion != Fact.MinorVersion)
+        {
+            _logger.Log(LogLevel.Warning, $"Connect: Weaviate schema version is {_oraculumConfig.Properties.schemaMajorVersion}.{_oraculumConfig.Properties.schemaMinorVersion} while Oraculum requires {Fact.MajorVersion}.{Fact.MinorVersion}. Trying to update schema...");
+            await UpgradeDB();
+        }
+
+        _facts = _kb.Schema.GetClass<Fact>(Fact.ClassName);
+    }
+
+    private async Task ReadSchemaMetadata()
+    {
         _oraculumConfigClass = _kb.Schema.GetClass<OraculumConfig>(OraculumConfig.ClassName);
         if (_oraculumConfigClass == null)
             throw new Exception("Internal error: cannot get OraculumConfig class!");
         _oraculumConfig = await _oraculumConfigClass.Get(OraculumConfig.ConfigID);
-        _facts = _kb.Schema.GetClass<Fact>(Fact.ClassName);
+
+        if (_oraculumConfig == null)
+            throw new Exception("Internal error: cannot get OraculumConfig object!");
     }
 
     public async Task Init()
@@ -269,8 +310,79 @@ public class Fact
 
     public async Task UpgradeDB()
     {
-        //await _kb.Schema.Update();
+        await _kb.Schema.Update();
 
+        // If upgradeDB is invoked alone, without a previous call to Connect(), we need to read the schema metadata
+        if (_oraculumConfigClass == null)
+        {
+            await ReadSchemaMetadata();
+        }
+
+        if (_oraculumConfig!.Properties.schemaMajorVersion == 1 && _oraculumConfig!.Properties.schemaMinorVersion == 0)
+        {
+            var facts = _kb.Schema.GetClass<Fact_1_0>(Fact_1_0.ClassName);
+            if (facts == null)
+            {
+                _logger.Log(LogLevel.Critical, "UpgradeDB: cannot get Facts class");
+                throw new Exception("Internal error: cannot get Facts class!");
+            }
+            var fn = Path.GetTempFileName();
+            var outf = new StreamWriter(fn);
+
+            var n = await facts.CountObjects();
+            for (var i = 0; i < n; i += 100)
+            {
+                var r = await facts.ListObjects(100, offset: i);
+                var outt = JsonConvert.SerializeObject(r.Objects.ToList());
+                outf.WriteLine(outt.Length);
+                await outf.WriteLineAsync(outt);
+            }
+            outf.Close();
+
+            await facts.Delete();
+            var factsNew = await _kb.Schema.NewClass<Fact>(Fact.ClassName);
+
+            _oraculumConfig!.Properties.schemaMajorVersion = Fact.MajorVersion;
+            _oraculumConfig!.Properties.schemaMinorVersion = Fact.MinorVersion;
+            await _oraculumConfig!.Save();
+
+            var inf = new StreamReader(fn);
+
+            string? line;
+            var total = 0;
+            while ((line = inf.ReadLine()) != null)
+            {
+                var sz = int.Parse(line);
+                var buf = new char[sz];
+                await inf.ReadBlockAsync(buf, 0, sz);
+                var facts_1_0 = JsonConvert.DeserializeObject<List<WeaviateObject<Fact_1_0>>>(new string(buf));
+                var facts_1_1 = facts_1_0!.ConvertAll(f =>
+                {
+                    var o = factsNew.Create();
+                    o.Properties.category = f.Properties.category;
+                    o.Properties.citation = f.Properties.citation;
+                    o.Properties.content = f.Properties.content;
+                    o.Properties.expiration = f.Properties.expiration;
+                    o.Properties.factType = f.Properties.factType;
+                    o.Properties.reference = f.Properties.reference;
+                    o.Properties.tags = f.Properties.tags;
+                    o.Properties.title = f.Properties.title;
+                    return o;
+                });
+                var na = await factsNew.Add(facts_1_1);
+                total += na.Count;
+                if (na.Count != facts_1_1.Count)
+                {
+                    _logger.Log(LogLevel.Critical, $"UpgradeDB: error adding facts, expected {facts_1_1.Count} but added {na.Count}");
+                }
+                inf.ReadLine();
+            }
+            if (total != n)
+            {
+                _logger.Log(LogLevel.Critical, $"UpgradeDB: error adding facts, expected {n} but added {total}");
+            }
+
+        }
         //var facts = _kb.Schema.GetClass<Fact>(Fact.ClassName);
         //var r = await facts.ListObjects(100);
         //var bk = r.Objects.ToList();
