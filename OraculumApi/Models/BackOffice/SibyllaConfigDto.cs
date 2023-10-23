@@ -45,6 +45,7 @@ namespace OraculumApi.Models.BackOffice
 
         public static SibyllaConfigDto ToSibyllaConfigDto(SibyllaConf sibyllaConf)
         {
+            //TODO:  the constructor with the Id is required until we dont use a db for storing configurations
             SibyllaConfigDto SibyllaConfigDto = new SibyllaConfigDto(sibyllaConf.Title);
             SibyllaConfigDto.BaseSystemPrompt = sibyllaConf.BaseSystemPrompt;
             SibyllaConfigDto.BaseAssistantPrompt = sibyllaConf.BaseAssistantPrompt;
@@ -63,6 +64,29 @@ namespace OraculumApi.Models.BackOffice
             SibyllaConfigDto.Limit = sibyllaConf.Limit;
             return SibyllaConfigDto;
         }
+
+        public static SibyllaConf FromSibyllaConfigDto(SibyllaConfigDto sibyllaConfigDto)
+        {
+            SibyllaConf SibyllaConf = new SibyllaConf();
+            SibyllaConf.Title = sibyllaConfigDto.Title;
+            SibyllaConf.BaseSystemPrompt = sibyllaConfigDto.BaseSystemPrompt;
+            SibyllaConf.BaseAssistantPrompt = sibyllaConfigDto.BaseAssistantPrompt;
+            SibyllaConf.MaxTokens = sibyllaConfigDto.MaxTokens;
+            SibyllaConf.Model = sibyllaConfigDto.Model;
+            SibyllaConf.Temperature = sibyllaConfigDto.Temperature;
+            SibyllaConf.TopP = sibyllaConfigDto.TopP;
+            SibyllaConf.FrequencyPenalty = sibyllaConfigDto.FrequencyPenalty;
+            SibyllaConf.PresencePenalty = sibyllaConfigDto.PresencePenalty;
+            SibyllaConf.FactFilter = sibyllaConfigDto.FactFilter;
+            SibyllaConf.CategoryFilter = sibyllaConfigDto.CategoryFilter;
+            SibyllaConf.TagFilter = sibyllaConfigDto.TagFilter;
+            SibyllaConf.FactMemoryTTL = sibyllaConfigDto.FactMemoryTTL;
+            SibyllaConf.MemorySpan = sibyllaConfigDto.MemorySpan;
+            SibyllaConf.OutOfScopeTag = sibyllaConfigDto.OutOfScopeTag;
+            SibyllaConf.Limit = sibyllaConfigDto.Limit;
+            return SibyllaConf;
+        }
+
         /// <summary>
         /// Returns the JSON string presentation of the object
         /// </summary>

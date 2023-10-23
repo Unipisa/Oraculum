@@ -66,21 +66,27 @@ public class BackOfficeController : Controller
     [Route("sibylla-configs")]
     [ValidateModelState]
     [SwaggerOperation("AddSibyllaConfigDto")]
-    public virtual IActionResult AddSibyllaConfigDto([FromBody] List<SibyllaConfigDto> body)
+    public async Task<IActionResult> AddSibyllaConfigDtoAsync([FromBody] List<SibyllaConfigDto> body)
     {
-        //TODO: Uncomment the next line to return response 201 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(201);
-
-        //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(400);
-
-        //TODO: Uncomment the next line to return response 409 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(409);
-
-        //TODO: Uncomment the next line to return response 500 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(500);
-
-        throw new NotImplementedException();
+        foreach (SibyllaConfigDto sibyllaConfig in body)
+        {
+            if (sibyllaConfig.Title == null)
+            {
+                // the title field is required because is being used as unique Id for teh configurations folder
+                return StatusCode(400);
+            }
+            // save the single configuration 
+            try
+            {
+                await Task.Run(() => _sibyllaManager.SaveSibylla(SibyllaConfigDto.FromSibyllaConfigDto(sibyllaConfig)));
+            }
+            catch (IOException)
+            {
+                // there was an error while saving the file on disk, maybe the file already exist
+                return StatusCode(409, "Error: configuration with Id or title " + sibyllaConfig.Title + " already exist");
+            }
+        }
+        return StatusCode(200);
     }
 
     /// <summary>
@@ -132,18 +138,14 @@ public class BackOfficeController : Controller
     [Route("sibylla-configs/{id}")]
     [ValidateModelState]
     [SwaggerOperation("DeleteSibyllaConfigDtoById")]
-    public virtual IActionResult DeleteSibyllaConfigDtoById([FromRoute][Required] string id)
+    public async Task<IActionResult> DeleteSibyllaConfigDtoById([FromRoute][Required] string id)
     {
-        //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(200);
-
-        //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(404);
-
-        //TODO: Uncomment the next line to return response 500 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(500);
-
-        throw new NotImplementedException();
+        var result = await Task.Run(() => _sibyllaManager.DeleteSibyllaById(id));
+        if (!result)
+        {
+            return StatusCode(404);
+        }
+        return StatusCode(200);
     }
 
     /// <summary>
@@ -228,7 +230,7 @@ public class BackOfficeController : Controller
     [SwaggerResponse(statusCode: 200, type: typeof(List<SibyllaConfigDto>), description: "List of Sibylla configurations")]
     public async Task<IActionResult> GetAllSibyllaeConfigs()
     {
-        List<SibyllaConf> sibyllaeConfs = await Task.Run(() => _sibyllaManager.GetSibillae());
+        List<SibyllaConf> sibyllaeConfs = await Task.Run(() => _sibyllaManager.GetSibyllae());
         if (sibyllaeConfs == null)
             return StatusCode(500);
         var result = getAllSibyllaeConfigs(sibyllaeConfs);
@@ -278,23 +280,14 @@ public class BackOfficeController : Controller
     [ValidateModelState]
     [SwaggerOperation("GetSibyllaConfigDtoById")]
     [SwaggerResponse(statusCode: 200, type: typeof(SibyllaConfigDto), description: "Specific Sibylla configuration data")]
-    public virtual IActionResult GetSibyllaConfigDtoById([FromRoute][Required] string id)
+    public async Task<IActionResult> GetSibyllaConfigDtoById([FromRoute][Required] string id)
     {
-        //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(200, default(SibyllaConfigDto));
-
-        //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(404);
-
-        //TODO: Uncomment the next line to return response 500 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(500);
-        string? exampleJson = null;
-        exampleJson = "{\n  \"systemPrompt\" : \"systemPrompt\",\n  \"presencePenalty\" : 5.637377,\n  \"assistantPrompt\" : \"assistantPrompt\",\n  \"file\" : \"file\",\n  \"maxTokens\" : 0,\n  \"temperature\" : 6.0274563,\n  \"model\" : \"gpt-3.5-turbo\",\n  \"id\" : \"id\",\n  \"topP\" : 1.4658129,\n  \"frequencyPenalty\" : 5.962134\n}";
-
-        var example = exampleJson != null
-        ? JsonConvert.DeserializeObject<SibyllaConfigDto>(exampleJson)
-        : default(SibyllaConfigDto);            //TODO: Change the data returned
-        return new ObjectResult(example);
+        var result = await Task.Run(() => _sibyllaManager.GetSibyllaById(id));
+        if (result == null)
+        {
+            return StatusCode(404);
+        }
+        return StatusCode(200, SibyllaConfigDto.ToSibyllaConfigDto(result));
     }
 
     /// <summary>
@@ -370,21 +363,27 @@ public class BackOfficeController : Controller
     [Route("sibylla-configs")]
     [ValidateModelState]
     [SwaggerOperation("PutSibyllaConfigDtos")]
-    public virtual IActionResult PutSibyllaConfigDtos([FromBody] List<SibyllaConfigDto> body)
+    public async Task<IActionResult> PutSibyllaConfigDtos([FromBody] List<SibyllaConfigDto> body)
     {
-        //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(200);
-
-        //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(400);
-
-        //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(404);
-
-        //TODO: Uncomment the next line to return response 500 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(500);
-
-        throw new NotImplementedException();
+        foreach (SibyllaConfigDto sibyllaConfig in body)
+        {
+            if (sibyllaConfig.Id == null)
+            {
+                // the Title or Id field is required because is being used as unique Id for teh configurations folder
+                return StatusCode(400);
+            }
+            // update the single configuration 
+            try
+            {
+                await Task.Run(() => _sibyllaManager.UpdateSibylla(SibyllaConfigDto.FromSibyllaConfigDto(sibyllaConfig)));
+            }
+            catch (Exception e)
+            {
+                // there was an error while saving the file on disk
+                return StatusCode(400, e);
+            }
+        }
+        return StatusCode(200);
     }
 
     // TODO 
