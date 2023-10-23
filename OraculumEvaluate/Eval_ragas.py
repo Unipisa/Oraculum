@@ -1,15 +1,43 @@
 import os
+# os.environ["OPENAI_API_KEY"] = "sk-"
 from ragas import evaluate
 from ragas.metrics import faithfulness, answer_relevancy, context_recall , answer_similarity , context_precision
 from datasets import load_dataset
+import json
+import pandas as pd
 
-mydataset=load_dataset("json", data_files="polimiEval1_preprocessed.json")
+filename = 'polimiEval1_preprocessed'
+path = f'./OraculumEvaluate/{filename}.json'
+mydataset=load_dataset("json", data_files=path)
 
 metrics_t = [faithfulness, answer_relevancy, context_recall, answer_similarity, context_precision]
 
-results = evaluate(mydataset['train'], metrics=metrics_t)
 
-print(results)
+augmented_data = []
+
+total_elements = len(mydataset['train'])
+for index, row in enumerate(mydataset['train']):
+    print(f"Evaluating {index + 1} of {total_elements}")
+    
+    filtered_dataset = mydataset.filter(lambda x: x == row)
+    
+    result = evaluate(filtered_dataset['train'], metrics=metrics_t)
+
+    row['evaluation'] = result
+    augmented_data.append(row)
+
+print('Evaluating dataset')
+#* Calcolare results senza rifare evaluate di tutto il dataset
+# results = evaluate(mydataset['train'], metrics=metrics_t)
+# print(results)
+# augmented_data.append({"ground_truths": "Dataset evaluation", "evaluation": results})
+
+with open("./OraculumEvaluate/augmented_polimiEval1_preprocessed.json", "w", encoding='UTF-8') as outfile:
+    json.dump(augmented_data, outfile)
+    df = pd.json_normalize(augmented_data)
+    df.to_excel(f'./OraculumEvaluate/{filename}.xlsx', index=False, engine='openpyxl')
+
+
 
 
 # Valutazione di 13 domande aggiornato al 23/10/2023
