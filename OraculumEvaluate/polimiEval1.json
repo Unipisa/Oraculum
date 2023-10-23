@@ -1,0 +1,58 @@
+[
+    {
+        "question": "Vorrei delle informazioni riguardo l'ammontare della rata annuale per frequentare il Politecnico.",
+        "ground_truths": ["Il contributo onnicomprensivo \u00e8 indicato nella sezione Contribuzione studentesca.\nL'importo dei soli contributi della seconda rata \u00e8 determinato in relazione alla fascia di contribuzione assegnata e dal numero di crediti formativi (CFU) che hai inserito nel Piano degli studi."]
+    },
+    {
+        "question": "Come pagare le rate ?",
+        "ground_truths": ["Dai Servizi Online Dati -Tasse e agevolazioni economiche - seleziona \"Ultima richiesta non pagata\", accedi alla piattaforma PagoPA e scegli tra i metodi di pagamento che ti verranno proposti."]
+    },
+    {
+        "question": "Per pagare la 1\u00b0 e la 2\u00b0 rata posso utilizzare scrigno Pago Facile della Banca Popolare di Sondrio?",
+        "ground_truths": ["Si, per farlo devi accedere al sito Pago Facile\n\nNelle modalit\u00e0 di pagamento:\n\n- IUV utilizzando il Codice Avviso di Pagamento sulla stampa dell\u2019avviso\noppure\n- utilizzando il circuito CBILL con il codice interbancario: F9489"]
+    },
+    {
+        "question": "Se l'importo dovuto supera il plafond della mia carta di credito come posso fare?",
+        "ground_truths": ["In alternativa puoi utilizzare la POLICARD con l\u2019importo richiesto\nConsulta le informazioni relative a PagoPA"]
+    },
+    {
+        "question": "Ho dimenticato di pagare la rata quanto dovr\u00f2 pagare di maggiorazione?",
+        "ground_truths": ["L\u2019importo della mora varia in proporzione all\u2019entit\u00e0 del ritardo e pu\u00f2 essere pari ad un valore massimo di 110,00 \u20ac, cos\u00ec come riportato nella sezione Maggiorazioni dovute a ritardi \nTale importo verr\u00e0 addebitato sulla prima richiesta di pagamento successiva."]
+    },
+    {
+        "question": "Ho redditi e patrimoni all'estero come presento l'Iseeu?",
+        "ground_truths": ["Devi rivolgerti al CAF convenzionato per ottenere l'Iseeu-parificato entro le scadenze previste."]
+    },
+    {
+        "question": "Dove mi rivolgo per richiedere la Dichiarazione sostitutiva unica (DSU) e calcolo Isee?",
+        "ground_truths": ["La Dichiarazione sostitutiva unica (DSU) pu\u00f2 essere presentata:\n\nalle sedi Inps competenti per territorio\n\nai centri di assistenza fiscale (CAF)\n\nai comuni"]
+    },
+    {
+        "question": "Sono previsti esoneri totali o parziali dal pagamento delle tasse?",
+        "ground_truths": ["Si, sono previsti esoneri per merito, studenti lavoratori, genitori studenti Erasmus doppia Laurea etc.\n\nTi ricordiamo che per ottenere gli esoneri \u00e8 necessario presentare la domanda dal 15 gennaio 2024 al 25 marzo 2024."]
+    },
+    {
+        "question": "Come avviene il rimborso?",
+        "ground_truths": ["Il rimborso \u00e8 in automatico con accredito sul conto corrente a te intestato/cointestato registrato sui Servizi Online > Dati > Gestione delle modalit\u00e0 di pagamento > Aggiungi o modifica modalit\u00e0 di pagamento standard. Ad accertamento avvenuto del rimborso riceverai apposita comunicazione (e-mail) con le relative indicazioni."]
+    },
+    {
+        "question": "Per ottener il rimborso posso indicare un IBAN non intestato a me?",
+        "ground_truths": ["Il rimborso avviene su coordinate bancarie intestate o cointestate allo studente, se ci\u00f2 non avviene \u00e8 a carico esclusivo dell'intestatario, accordarsi prima della registrazione direttamente con l'Istituto di credito a garanzia del buon fine dell\u2019accredito dell\u2019importo a rimborso.\nIn caso di rifiuto dell'accredito, l\u2019Ateneo non provveder\u00e0 ad eseguire nuovamente l\u2019operazione, almeno finch\u00e9 lo studente beneficiario non registrer\u00e0 un conto a lui intestato o cointestato."]
+    },
+    {
+        "question": "Posso ottenere un rimborso per l'esame di lingua inglese?",
+        "ground_truths": ["Si \u00e8 previsto il rimborso di \u20ac 100,00 se hai ottenuto un punteggio utile per l'accesso alle lauree magistrali, per un solo esame superato durante il percorso di studi triennale presso il Politecnico di MIlano.\n\nIl rimborso viene erogato in automatico non devi presentare nessuna richiesta.\n\nVisita la pagina: Agevolazioni economiche previste"]
+    },
+    {
+        "question": "Mi serve la ricevuta di pagamento delle tasse universitarie, come posso ottenerla?",
+        "ground_truths": ["Attraverso i Servizi Online alla voce Tasse e Agevolazioni economiche e poi nel men\u00f9 Storico Pagamenti. \nEffettuando il pagamento della relativa marca da bollo da 2 euro, potrai stampare la quietanza relativa ad importi superiori a 77.74 \u20ac, per gli importi inferiori invece stampa direttamente il file."]
+    },
+    {
+        "question": "Sono uno studente prossimo alla laurea, devo pagare le tasse?",
+        "ground_truths": ["Per capire se devi pagare la rata d'iscrizione devi consultare la sezione:\nStudenti prossimi alla conclusione degli studi"]
+    },
+    {
+        "question": "Ho richiesto per sbaglio lo IUV del pagamento della prima rata, cosa devo fare?",
+        "ground_truths": ["Se non devi o vuoi iscriverti all'anno accademico non pagare lo IUV.\nLa generazione dello IUV non comporta l'obbligo del pagamento e non \u00e8 possibile eliminare lo IUV generato."]
+    }
+]
