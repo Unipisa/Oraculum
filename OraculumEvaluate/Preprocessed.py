@@ -3,7 +3,8 @@ import requests
 import json
 
 file_name_input = "polimiEval1"
-mydataset=load_dataset("json", data_files=file_name_input+".json")
+path = f'./OraculumEvaluate/{file_name_input}.json'
+mydataset=load_dataset("json", data_files=path)
 # File Structure:
 #[
 #    {
