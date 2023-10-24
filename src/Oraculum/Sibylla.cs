@@ -39,122 +39,124 @@ namespace Oraculum
         public int MemorySpan { get; set; } = 4;
         public string? OutOfScopeTag = "*&oo&*";
         public int? Limit { get; set; } = null;
+        public string? SibyllaName { get; set; } = "Sibylla Sandbox";
     }
 
-    internal class Actor
-    {
-        internal const string System = "system";
-        internal const string User = "user";
-        internal const string Assistant = "assistant";
-    }
+internal class Actor
+{
+    internal const string System = "system";
+    internal const string User = "user";
+    internal const string Assistant = "assistant";
+}
 
-    public class KnowledgeFilter
-    {
-        public string[]? FactTypeFilter = null;
-        public string[]? CategoryFilter = null;
-        public string[]? TagsFilter = null;
-        public int? Limit = null;
-    }
+public class KnowledgeFilter
+{
+    public string[]? FactTypeFilter = null;
+    public string[]? CategoryFilter = null;
+    public string[]? TagsFilter = null;
+    public int? Limit = null;
+}
 
-    public class Sibylla
-    {
-        private OpenAIService _openAiService;
-        private ChatCompletionCreateRequest _chat;
-        private Memory _memory;
-        private SibyllaConf _conf;
+public class Sibylla
+{
+    private OpenAIService _openAiService;
+    private ChatCompletionCreateRequest _chat;
+    private Memory _memory;
+    private SibyllaConf _conf;
 
-        public Sibylla(Configuration conf, SibyllaConf sybillaConf)
+    public Sibylla(Configuration conf, SibyllaConf sybillaConf)
+    {
+        _conf = sybillaConf;
+        _openAiService = new OpenAIService(new OpenAiOptions()
         {
-            _conf = sybillaConf;
-            _openAiService = new OpenAIService(new OpenAiOptions()
-            {
-                ApiKey = conf.OpenAIApiKey!,
-                Organization = conf.OpenAIOrgId
-            });
-            _chat = new ChatCompletionCreateRequest();
-            _chat.MaxTokens = sybillaConf.MaxTokens;
-            _chat.Temperature = sybillaConf.Temperature;
-            _chat.TopP = sybillaConf.TopP;
-            _chat.FrequencyPenalty = sybillaConf.FrequencyPenalty;
-            _chat.PresencePenalty = sybillaConf.PresencePenalty;
-            _chat.Model = sybillaConf.Model;
-            _chat.Messages = new List<ChatMessage>()
+            ApiKey = conf.OpenAIApiKey!,
+            Organization = conf.OpenAIOrgId
+        });
+        _chat = new ChatCompletionCreateRequest();
+        _chat.MaxTokens = sybillaConf.MaxTokens;
+        _chat.Temperature = sybillaConf.Temperature;
+        _chat.TopP = sybillaConf.TopP;
+        _chat.FrequencyPenalty = sybillaConf.FrequencyPenalty;
+        _chat.PresencePenalty = sybillaConf.PresencePenalty;
+        _chat.Model = sybillaConf.Model;
+        _chat.Messages = new List<ChatMessage>()
             {
                 new ChatMessage(Actor.System, sybillaConf.BaseSystemPrompt!),
                 new ChatMessage(Actor.Assistant, sybillaConf.BaseAssistantPrompt!)
             };
-            _memory = new Memory(new Oraculum(conf), _conf.FactMemoryTTL);
-            _memory.History.AddRange(new[]
-            {
+        _memory = new Memory(new Oraculum(conf), _conf.FactMemoryTTL);
+        _memory.History.AddRange(new[]
+        {
                 new ChatMessage(Actor.Assistant, sybillaConf.BaseAssistantPrompt!)
             });
-        }
+    }
 
-        public SibyllaConf Configuration { get { return _conf; } }
+    public SibyllaConf Configuration { get { return _conf; } }
 
-        public async Task Connect()
+    public async Task Connect()
+    {
+        if (!_memory.Oraculum.IsConnected)
+            await _memory.Oraculum.Connect();
+    }
+
+    public ICollection<ChatMessage> History => _memory.History.ToList();
+
+    public async IAsyncEnumerable<string> AnswerAsync(string message, KnowledgeFilter? filter = null)
+    {
+        await PrepreAnswer(message, filter);
+
+        var m = new StringBuilder();
+
+        await foreach (var fragment in _openAiService.ChatCompletion.CreateCompletionAsStream(_chat))
         {
-            if (!_memory.Oraculum.IsConnected)
-                await _memory.Oraculum.Connect();
-        }
-
-        public ICollection<ChatMessage> History => _memory.History.ToList();
-
-        public async IAsyncEnumerable<string> AnswerAsync(string message, KnowledgeFilter? filter = null)
-        {
-            await PrepreAnswer(message, filter);
-
-            var m = new StringBuilder();
-
-            await foreach (var fragment in _openAiService.ChatCompletion.CreateCompletionAsStream(_chat))
+            if (fragment.Successful)
             {
-                if (fragment.Successful)
-                {
-                    var txt = fragment.Choices.First().Message.Content;
-                    m.Append(txt);
-                    yield return txt;
-                }
-            }
-            if (m.Length > 0)
-            {
-                _chat.Messages.Add(new ChatMessage(Actor.Assistant, m.ToString()));
-                _memory.History.Add(new ChatMessage(Actor.Assistant, m.ToString()));
+                var txt = fragment.Choices.First().Message.Content;
+                m.Append(txt);
+                yield return txt;
             }
         }
-
-        public async Task<string?> Answer(string message, KnowledgeFilter? filter = null)
+        if (m.Length > 0)
         {
-            await PrepreAnswer(message, filter);
-
-            var result = await _openAiService.ChatCompletion.CreateCompletion(_chat);
-            if (result.Successful)
-            {
-                var ret = result.Choices.First().Message.Content;
-                _chat.Messages.Add(new ChatMessage(Actor.Assistant, ret));
-                _memory.History.Add(new ChatMessage(Actor.Assistant, ret));
-                return ret;
-            }
-            return null;
-        }
-
-        private async Task PrepreAnswer(string message, KnowledgeFilter? filter = null)
-        {
-            if (filter == null)
-                filter = new KnowledgeFilter(){
-                    Limit = _conf.Limit
-                };
-
-            var (xml, msg) = await _memory.Recall(message, filter);
-            _chat.Messages.Clear();
-            _chat.Messages.Add(new ChatMessage(Actor.System, _conf.BaseSystemPrompt!));
-            _chat.Messages.Add(new ChatMessage(Actor.System, xml.OuterXml));
-            _chat.Messages.Add(new ChatMessage(Actor.Assistant, _conf.BaseAssistantPrompt!));
-            foreach (var m in msg)
-                _chat.Messages.Add(m);
-            _chat.Messages.Add(new ChatMessage(Actor.User, message));
-            // add base system prompt again to make sure the assistant responds to the user correctly
-            _chat.Messages.Add(new ChatMessage(Actor.System, _conf.BaseSystemPrompt!));
-            _memory.History.Add(new ChatMessage(Actor.User, message));
+            _chat.Messages.Add(new ChatMessage(Actor.Assistant, m.ToString()));
+            _memory.History.Add(new ChatMessage(Actor.Assistant, m.ToString()));
         }
     }
+
+    public async Task<string?> Answer(string message, KnowledgeFilter? filter = null)
+    {
+        await PrepreAnswer(message, filter);
+
+        var result = await _openAiService.ChatCompletion.CreateCompletion(_chat);
+        if (result.Successful)
+        {
+            var ret = result.Choices.First().Message.Content;
+            _chat.Messages.Add(new ChatMessage(Actor.Assistant, ret));
+            _memory.History.Add(new ChatMessage(Actor.Assistant, ret));
+            return ret;
+        }
+        return null;
+    }
+
+    private async Task PrepreAnswer(string message, KnowledgeFilter? filter = null)
+    {
+        if (filter == null)
+            filter = new KnowledgeFilter()
+            {
+                Limit = _conf.Limit
+            };
+
+        var (xml, msg) = await _memory.Recall(message, filter);
+        _chat.Messages.Clear();
+        _chat.Messages.Add(new ChatMessage(Actor.System, _conf.BaseSystemPrompt!));
+        _chat.Messages.Add(new ChatMessage(Actor.System, xml.OuterXml));
+        _chat.Messages.Add(new ChatMessage(Actor.Assistant, _conf.BaseAssistantPrompt!));
+        foreach (var m in msg)
+            _chat.Messages.Add(m);
+        _chat.Messages.Add(new ChatMessage(Actor.User, message));
+        // add base system prompt again to make sure the assistant responds to the user correctly
+        _chat.Messages.Add(new ChatMessage(Actor.System, _conf.BaseSystemPrompt!));
+        _memory.History.Add(new ChatMessage(Actor.User, message));
+    }
+}
 }

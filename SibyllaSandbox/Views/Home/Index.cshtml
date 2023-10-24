@@ -1,8 +1,10 @@
 ﻿@model Oraculum.Sibylla
 
 @{
-    ViewData["Title"] = "Home Page";
+    var config = Model.Configuration;
     var messages = Model.History;
+    ViewData["Title"] = "Home Page";
+    ViewData["SibyllaName"] = config.SibyllaName;
 }
 
 <link rel="stylesheet" href="~/css/ChatStyles.css" />
@@ -10,6 +12,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css" />
 
 <script type="text/javascript">
+
     function loadChunk(id) {
         $.ajax({
             type: "GET",
@@ -49,7 +52,7 @@
         <div class="container1">
             <img src="~/img/Logo.png" class="msgimg" />
             <div class="active">
-                <p>Assistente virtuale</p>
+                <p>@(config.Title ?? "Assistente Virtuale")</p>
             </div>
         </div>
     </div>
@@ -106,7 +109,7 @@
 
             <div class="msg-bottom">
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Write message..." id="userreq"
+                    <input type="text" class="form-control" placeholder="Fai una domanda..." id="userreq"
                         onkeydown="if (event.keyCode == 13) answer()" />
                     <span class="input-group-text send-icon">
                         <i class="bi bi-send" onclick="answer()"></i>
