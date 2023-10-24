@@ -210,12 +210,14 @@ namespace Oraculum
             return Task.FromResult(sibyllaeConfigs);
         }
 
+        // get a Sibylla configuration by Id
         public async Task<SibyllaConf> GetSibyllaById(String sibyllaId)
         {
             var sibyllae = await Task.Run(() => GetSibyllae());
             return sibyllae.FirstOrDefault(f => f.Title != null && f.Title.Equals(sibyllaId));
         }
 
+        // delete a Sibylla by Id
         public async Task<Boolean> DeleteSibyllaById(String sibyllaId)
         {
             var sibyllae = await Task.Run(() => GetSibyllae());
@@ -243,11 +245,13 @@ namespace Oraculum
             return false;
         }
 
+        // save a Sibylla configuration by Id
         public async Task<Boolean> SaveSibylla(SibyllaConf sibyllaConf)
         {
             return await SaveOrUpdateSibyllaConfigFile(sibyllaConf, false);
         }
 
+        // update the configuration of a Sibylla 
         public async Task<Boolean> UpdateSibylla(SibyllaConf sibyllaConf)
         {
             return await SaveOrUpdateSibyllaConfigFile(sibyllaConf, true); ;
