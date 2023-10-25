@@ -1,16 +1,16 @@
 import os
 # os.environ["OPENAI_API_KEY"] = "sk-"
 from ragas import evaluate
-from ragas.metrics import faithfulness, answer_relevancy, context_recall , answer_similarity , context_precision
+from ragas.metrics import faithfulness, answer_relevancy, context_recall , context_precision
 from datasets import load_dataset
 import json
 import pandas as pd
 
 filename = 'polimiEval1_preprocessed'
-path = f'./OraculumEvaluate/{filename}.json'
+path = f'{filename}.json'
 mydataset=load_dataset("json", data_files=path)
 
-metrics_t = [faithfulness, answer_relevancy, context_recall, answer_similarity, context_precision]
+metrics_t = [faithfulness, answer_relevancy, context_recall, context_precision]
 
 
 augmented_data = []
@@ -22,6 +22,7 @@ for index, row in enumerate(mydataset['train']):
     filtered_dataset = mydataset.filter(lambda x: x == row)
     
     result = evaluate(filtered_dataset['train'], metrics=metrics_t)
+    print(result)
 
     row['evaluation'] = result
     augmented_data.append(row)
@@ -37,6 +38,10 @@ with open("./OraculumEvaluate/augmented_polimiEval1_preprocessed.json", "w", enc
     df = pd.json_normalize(augmented_data)
     df.to_excel(f'./OraculumEvaluate/{filename}.xlsx', index=False, engine='openpyxl')
 
+
+# if len(values) > 1:
+#             reciprocal_sum = np.sum(1.0 / np.array(values))  # type: ignore
+#             self["ragas_score"] = len(values) / reciprocal_sum
 
 
 
