@@ -6,6 +6,7 @@
 # Project specific ignore
 oraculum.secret.conf
 weaviate.secret.yml
+appsettings.json
 
 # User-specific files
 *.rsuser
