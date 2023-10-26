@@ -25,13 +25,14 @@ Also be careful to give the right permissions to Terminal (or iTerm2 if you pref
 - You can install [Polyglot](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.dotnet-interactive-vscode) directly from the MarketPlace 
 - Now it's time to install **Powershell** on Macos! 
 There are several methods to be able to do this, the one i recommend is as a **.NET Global tool** but, even using Homebrew is a viable alternative. 
-In the case of Homebrew **be careful** if you use bash or ZSH and the related environment variables identified by ```PATH```, otherwise I would not be able to invoke ```pwsh``` command.
+In the case of Homebrew **be careful** if you use bash or ZSH and the related environment variables identified by ```PATH```, otherwise I would not be able to invoke ```pwsh``` command. Make sure that your zsh or bash profile does not contain duplicates in the definition of pwsh path.
 If you already have the .NET Core SDK installed, it's easy to install PowerShell as a .NET Global tool.
     ```console
     dotnet tool install --global PowerShell
     ```
 The dotnet tool installer adds ```~/.dotnet/tools``` to your PATH environment variable. However, the currently running shell doesn't have the updated ```PATH```. You should be able to start PowerShell from a new shell by typing **```pwsh```**.
 
+## Usage
 Then copy:
 
 - _oraculum.conf_ into _oraculum.secret.conf_
@@ -39,10 +40,10 @@ Then copy:
 
 Edit the _secret_ files just copied and fill the OpenAI API key and Organization ID.
 
-## .NET Api
+### .NET Api
 
 Open the _dotnetplayground.ipynb_ notebook in Visual Studio code and run it. You need _.NET Interactive_ and _Polyglot_ to interactively test the .NET API.
 
-## PowerShell Api
+### PowerShell Api
 
 Open the _pwshplayground.ipynb_ notebook in Visual Studio code and run it. You can also run the command inside the _pwsh_ terminal without using Visual Studio Code. The notebook explains how to use commands step by step. 
