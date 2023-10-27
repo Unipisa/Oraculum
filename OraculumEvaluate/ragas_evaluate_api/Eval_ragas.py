@@ -75,7 +75,6 @@ def ragasEvaluate(file_json_input, metrics_t=None):
 
     return augmented_data
 
-
 # Esempio di utilizzo con metriche custom
 #selected_metrics = {
 #    'faithfulness': faithfulness,

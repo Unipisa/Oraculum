@@ -28,17 +28,20 @@ class FlaskApp:
             output = Output(json.dumps(augmented_data))
             db.session.add(output)
             db.session.commit()
-            return jsonify({'message': 'Data augmented successfully'}), 200
+            return jsonify(output.to_dict()), 200
         
-        @self.app.route('/process', methods=['POST'])
+        @self.app.route('/evaluate', methods=['GET'])
         def evaluate():
-            """Evaluate JSON data."""
-            input_data = request.get_json()
-            evaluated_data = self.data_processor.eval_data(input_data)
-            output = Output(evaluated_data)
+            """Evaluate data by id."""
+            id = int(request.args.get('id'))
+            data = Output.query.get({"id": id})
+            # json_data = json.loads(data)
+            evaluated_data = self.data_processor.eval_data(json.loads(data.output_data))
+            output = Output(json.dumps(evaluated_data))
             db.session.add(output)
             db.session.commit()
-            return jsonify({'message': 'Data evaluated successfully'}), 200
+            return jsonify(output.to_dict()), 200
+
 
         @self.app.route('/retrieve', methods=['GET'])
         def retrieve():
