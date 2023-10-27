@@ -36,18 +36,31 @@ def ragasEvaluate(file_json_input, metrics_t=None):
     #]
 
     # Imposta le metriche predefinite se metrics_t è None
+
     if metrics_t is None:
         metrics_t = {
-            'faithfulness': faithfulness,
-            'answer_relevancy': answer_relevancy,
-            'context_recall': context_recall,
-            'context_precision': context_precision
-        }
+                'faithfulness': faithfulness,
+                'answer_relevancy': answer_relevancy,
+                'context_recall': context_recall,
+                'context_precision': context_precision
+            }
+        if file_json_input and len(file_json_input) > 0 and "ground_truths" not in file_json_input[0]:
+              del metrics_t['context_recall']
+
+    if metrics_t and file_json_input and len(file_json_input) > 0 and "ground_truths" not in file_json_input[0] and 'context_recall' in metrics_t:
+        print("AAAAAAAAAA")
+        raise Exception("Non puoi usare la metrica context_recall se la ground_truths non è presente!")
+
+
+
 
     with open("file_json_input.json", "w") as outfile: #TODO Evitare la creazione di un file temporaneo!
         json.dump(file_json_input, outfile)
 
     mydataset = load_dataset("json", data_files="file_json_input.json")
+
+    if os.path.exists("file_json_input.json"): #TODO ELIMINARE QUESTO GESTENDO INPUT SU DATA (TODO SOPRA)
+        os.remove("file_json_input.json")
 
     augmented_data = []
     metric_values = {metric_name: [] for metric_name in metrics_t}
@@ -70,14 +83,14 @@ def ragasEvaluate(file_json_input, metrics_t=None):
     final_row = {'ragas_score': ragas_score, **mean_metric_values}
     augmented_data.append(final_row)
 
-    if os.path.exists("file_json_input.json"): #TODO ELIMINARE QUESTO GESTENDO INPUT SU DATA (TODO SOPRA)
-        os.remove("file_json_input.json")
-
     return augmented_data
 
-# Esempio di utilizzo con metriche custom
+#Esempio di utilizzo con metriche custom
 #selected_metrics = {
 #    'faithfulness': faithfulness,
-#    'answer_relevancy': answer_relevancy
+#    'answer_relevancy': answer_relevancy,
+#    'context_recall': context_recall
 #}
+
+#print(ragasEvaluate(domande ))
 
