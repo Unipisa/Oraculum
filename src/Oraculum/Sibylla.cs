@@ -72,11 +72,7 @@ namespace Oraculum
             _logger = logger ?? NullLogger.Instance;
 
             _conf = sybillaConf;
-            _openAiService = new OpenAIService(new OpenAiOptions()
-            {
-                ApiKey = conf.OpenAIApiKey!,
-                Organization = conf.OpenAIOrgId
-            });
+            _openAiService = conf.CreateService();
             _logger.Log(LogLevel.Trace, $"Sibylla: Oraculum conf {JsonConvert.SerializeObject(conf)} Sibylla conf {JsonConvert.SerializeObject(_conf)}");
             _chat = new ChatCompletionCreateRequest();
             _chat.MaxTokens = sybillaConf.MaxTokens;
@@ -116,7 +112,7 @@ namespace Oraculum
 
             await foreach (var fragment in _openAiService.ChatCompletion.CreateCompletionAsStream(_chat, cancellationToken: cancellationToken))
             {
-                if (fragment.Successful)
+                if (fragment.Successful && fragment.Choices.Count > 0)
                 {
                     var txt = fragment.Choices.First().Message.Content;
                     m.Append(txt);

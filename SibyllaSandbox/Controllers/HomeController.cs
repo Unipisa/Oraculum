@@ -56,6 +56,7 @@ namespace SibyllaSandbox.Controllers
             var answerid = Guid.NewGuid().ToString();
             var l = _serverSentEventsService.GetClients().Where(c => c.User == this.User).ToList();
             var t = Task.Run(() => {
+                
                 var ena = Sibylla.AnswerAsync(question);
                 var en = ena.GetAsyncEnumerator();
                 while (true)

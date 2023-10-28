@@ -25,10 +25,45 @@ public class Configuration
         return System.Text.Json.JsonSerializer.Deserialize<Configuration>(json)!;
     }
 
+    internal OpenAIService CreateService()
+    {
+        if (Provider == ProviderType.OpenAi)
+            return new OpenAIService(new OpenAiOptions() { 
+                ProviderType = ProviderType.OpenAi,
+                ApiKey = OpenAIApiKey!, 
+                Organization = OpenAIOrgId 
+            });
+        else if (Provider == ProviderType.Azure)
+            return new OpenAIService(new OpenAiOptions() {
+                ProviderType = ProviderType.Azure,
+                ApiKey = AzureOpenAIApiKey!,
+                ResourceName = AzureResourceName!,
+                DeploymentId = AzureDeploymentId!
+            });
+        else
+            throw new Exception($"Unknown provider {Provider}");
+    }
+
+    internal bool IsValid()
+    {
+        if (WeaviateEndpoint == null || WeaviateApiKey == null)
+            return false;
+        if (Provider == ProviderType.OpenAi)
+            return OpenAIApiKey != null && OpenAIOrgId != null;
+        else if (Provider == ProviderType.Azure)
+            return AzureOpenAIApiKey != null && AzureResourceName != null && AzureDeploymentId != null;
+        else
+            return false;
+    }
+
     public string? WeaviateEndpoint { get; set; }
     public string? WeaviateApiKey { get; set; }
+    public OpenAI.ProviderType Provider { get; set; } = ProviderType.OpenAi;
     public string? OpenAIApiKey { get; set; }
     public string? OpenAIOrgId { get; set; }
+    public string? AzureDeploymentId { get; set; }
+    public string? AzureResourceName { get; set; }
+    public string? AzureOpenAIApiKey { get; set; }
 }
 
 public class OraculumConfig
@@ -133,13 +168,13 @@ public class Fact
     public Oraculum(Configuration conf, ILogger? logger = null) {
         _logger = logger ?? NullLogger.Instance;
         _configuration = conf;
-        if (conf == null || conf.WeaviateEndpoint == null || conf.OpenAIApiKey == null)
+        if (!conf.IsValid())
         {
             _logger.Log(LogLevel.Critical, "Oraculum: configuration not provided");
             throw new ArgumentNullException(nameof(conf));
         }
         _kb = new WeaviateDB(conf.WeaviateEndpoint, conf.WeaviateApiKey);
-        _gpt = new OpenAIService(new OpenAiOptions() { ApiKey = conf.OpenAIApiKey, Organization = conf.OpenAIOrgId });
+        _gpt = conf.CreateService();
         _facts = null;
     }
 
