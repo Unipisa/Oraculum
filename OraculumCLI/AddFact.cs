@@ -5,6 +5,7 @@ using System.Linq;
 using System.Management.Automation;
 using System.Text;
 using System.Threading.Tasks;
+using WeaviateNET;
 
 namespace OraculumCLI
 {
@@ -35,6 +36,27 @@ namespace OraculumCLI
         [Parameter]
         public DateTime? Expiration { get; set; }
 
+        [Parameter]
+        public DateTime? FactAdded { get; set; }
+
+        [Parameter]
+        public GeoCoordinates? Location { get; set; }
+
+        [Parameter]
+        public string? LocationName { get; set; }
+
+        [Parameter]
+        public double? LocationDistance { get; set; }
+
+        [Parameter]
+        public string[]? EditPrincipals { get; set; }
+
+        [Parameter]
+        public string? ValidFrom { get; set; }
+
+        [Parameter]
+        public string? ValidTo { get; set; }
+
         protected override void ProcessRecord()
         {
             base.ProcessRecord();
@@ -47,7 +69,14 @@ namespace OraculumCLI
                 content = Content,
                 citation = Citation,
                 reference = Reference,
-                expiration = Expiration
+                expiration = Expiration,
+                location = Location,
+                locationName = LocationName,
+                locationDistance = LocationDistance,
+                editPrincipals = EditPrincipals,
+                validFrom = ValidFrom,
+                validTo = ValidTo,
+                factAdded = FactAdded ?? DateTime.Now
             };
             Connection.AddFact(fact).Wait();
         }

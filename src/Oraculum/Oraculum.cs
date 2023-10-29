@@ -28,13 +28,15 @@ public class Configuration
     internal OpenAIService CreateService()
     {
         if (Provider == ProviderType.OpenAi)
-            return new OpenAIService(new OpenAiOptions() { 
+            return new OpenAIService(new OpenAiOptions()
+            {
                 ProviderType = ProviderType.OpenAi,
-                ApiKey = OpenAIApiKey!, 
-                Organization = OpenAIOrgId 
+                ApiKey = OpenAIApiKey!,
+                Organization = OpenAIOrgId
             });
         else if (Provider == ProviderType.Azure)
-            return new OpenAIService(new OpenAiOptions() {
+            return new OpenAIService(new OpenAiOptions()
+            {
                 ProviderType = ProviderType.Azure,
                 ApiKey = AzureOpenAIApiKey!,
                 ResourceName = AzureResourceName!,
@@ -144,7 +146,7 @@ public class Fact
     public DateTime? factAdded;
 }
 
-    public class Oraculum
+public class Oraculum
 {
     internal const int MajorVersion = 1;
     internal const int MinorVersion = 0;
@@ -165,7 +167,8 @@ public class Fact
         }
     }
 
-    public Oraculum(Configuration conf, ILogger? logger = null) {
+    public Oraculum(Configuration conf, ILogger? logger = null)
+    {
         _logger = logger ?? NullLogger.Instance;
         _configuration = conf;
         if (!conf.IsValid())
@@ -308,12 +311,24 @@ public class Fact
         return f.Id;
     }
 
+    public async Task UpdateFact(Fact fact)
+    {
+        ensureConnection();
+
+        var obj = await _facts.Get(fact.id!.Value);
+        if (obj == null)
+            throw new Exception($"Cannot find fact {fact.id}");
+        obj.Properties = fact;
+        await obj.Save();
+    }
+
     public async Task<int> AddFact(ICollection<Fact> facts)
     {
         ensureConnection();
         _logger.Log(LogLevel.Information, "AddFact: adding a collection of facts");
         var toadd = new List<WeaviateObject<Fact>>();
-        foreach (var fact in facts) {
+        foreach (var fact in facts)
+        {
             var f = _facts.Create();
             f.Properties = fact;
             toadd.Add(f);
@@ -426,12 +441,12 @@ public class Fact
         //await facts.Add(bk);
     }
 
-    public async Task<ICollection<Fact>> ListFacts(long limit=1024, long offset=0, string? sort=null, string? order=null)
+    public async Task<ICollection<Fact>> ListFacts(long limit = 1024, long offset = 0, string? sort = null, string? order = null)
     {
         ensureConnection();
 
         _logger.Log(LogLevel.Trace, $"ListFacts: listing facts with limit {limit}, offset {offset}, sort {sort}, order {order}");
-        var facts = await _facts.ListObjects(limit,offset: offset, sort: sort, order: order);
+        var facts = await _facts.ListObjects(limit, offset: offset, sort: sort, order: order);
         if (facts == null) return new List<Fact>();
         var ret = new List<Fact>();
         foreach (var fact in facts.Objects)
@@ -454,7 +469,7 @@ public class Fact
         qg.Filter.NearText(concept, distance: factFilter.Distance);
         if (factFilter.Limit.HasValue) qg.Filter.Limit(factFilter.Limit.Value);
         if (factFilter.Autocut.HasValue) qg.Filter.Autocut(factFilter.Autocut.Value);
-        var andcond = new List<ConditionalAtom<Fact>>() { 
+        var andcond = new List<ConditionalAtom<Fact>>() {
             Conditional<Fact>.Or(
                 When<Fact, DateTime>.GreaterThanEqual(nameof(Fact.expiration), DateTime.Now),
                 When<Fact, DateTime>.IsNull(nameof(Fact.expiration))

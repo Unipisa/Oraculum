@@ -32,6 +32,9 @@ The project it's still in his infancy but it can be used in production if you wa
 
 ## What's new
 
+### Version 1.1.2
+- Added `UpdateFact` to support fact update (in particular from CLI)
+
 ### Version 1.1.1
 - Added support for Azure OpenAI version of GPT. The Oraculum configuration has been updated to include also Azure OpenAI parameters.
 
