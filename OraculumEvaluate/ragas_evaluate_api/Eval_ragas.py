@@ -6,6 +6,15 @@ from datasets import load_dataset
 import numpy as np
 from statistics import harmonic_mean
 import json
+from langchain.chat_models import ChatOpenAI
+
+gpt4 = ChatOpenAI(model_name="gpt-4")
+gptTurbo16k = ChatOpenAI(model_name="gpt-3.5-turbo-16k")
+
+faithfulness.llm.langchain_llm = gptTurbo16k
+answer_relevancy.llm.langchain_llm = gptTurbo16k
+context_precision.llm.langchain_llm = gptTurbo16k
+context_recall.llm.langchain_llm = gptTurbo16k
 
 def corrected_harmonic_mean(data):
     # Filtering out zero values
@@ -76,6 +85,10 @@ def ragasEvaluate(file_json_input, metrics_t=None):
 
         row['evaluation'] = result
         augmented_data.append(row)
+        
+        #TODO: Fare evaluate su tutto il dataset e usare to_pandas() per accedere alle valutazioni delle singole domande
+        # df = result.to_pandas()
+        # print(df.head(20))
 
     mean_metric_values = {metric_name: np.mean(values) for metric_name, values in metric_values.items()}
     ragas_score = corrected_harmonic_mean(list(mean_metric_values.values()))
