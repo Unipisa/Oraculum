@@ -1,0 +1,62 @@
+[
+    {
+        "question": "Spiega il concetto di carico concentrato e fornisci un esempio pratico."
+    },
+    {
+        "question": "Descrivi le differenze tra sollecitazioni statiche e dinamiche nelle strutture."
+    },
+    {
+        "question": "Cosa si intende per modulo di elasticità dei materiali da costruzione e qual è la sua importanza nel calcolo strutturale?"
+    },
+    {
+        "question": "Illustra il concetto di momento flettente e come viene calcolato in una trave."
+    },
+    {
+        "question": "Descrivi il principio di sovrapposizione degli effetti nel calcolo delle sollecitazioni."
+    },
+    {
+        "question": "Spiega il concetto di deformazione elastica e plastica nei materiali da costruzione."
+    },
+    {
+        "question": "Discuti l'importanza delle giunzioni e delle connessioni nelle strutture."
+    },
+    {
+        "question": "Descrivi il principio di funzionamento di un pilastro compresso e come viene calcolata la sua capacità di carico."
+    },
+    {
+        "question": "Illustra le principali differenze tra travi continue e travi semplici."
+    },
+    {
+        "question": "Cosa si intende per tensione normale e quali sono i suoi effetti sul comportamento strutturale?"
+    },
+    {
+        "question": "Spiega il concetto di momento torcente e come viene calcolato in un elemento strutturale."
+    },
+    {
+        "question": "Descrivi le principali differenze tra materiali duttili e fragili nelle costruzioni."
+    },
+    {
+        "question": "Qual è l'importanza del concetto di analisi agli stati limite nel progetto di una struttura?"
+    },
+    {
+        "question": "Spiega il concetto di sollecitazioni di taglio e come vengono calcolate."
+    },
+    {
+        "question": "Illustra l'importanza dell'analisi delle deformazioni nelle strutture."
+    },
+    {
+        "question": "Descrivi l'effetto delle variazioni termiche sul comportamento strutturale."
+    },
+    {
+        "question": "Cosa si intende per momento di inerzia di una sezione e qual è la sua rilevanza nel calcolo delle travi?"
+    },
+    {
+        "question": "Spiega il principio di funzionamento di una struttura a volta e fornisce esempi di utilizzi pratici."
+    },
+    {
+        "question": "Descrivi l'importanza dell'analisi delle vibrazioni nelle strutture edilizie."
+    },
+    {
+        "question": "Spiega come l'uso di materiali compositi può migliorare le prestazioni strutturali di un edificio."
+    }
+]
