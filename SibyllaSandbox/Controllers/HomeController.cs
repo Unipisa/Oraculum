@@ -17,11 +17,20 @@ namespace SibyllaSandbox.Controllers
         private readonly SibyllaManager _sibyllaManager;
         private readonly IServerSentEventsService _serverSentEventsService;
 
+        private static void SaveClientId(object? sender, ServerSentEventsClientConnectedArgs e)
+        {
+            e.Request.HttpContext.Session.SetString("SSEId", e.Client.Id.ToString());
+            e.Request.HttpContext.Session.CommitAsync().Wait();
+        }
+
         public HomeController(ILogger<HomeController> logger, SibyllaManager sibyllaManager, IServerSentEventsService serverSentEventsService)
         {
             _logger = logger;
             _sibyllaManager = sibyllaManager;
             _serverSentEventsService = serverSentEventsService;
+            // to avoid multiple subscriptions I remove the previous one if exists
+            _serverSentEventsService.ClientConnected -= SaveClientId;
+            _serverSentEventsService.ClientConnected += SaveClientId;
         }
 
 

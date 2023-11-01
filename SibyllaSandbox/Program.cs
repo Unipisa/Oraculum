@@ -34,21 +34,6 @@ builder.Services.AddServerSentEvents();
 
 var app = builder.Build();
 
-var sses = app.Services.GetService<ServerSentEventsService>();
-// This is a hack to get the SSE client id into the session.
-if (sses != null)
-{
-    sses.ClientConnected += (sender, e) =>
-     {
-         var session = e.Request.HttpContext.Session;
-         if (session.IsAvailable && !session.Keys.Contains("SSEId"))
-         {
-             session.SetString("SSEId", e.Client.Id.ToString());
-             session.CommitAsync().Wait();
-         }
-     };
-}
-
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

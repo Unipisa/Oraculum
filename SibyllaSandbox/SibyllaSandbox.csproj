@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lib.AspNetCore.ServerSentEvents" Version="8.3.0" />
+    <PackageReference Include="Lib.AspNetCore.ServerSentEvents" Version="8.3.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
   </ItemGroup>
 
