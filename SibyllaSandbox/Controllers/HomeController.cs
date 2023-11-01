@@ -13,13 +13,16 @@ namespace SibyllaSandbox.Controllers
 {
     public class HomeController : Controller
     {
+        private const string SSEId = "SSEId";
+        private const string SibyllaRef = "sibyllaRef";
+        private const string DemoConf = "Demo";
         private readonly ILogger<HomeController> _logger;
         private readonly SibyllaManager _sibyllaManager;
         private readonly IServerSentEventsService _serverSentEventsService;
 
         private static void SaveClientId(object? sender, ServerSentEventsClientConnectedArgs e)
         {
-            e.Request.HttpContext.Session.SetString("SSEId", e.Client.Id.ToString());
+            e.Request.HttpContext.Session.SetString(SSEId, e.Client.Id.ToString());
             e.Request.HttpContext.Session.CommitAsync().Wait();
         }
 
@@ -42,16 +45,16 @@ namespace SibyllaSandbox.Controllers
 
         private async Task<Sibylla> ConnectSibylla()
         {
-            var sibyllaKey = HttpContext.Session.GetString("sibyllaRef");
+            var sibyllaKey = HttpContext.Session.GetString(SibyllaRef);
             if (sibyllaKey == null)
             {
                 // It would be nice to align the expiration of the Sibylla with the expiration of the session.
-                var (id, _) = await _sibyllaManager.AddSibylla("Demo", expiration: DateTime.Now.AddMinutes(60));
-                HttpContext.Session.SetString("sibyllaRef", id.ToString());
+                var (id, _) = await _sibyllaManager.AddSibylla(DemoConf, expiration: DateTime.Now.AddMinutes(60));
+                HttpContext.Session.SetString(SibyllaRef, id.ToString());
                 sibyllaKey = id.ToString();
                 await HttpContext.Session.CommitAsync();
             }
-            var sibylla = _sibyllaManager.GetSibylla("Demo", Guid.Parse(sibyllaKey));
+            var sibylla = _sibyllaManager.GetSibylla(DemoConf, Guid.Parse(sibyllaKey));
             return sibylla;
         }
 
@@ -61,7 +64,7 @@ namespace SibyllaSandbox.Controllers
             await HttpContext.Session.LoadAsync();
             var Sibylla = await ConnectSibylla();
 
-            var clientid = HttpContext.Session.GetString("SSEId");
+            var clientid = HttpContext.Session.GetString(SSEId);
             var answerid = Guid.NewGuid().ToString();
             var l = _serverSentEventsService.GetClients().Where(c => c.User == this.User).ToList();
             var t = Task.Run(() => {
