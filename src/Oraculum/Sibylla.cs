@@ -26,6 +26,19 @@ namespace Oraculum
             return System.Text.Json.JsonSerializer.Deserialize<SibyllaConf>(json)!;
         }
 
+        public KnowledgeFilter KnowledgeFilter
+        {
+            get
+            {
+                return new KnowledgeFilter()
+                {
+                    FactTypeFilter = FactFilter,
+                    CategoryFilter = CategoryFilter,
+                    TagsFilter = TagFilter
+                };
+            }
+        }
+
         public string? Title { get; set; }
         public string? BaseSystemPrompt { get; set; }
         public string? BaseAssistantPrompt { get; set; }
@@ -166,7 +179,7 @@ namespace Oraculum
         private async Task PrepreAnswer(string message, KnowledgeFilter? filter = null)
         {
             if (filter == null)
-                filter = new KnowledgeFilter();
+                filter = Configuration.KnowledgeFilter;
 
             _logger.Log(LogLevel.Trace, $"PrepareAnswer: knowledge filtere is '{JsonConvert.SerializeObject(filter)}'");
 

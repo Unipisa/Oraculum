@@ -32,6 +32,9 @@ The project it's still in his infancy but it can be used in production if you wa
 
 ## What's new
 
+### Version 1.1.3
+- Fixed a bug in the application of Knowledge Filters from Sibylla configuration
+
 ### Version 1.1.2
 - Added `UpdateFact` to support fact update (in particular from CLI)
 
