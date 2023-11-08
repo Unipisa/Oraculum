@@ -25,7 +25,7 @@ class FlaskApp:
             """Augment JSON data."""
             input_data = request.get_json()
             augmented_data = self.data_processor.augment_data(input_data)
-            output = Output(json.dumps(augmented_data))
+            output = Output(json.dumps(augmented_data), "augmented")
             db.session.add(output)
             db.session.commit()
             return jsonify(output.to_dict()), 200
@@ -37,7 +37,7 @@ class FlaskApp:
             data = Output.query.get({"id": id})
             # json_data = json.loads(data)
             evaluated_data = self.data_processor.eval_data(json.loads(data.output_data))
-            output = Output(json.dumps(evaluated_data))
+            output = Output(json.dumps(evaluated_data), "evaluated")
             db.session.add(output)
             db.session.commit()
             return jsonify(output.to_dict()), 200
@@ -55,6 +55,9 @@ class FlaskApp:
                 if data is None:
                     return "Record not found", 404
                 return jsonify(data.to_dict()), 200
+            else:
+                outputs = Output.query.all()
+                return jsonify([output.to_dict() for output in outputs]), 200
 
         @self.app.route('/report', methods = ['GET'])
         def report():
