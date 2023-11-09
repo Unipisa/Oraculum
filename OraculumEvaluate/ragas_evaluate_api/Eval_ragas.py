@@ -1,5 +1,5 @@
 import os
-# os.environ["OPENAI_API_KEY"] = "sk-"
+#os.environ["OPENAI_API_KEY"] = ""
 from ragas import evaluate
 from ragas.metrics import faithfulness, answer_relevancy, context_recall, context_precision
 from datasets import load_dataset

@@ -1,11 +1,13 @@
 ## app.py
-
 from flask import Flask, request, jsonify, send_from_directory
 from data_processor import DataProcessor
 from models import db, Output
 from config import Config
 import json, os
 from openpyxl import Workbook
+from flask import Flask, request, jsonify, render_template
+
+#http://localhost:5000/api/docs#/
         
 class FlaskApp:
     """FlaskApp class for setting up and running the Flask app."""
@@ -19,6 +21,16 @@ class FlaskApp:
 
     def run(self):
         """Run the Flask app."""
+
+        @self.app.route('/')
+        def get_root():
+            print('sending root')
+            return render_template('index.html')
+
+        @self.app.route('/api/docs')
+        def get_docs():
+            print('sending docs')
+            return render_template('swaggerui.html')
 
         @self.app.route('/augment', methods=['POST'])
         def augment():
