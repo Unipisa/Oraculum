@@ -11,7 +11,8 @@ Su http://localhost:5009/swagger è anche possibile visualizzare tutte le altre 
 
 ### Inizializzazione
 
-Al primo utilizzo eseguire `python init.py` per inizializzare il DB, che viene creato nella cartella instance. Attenzione: su Windows è possibile che Powershell dia problemi nell'esecuzione, pertanto è raccomandato cmd.
+È raccomandato usare cmd su Windows.
+Al primo utilizzo eseguire `python init.py` per inizializzare il DB, che viene creato nella cartella instance.
 
 ### Avvio
 
@@ -20,7 +21,7 @@ Su http://localhost:5000/api/docs/ è possibile visualizzare lo swagger.
 
 ### Preparazione delle domande da sottoporre all'assistente e generazione delle risposte
 
-Per eseguire la valutazione è sufficiente eseguire una POST su `/augment` un json con la lista delle domande ad es:
+Per ottenere la valutazione è sufficiente un json con la lista delle domande, ad es:
 
 ```json
 [
@@ -34,8 +35,8 @@ Per eseguire la valutazione è sufficiente eseguire una POST su `/augment` un js
 ]
 ```
 
-Tuttavia, senza fornire le risposte attese ("ground_truths"), non sarà possibile calcolare la metrica "context_recall", e di conseguenza il "ragas_score" riassuntivo sarà sempre zero.
-È consigliabile fornire un json con la seguente struttura:
+Tuttavia, in mancanza delle risposte attese ("ground_truths"), non sarà possibile calcolare la metrica "context_recall", e di conseguenza il "ragas_score" riassuntivo sarà sempre zero.
+Pertanto è consigliabile fornire un json con la seguente struttura:
 
 ```json
 [
@@ -51,15 +52,18 @@ Tuttavia, senza fornire le risposte attese ("ground_truths"), non sarà possibil
 ]
 ```
 
-La funzione effettua una chiamata a OraculumAPI per ogni domanda, e recupera le risposte e i contesti. La risposta di `/augment` è l'oggetto che viene salvato sul DB, che ha le seguenti proprietà:
+Eseguire una POST su `/augment`: la funzione effettua una chiamata a OraculumAPI per ogni domanda, e recupera le risposte e i contesti. La risposta di `/augment` è l'oggetto che viene salvato sul DB, che ha le seguenti proprietà:
 
 - id (int)
-- output_data (string), il json fornito a cui sono stati aggiunti "answer" e "contexts"
-- data_type (string) che in questo caso vale "augmented" (sarà "evaluated" per i dati già valutati)
-- timestamp
+- output_data (str), il json fornito a cui sono stati aggiunti "answer" e "contexts"
+- data_type (str) che in questo caso vale "augmented" (sarà "evaluated" per i dati già valutati)
+- timestamp (date)
 
 ### Valutazione delle risposte
 
-È
+Con una GET su `/evaluate?id=1` si effettua la valutazione con il metodo RAGAS e viene dato in output un oggetto di tipo "evaluated" che include le metriche faithfulness, answer_relevancy, context_precision, context_recall e ragas_score; queste ultime due sono disponibili solo se sono presenti le ground_truths. Le metriche vengono calcolate per ogni domanda e sull'intero dataset complessivo.
+
 
 ### Salvataggio dei risultati come foglio di calcolo
+
+Per salvare la valutazione come .xlsx fare GET su `/report?id=2`
