@@ -63,7 +63,10 @@ Eseguire una POST su `/augment`: la funzione effettua una chiamata a OraculumAPI
 
 Con una GET su `/evaluate?id=1` si effettua la valutazione con il metodo RAGAS e viene dato in output un oggetto di tipo "evaluated" che include le metriche faithfulness, answer_relevancy, context_precision, context_recall e ragas_score; queste ultime due sono disponibili solo se sono presenti le ground_truths. Le metriche vengono calcolate per ogni domanda e sull'intero dataset complessivo.
 
-
 ### Salvataggio dei risultati come foglio di calcolo
 
 Per salvare la valutazione come .xlsx fare GET su `/report?id=2`
+
+### Recupero dei rapporti salvati sul DB
+
+La GET su `/retrieve` restituisce il contenuto del DB, per visualizzare un elemento in particolare specificare l'ìd: `/retrieve?id=1`
