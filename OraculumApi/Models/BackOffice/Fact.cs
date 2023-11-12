@@ -96,19 +96,19 @@ namespace OraculumApi.Models.BackOffice
         /// <returns>String presentation of the object</returns>
         public override string ToString()
         {
-            var sb = new StringBuilder();
-            sb.Append("class Fact {\n");
-            sb.Append("  Id: ").Append(Id).Append("\n");
-            sb.Append("  FactType: ").Append(FactType).Append("\n");
-            sb.Append("  Category: ").Append(Category).Append("\n");
-            sb.Append("  Tags: ").Append(Tags).Append("\n");
-            sb.Append("  Title: ").Append(Title).Append("\n");
-            sb.Append("  Content: ").Append(Content).Append("\n");
-            sb.Append("  Citation: ").Append(Citation).Append("\n");
-            sb.Append("  Reference: ").Append(Reference).Append("\n");
-            sb.Append("  Expiration: ").Append(Expiration).Append("\n");
-            sb.Append("}\n");
-            return sb.ToString();
+            return $@"
+class Fact {{
+    Id: {Id}
+    FactType: {FactType}
+    Category: {Category}
+    Tags: {Tags}
+    Title: {Title}
+    Content: {Content}
+    Citation: {Citation}
+    Reference: {Reference}
+    Expiration: {Expiration}
+}}
+";
         }
 
         /// <summary>

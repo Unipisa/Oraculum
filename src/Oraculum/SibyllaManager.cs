@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using System.Xml.Linq;
 
 namespace Oraculum
 {
@@ -32,7 +33,7 @@ namespace Oraculum
             _oraculum = new Oraculum(oraculumConf);
         }
 
-        private string ConfFile(string name)
+        private string ConfFile(string name, bool checkIfExists=true)
         {
             var path = Path.Combine(_dataDir, $"{name}.json");
             if (!File.Exists(path))
@@ -185,37 +186,20 @@ namespace Oraculum
         }
 
         // get all Sibyllae Configurations
-        public Task<List<SibyllaConf>> GetSibyllae()
+        public List<SibyllaConf?> GetSibyllae()
         {
-            var sibyllaeConfigs = new List<SibyllaConf>();
-            DirectoryInfo di = new DirectoryInfo(_dataDir);
-            FileInfo[] confFiles = di.GetFiles("*.json");
-            if (confFiles.Length != 0)
-            {
-                foreach (FileInfo fi in confFiles)
-                {
-                    var name = Path.GetFileNameWithoutExtension(fi.Name);
-                    try
-                    {
-                        var s = SibyllaConf.FromJson(File.ReadAllText(ConfFile(name))) ?? throw new Exception($"Configuration file {ConfFile(name)} is not valid.");
-                        // TODO: this manages the Id
-                        s.Title = name;
-                        sibyllaeConfigs.Add(s);
-                    }
-                    catch (System.Text.Json.JsonException)
-                    {
-                        return null;
-                    }
-                }
-            }
-            return Task.FromResult(sibyllaeConfigs);
+            return AvailableConfigurations.ConvertAll(c => GetSibyllaConfById(c));
         }
 
         // get a Sibylla configuration by Id
-        public async Task<SibyllaConf> GetSibyllaById(String sibyllaId)
+        public SibyllaConf? GetSibyllaConfById(String sibyllaId)
         {
-            var sibyllae = await Task.Run(() => GetSibyllae());
-            return sibyllae.FirstOrDefault(f => f.Title != null && f.Title.Equals(sibyllaId));
+            var path = ConfFile(sibyllaId, checkIfExists: false);
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+            return SibyllaConf.FromJson(File.ReadAllText(ConfFile(sibyllaId))) ?? throw new Exception($"Configuration file {ConfFile(sibyllaId)} is not valid.");
         }
 
         // delete a Sibylla by Id
@@ -225,16 +209,7 @@ namespace Oraculum
             var s = sibyllae.FirstOrDefault(f => f.Title != null && f.Title.Equals(sibyllaId));
             if (s != null)
             {
-                // build the right path for the file
-                var sepChar = Path.DirectorySeparatorChar.ToString();
-                var altChar = Path.AltDirectorySeparatorChar.ToString();
-                var path = _dataDir;
-                if (!path.EndsWith(sepChar) && !path.EndsWith(altChar))
-                {
-                    path += sepChar;
-                }
-                path += s.Title;
-                path += ".json";
+                var path = Path.Combine(_dataDir, $"{sibyllaId}.json");
                 // if the file doesn't exist in the case of an Id different than the Title attribute
                 if (!File.Exists(path))
                 {
@@ -258,31 +233,23 @@ namespace Oraculum
             return await SaveOrUpdateSibyllaConfigFile(sibyllaConf, true); ;
         }
 
-        private async Task<Boolean> SaveOrUpdateSibyllaConfigFile(SibyllaConf sibyllaConf, Boolean update)
+        private async Task<bool> SaveOrUpdateSibyllaConfigFile(SibyllaConf sibyllaConf, bool update)
         {
             // remeber that the title attribute must be unique as is being used as an Id or file name in this case
             if (sibyllaConf.Title == null)
             {
                 return false;
             }
-            // build the right path for the file
-            var sepChar = Path.DirectorySeparatorChar.ToString();
-            var altChar = Path.AltDirectorySeparatorChar.ToString();
-            var path = _dataDir;
-            if (!path.EndsWith(sepChar) && !path.EndsWith(altChar))
-            {
-                path += sepChar;
-            }
-            path += sibyllaConf.Title;
-            path += ".json";
+            var path = ConfFile(sibyllaConf.Title, checkIfExists: false);
             if (File.Exists(path) && !update)
             {
                 // the file already exist
                 throw new IOException("The configuration file already exist");
             }
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            await using FileStream createStream = File.Create(path);
-            await JsonSerializer.SerializeAsync(createStream, sibyllaConf, options);
+            await using var configOut = File.Create(path);
+            await JsonSerializer.SerializeAsync(configOut, sibyllaConf, new JsonSerializerOptions { 
+                WriteIndented = true 
+            });
             return true;
         }
 

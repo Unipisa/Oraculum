@@ -246,7 +246,7 @@ public class BackOfficeController : Controller
     [SwaggerResponse(statusCode: 200, type: typeof(SibyllaConfigDto), description: "Specific Sibylla configuration data")]
     public async Task<IActionResult> GetSibyllaConfigDtoById([FromRoute][Required] string id)
     {
-        var result = await Task.Run(() => _sibyllaManager.GetSibyllaById(id));
+        var result = await Task.Run(() => _sibyllaManager.GetSibyllaConfById(id));
         if (result == null)
         {
             return StatusCode(404);
