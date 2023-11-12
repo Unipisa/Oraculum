@@ -8,6 +8,7 @@ using Oraculum;
 using System.Text;
 using System.Threading.Channels;
 using Microsoft.OpenApi.Any;
+using Asp.Versioning;
 
 namespace OraculumApi.Controllers;
 

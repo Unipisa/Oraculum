@@ -9,6 +9,7 @@ using System.Text;
 using System.Runtime.CompilerServices;
 using Microsoft.OpenApi.Any;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Asp.Versioning;
 
 namespace OraculumApi.Controllers;
 
