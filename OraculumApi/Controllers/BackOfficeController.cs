@@ -16,7 +16,6 @@ namespace OraculumApi.Controllers;
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1")]
-[ApiVersion("2")]
 public class BackOfficeController : Controller
 {
 
