@@ -48,7 +48,7 @@ public class Configuration
 
     internal bool IsValid()
     {
-        if (WeaviateApiKey == null)
+        if (WeaviateEndpoint == null)
             return false;
         if (Provider == ProviderType.OpenAi)
             return OpenAIApiKey != null && OpenAIOrgId != null;
