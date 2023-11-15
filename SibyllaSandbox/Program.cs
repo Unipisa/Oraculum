@@ -1,4 +1,5 @@
 using Oraculum;
+using Lib.AspNetCore.ServerSentEvents;
 using SibyllaSandbox;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,9 +22,15 @@ builder.Services.AddSingleton<SibyllaManager>(new SibyllaManager(new Oraculum.Co
 {
     WeaviateEndpoint = _configuration["Weaviate:ServiceEndpoint"],
     WeaviateApiKey = _configuration["Weaviate:ApiKey"],
+    Provider = _configuration["GPTProvider"] == "Azure" ? OpenAI.ProviderType.Azure : OpenAI.ProviderType.OpenAi,
     OpenAIApiKey = _configuration["OpenAI:ApiKey"],
-    OpenAIOrgId = _configuration["OpenAI:OrgId"]
+    OpenAIOrgId = _configuration["OpenAI:OrgId"],
+    AzureOpenAIApiKey = _configuration["Azure:ApiKey"],
+    AzureResourceName = _configuration["Azure:ResourceName"],
+    AzureDeploymentId = _configuration["Azure:DeploymentId"]
 }, Path.Combine(_env.ContentRootPath, "SibyllaeConf")));
+
+builder.Services.AddServerSentEvents();
 
 var app = builder.Build();
 
@@ -47,5 +54,7 @@ app.UseSession();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapServerSentEvents("/MessagesStream");
 
 app.Run();

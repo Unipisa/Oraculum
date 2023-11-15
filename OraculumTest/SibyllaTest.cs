@@ -31,8 +31,12 @@ namespace OraculumTest
             {
                 WeaviateApiKey = conf["Weaviate:ApiKey"],
                 WeaviateEndpoint = conf["Weaviate:ServiceEndpoint"],
+                Provider = conf["GPTProvider"] == "Azure" ? OpenAI.ProviderType.Azure : OpenAI.ProviderType.OpenAi,
                 OpenAIApiKey = conf["OpenAI:ApiKey"],
-                OpenAIOrgId = conf["OpenAI:OrgId"]
+                OpenAIOrgId = conf["OpenAI:OrgId"],
+                AzureOpenAIApiKey = conf["Azure:ApiKey"],
+                AzureResourceName = conf["Azure:ResourceName"],
+                AzureDeploymentId = conf["Azure:DeploymentId"]
             }, sconf);
             
             sibylla.Connect().Wait();
@@ -46,6 +50,29 @@ namespace OraculumTest
             {
                 CategoryFilter = new[] { "missioni" }
             });
+            //var answer = await sibylla.Answer("What are PAST codes and which one should I use?");
+            Assert.IsNotNull(answer);
+        }
+
+        [TestMethod]
+        public async Task TestQuestion1Enum()
+        {
+            Assert.IsNotNull(sibylla);
+            var answer = sibylla.AnswerAsync("Cosa sono i codici PAST?", new KnowledgeFilter()
+            {
+                CategoryFilter = new[] { "missioni" }
+            });
+            try
+            {
+                await foreach (var r in answer)
+                {
+                    Assert.IsTrue(r == null || r.Length >= 0);
+                }
+            }
+            catch (Exception e)
+            {
+                Assert.Fail();
+            }
             //var answer = await sibylla.Answer("What are PAST codes and which one should I use?");
             Assert.IsNotNull(answer);
         }

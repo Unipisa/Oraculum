@@ -8,6 +8,7 @@ using Oraculum;
 using System.Text;
 using System.Threading.Channels;
 using Microsoft.OpenApi.Any;
+using Asp.Versioning;
 
 namespace OraculumApi.Controllers;
 
@@ -47,7 +48,6 @@ public class FrontOfficeController : Controller
         var sibyllaKey = HttpContext.Session.GetString("sibyllaRef");
         if (sibyllaKey == null)
         {
-            // It would be nice to align the expiration of the Sibylla with the expiration of the session.
             var (id, _) = await _sibyllaManager.AddSibylla(sibyllaName, expiration: DateTime.Now.AddMinutes(60));
             HttpContext.Session.SetString("sibyllaRef", id.ToString());
             sibyllaKey = id.ToString();
@@ -70,15 +70,6 @@ public class FrontOfficeController : Controller
     [SwaggerOperation("DeleteChatsChatId")]
     public virtual IActionResult DeleteChatsChatId([FromRoute][Required] string chatId, [FromRoute][Required] string sibyllaId)
     {
-        //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        return StatusCode(200);
-
-        //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(404);
-
-        //TODO: Uncomment the next line to return response 500 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(500);
-
         throw new NotImplementedException();
     }
 
@@ -86,7 +77,6 @@ public class FrontOfficeController : Controller
     [Route("sibylla")]
     public IActionResult GetAllSibyllae()
     {
-        // Your logic here...
         throw new NotImplementedException();
     }
 
@@ -94,7 +84,6 @@ public class FrontOfficeController : Controller
     [Route("sibylla/{sibyllaId}/chat")]
     public IActionResult GetChats([FromRoute] string sibyllaId)
     {
-        // Your logic here...
         throw new NotImplementedException();
     }
 
@@ -102,7 +91,6 @@ public class FrontOfficeController : Controller
     [Route("sibylla/{sibyllaId}/chat")]
     public IActionResult PostChat([FromRoute] string sibyllaId, [FromBody] Message message)
     {
-        // Your logic here...
         throw new NotImplementedException();
     }
 
@@ -110,7 +98,6 @@ public class FrontOfficeController : Controller
     [Route("sibylla/{sibyllaId}/chat/{chatId}")]
     public IActionResult GetChatById([FromRoute] string sibyllaId, [FromRoute] string chatId)
     {
-        // Your logic here...
         throw new NotImplementedException();
     }
 
@@ -118,7 +105,6 @@ public class FrontOfficeController : Controller
     [Route("sibylla/{sibyllaId}/chat/{chatId}/message")]
     public IActionResult PostMessage([FromRoute] string sibyllaId, [FromRoute] string chatId, [FromBody] Message message)
     {
-        // Your logic here...
         throw new NotImplementedException();
     }
 
@@ -126,7 +112,6 @@ public class FrontOfficeController : Controller
     [Route("sibylla/{sibyllaId}/chat/{chatId}/feedback")]
     public IActionResult PostFeedback([FromRoute] string sibyllaId, [FromRoute] string chatId, [FromBody] Feedback feedback)
     {
-        // Your logic here...
         throw new NotImplementedException();
     }
 
@@ -134,14 +119,13 @@ public class FrontOfficeController : Controller
     [Route("reference/{id}")]
     public IActionResult GetReferenceById([FromRoute] string id)
     {
-        // Your logic here...
         throw new NotImplementedException();
     }
 
 
     [HttpPost]
-    [Route("answer/{question}")]
-    public async Task<IActionResult> Answer([FromRoute][Required] string question)
+    [Route("answerStream/{question}")]
+    public async Task<IActionResult> AnswerStream([FromRoute][Required] string question)
     {
         var Sibylla = await ConnectSibylla();
         var answerid = Guid.NewGuid().ToString();
@@ -167,8 +151,8 @@ public class FrontOfficeController : Controller
     }
 
     [HttpPost]
-    [Route("answer1/{question}")]
-    public async Task<string> Answer1(string question)
+    [Route("answer/{question}")]
+    public async Task<string> Answer(string question)
     {
         var Sibylla = await ConnectSibylla();
         var answerid = Guid.NewGuid().ToString();
@@ -229,26 +213,13 @@ public class FrontOfficeController : Controller
     //api di debug per fare le metriche, metodo sincrono
     [HttpGet]
     [Route("getanswer/debug/{query}")]
-    public async Task<IActionResult> GetAnswerDebugAsync(string query)
+    public async Task<IActionResult> GetAnswerDebugAsync(string query, int limit = 10)
     {
         var Sibylla = await ConnectSibylla();
         var answer = await Sibylla.Answer(query);
         var prompt = Sibylla.Configuration.BaseSystemPrompt;
-        var facts = await _sibyllaManager.FindRelevantFacts(query, null, Sibylla.Configuration.Limit);
-        var factsList = facts.Select(f => new Models.BackOffice.Fact
-        {
-            Id = f.id ?? Guid.Empty,
-            FactType = f.factType ?? "",
-            Category = f.category ?? "",
-            Tags = f.tags != null ? f.tags.ToList() : new List<string>(),
-            Title = f.title ?? "",
-            Content = f.content ?? "",
-            Citation = f.citation ?? "",
-            Reference = f.reference ?? "",
-            Expiration = f.expiration
-        }).ToList();
-
-        // return a json with field "answer" and "prompt" "facts"
+        var facts = await _sibyllaManager.FindRelevantFacts(query, null, limit);
+        var factsList = facts.Select(f => Models.BackOffice.Fact.FromOraculumFact(f)).ToList();
         return Ok(new { answer, prompt, factsList });
     }
 

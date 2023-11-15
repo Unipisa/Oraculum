@@ -9,13 +9,13 @@ using System.Text;
 using System.Runtime.CompilerServices;
 using Microsoft.OpenApi.Any;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Asp.Versioning;
 
 namespace OraculumApi.Controllers;
 
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ApiVersion("1")]
-[ApiVersion("2")]
 public class BackOfficeController : Controller
 {
 
@@ -44,7 +44,6 @@ public class BackOfficeController : Controller
         var sibyllaKey = HttpContext.Session.GetString("sibyllaRef");
         if (sibyllaKey == null)
         {
-            // It would be nice to align the expiration of the Sibylla with the expiration of the session.
             var (id, _) = await _sibyllaManager.AddSibylla(sibyllaName, expiration: DateTime.Now.AddMinutes(60));
             HttpContext.Session.SetString("sibyllaRef", id.ToString());
             sibyllaKey = id.ToString();
@@ -120,9 +119,6 @@ public class BackOfficeController : Controller
     [SwaggerOperation("DeleteFacts")]
     public virtual IActionResult DeleteFacts([FromQuery] string factType, [FromQuery] string category, [FromQuery] bool? expired)
     {
-        //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(200);
-
         throw new NotImplementedException();
     }
 
@@ -163,20 +159,8 @@ public class BackOfficeController : Controller
     [SwaggerResponse(statusCode: 200, type: typeof(List<Models.BackOffice.Fact>), description: "List of relevant facts")]
     public async Task<IActionResult> FindRelevantFacts([FromBody] SearchCriteria body)
     {
-        // find relevant facts with sibyllamanager method
         var facts = await _sibyllaManager.FindRelevantFacts(body.Query, body.Distance, body.Limit, body.AutoCut, body.FactTypeFilter, body.CategoryFilter, body.TagsFilter);
-        var factsList = facts.Select(f => new Models.BackOffice.Fact
-        {
-            Id = f.id ?? Guid.Empty,
-            FactType = f.factType ?? "",
-            Category = f.category ?? "",
-            Tags = f.tags != null ? f.tags.ToList() : new List<string>(),
-            Title = f.title ?? "",
-            Content = f.content ?? "",
-            Citation = f.citation ?? "",
-            Reference = f.reference ?? "",
-            Expiration = f.expiration
-        }).ToList();
+        var factsList = facts.Select(f => Models.BackOffice.Fact.FromOraculumFact(f)).ToList();
         return Ok(factsList);
     }
 
@@ -197,21 +181,8 @@ public class BackOfficeController : Controller
     [SwaggerResponse(statusCode: 200, type: typeof(List<Models.BackOffice.Fact>), description: "A list of facts")]
     public async Task<IActionResult> GetAllFacts([FromQuery] int? limit, [FromQuery] int? offset, [FromQuery] string? sort, [FromQuery] string? order)
     {
-        // get all facts from sibyllamanager
         var facts = await _sibyllaManager.GetAllFacts(limit ?? 10, offset ?? 0, sort, order);
-        // build a new list of facts of type Models.BackOffice.Fact from facts
-        var factsList = facts.Select(f => new Models.BackOffice.Fact
-        {
-            Id = f.id ?? Guid.Empty,
-            FactType = f.factType ?? "",
-            Category = f.category ?? "",
-            Tags = f.tags != null ? f.tags.ToList() : new List<string>(),
-            Title = f.title ?? "",
-            Content = f.content ?? "",
-            Citation = f.citation ?? "",
-            Reference = f.reference ?? "",
-            Expiration = f.expiration
-        }).ToList();
+        var factsList = facts.Select(f => Models.BackOffice.Fact.FromOraculumFact(f)).ToList();
         return Ok(factsList);
     }
 
@@ -238,7 +209,6 @@ public class BackOfficeController : Controller
         {
             return StatusCode(500);
         }
-        // return Ok(sibyllae);
         return StatusCode(200, result);
     }
 
@@ -256,15 +226,9 @@ public class BackOfficeController : Controller
     [SwaggerResponse(statusCode: 200, type: typeof(Models.BackOffice.Fact), description: "Specific fact data")]
     public async Task<IActionResult> GetFactByIdAsync([FromRoute][Required] string id)
     {
-        // get Fact from Oraculum and return it
         var fact = await _sibyllaManager.GetFactById(Guid.Parse(id));
-        // check if fact is null
-        if (fact == null)
-        {
-            // return 404
-            return NotFound();
-        }
-        return Ok(fact);
+        var factToReturn = Models.BackOffice.Fact.FromOraculumFact(fact);
+        return StatusCode(200, factToReturn);
     }
 
     /// <summary>
@@ -282,7 +246,7 @@ public class BackOfficeController : Controller
     [SwaggerResponse(statusCode: 200, type: typeof(SibyllaConfigDto), description: "Specific Sibylla configuration data")]
     public async Task<IActionResult> GetSibyllaConfigDtoById([FromRoute][Required] string id)
     {
-        var result = await Task.Run(() => _sibyllaManager.GetSibyllaById(id));
+        var result = await Task.Run(() => _sibyllaManager.GetSibyllaConfById(id));
         if (result == null)
         {
             return StatusCode(404);
@@ -335,18 +299,6 @@ public class BackOfficeController : Controller
     [SwaggerOperation("PutFacts")]
     public virtual IActionResult PutFacts([FromBody] List<Models.BackOffice.Fact> body)
     {
-        //TODO: Uncomment the next line to return response 200 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(200);
-
-        //TODO: Uncomment the next line to return response 400 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(400);
-
-        //TODO: Uncomment the next line to return response 404 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(404);
-
-        //TODO: Uncomment the next line to return response 500 or use other options such as return this.NotFound(), return this.BadRequest(..), ...
-        // return StatusCode(500);
-
         throw new NotImplementedException();
     }
 
@@ -386,7 +338,7 @@ public class BackOfficeController : Controller
         return StatusCode(200);
     }
 
-    // TODO 
+    // TODO:
     // temporary method waiting to have a real database with real IDs
     // Call this for obtaining a list of configurations with an Id based on the name of the json file from the configurations  folder
     private List<SibyllaConfigDto> getAllSibyllaeConfigs(List<SibyllaConf> sibyllaeConfs)

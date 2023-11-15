@@ -18,7 +18,6 @@ namespace OraculumApi.Attributes
         /// <param name="context"></param>
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            // Per https://blog.markvincze.com/how-to-validate-action-parameters-with-dataannotation-attributes/
             var descriptor = context.ActionDescriptor as ControllerActionDescriptor;
             if (descriptor != null)
             {
@@ -26,7 +25,7 @@ namespace OraculumApi.Attributes
                 {
                     object args = null;
                     if (context.ActionArguments.ContainsKey(parameter.Name))
-                    { 
+                    {
                         args = context.ActionArguments[parameter.Name];
                     }
 
