@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="8a38e579-b47d-4049-a99f-2fb434f12c5d" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/index.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/oauth2-redirect.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/swagger-initializer.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/swagger-ui-bundle.js.map" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/swagger-ui-es-bundle-core.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/swagger-ui-es-bundle-core.js.map" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/swagger-ui-es-bundle.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/swagger-ui-es-bundle.js.map" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/swagger-ui-standalone-preset.js.map" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/swagger-ui.css.map" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/swagger-ui.js.map" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/instance/ragas_evaluate.db" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/css/swagger-ui.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/img/favicon-16x16.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/img/favicon-32x32.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/js/swagger-ui-bundle.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/js/swagger-ui-standalone-preset.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/js/swagger-ui.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/openapi.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/swaggerui.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../sdcQuestions.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../ragasSdc.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Endpoints.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../Endpoints.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../OraculumApi/SibyllaeConf/polimi.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../OraculumApi/SibyllaeConf/polimi.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Eval_ragas.py" beforeDir="false" afterPath="$PROJECT_DIR$/Eval_ragas.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/instance/ragas_evaluate_.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../instance/ragas_evaluate.db" beforeDir="false" afterPath="$PROJECT_DIR$/../../instance/ragas_evaluate.db" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "customColor": "",
+  "associatedIndex": 6
+}]]></component>
+  <component name="ProjectId" id="2XwEsUBtETA9LdfM0q7kCuSbY53" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "develop"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8a38e579-b47d-4049-a99f-2fb434f12c5d" name="Changes" comment="" />
+      <created>1699531950257</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1699531950257</updated>
+    </task>
+    <servers />
+  </component>
+</project>

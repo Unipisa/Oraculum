@@ -4,7 +4,7 @@
     var config = Model.Configuration;
     var messages = Model.History;
     ViewData["Title"] = "Home Page";
-    ViewData["SibyllaName"] = config.SibyllaName;
+    ViewData["SibyllaName"] = config.Title;
 }
 
 <link rel="stylesheet" href="~/css/ChatStyles.css" />
@@ -12,19 +12,21 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css" />
 
 <script type="text/javascript">
-
-    function loadChunk(id) {
-        $.ajax({
-            type: "GET",
-            url: "/Home/GetAnswer",
-            data: { "answerid": id },
-            success: function (data) {
-                $("#" + id).append(data.replaceAll('\n', '<br/>'));
-                $("#chat").scrollTop($("#chat")[0].scrollHeight);
-                setTimeout(() => { loadChunk(id); }, 300);
-            }
-        });
-    }
+    var evt = new EventSource("/MessagesStream");
+    evt.addEventListener('message', (e) => {
+        @if (Model.Configuration.OutOfScopePrefix != null)
+        {
+        <text>
+        var txt = $("#" + e.lastEventId)[0].innerHTML;
+        var pfx = '@(Model.Configuration.OutOfScopePrefix!)';
+        if (txt.startsWith(pfx)) {
+            $("#" + e.lastEventId)[0].innerHTML = txt.substring(pfx.length);
+        }
+        </text>
+        }
+        $("#" + e.lastEventId).append(e.data.replaceAll('\n', '<br/>'));
+        $("#chat").scrollTop($("#chat")[0].scrollHeight);
+    });
 
     function answer() {
         var text = $("#userreq").val();
@@ -39,7 +41,6 @@
                 $("#chat").append('<div class="received-chats"><div class="received-chats-img"><img src="/img/Logo.png" /></div><div class= "received-msg" ><div class="received-msg-inbox" ><p><span id="' + data + '"/></p></div></div></div>');
                 $("#userreq").val("");
                 $("#chat").scrollTop($("#chat")[0].scrollHeight);
-                loadChunk(data);
             }
         });
     }
@@ -67,38 +68,38 @@
                     @{
                         foreach (var m in messages)
                         {
-                            if (m.Role == "assistant")
+                            if (m.Role == "assistant" || m.Role == "assistantOT")
                             {
-                                <div class="received-chats">
-                                    <div class="received-chats-img">
-                                        <img src="~/img/Logo.png" />
-                                    </div>
-                                    <div class="received-msg">
-                                        <div class="received-msg-inbox">
-                                            <p>
-                                                @m.Content
-                                            </p>
-                                            <!-- <span class="time">18:06 PM | July 24</span> -->
-                                        </div>
-                                    </div>
-                                </div>
+                                                <div class="received-chats">
+                                                    <div class="received-chats-img">
+                                                        <img src="~/img/Logo.png" />
+                                                    </div>
+                                                    <div class="received-msg">
+                                                        <div class="received-msg-inbox">
+                                                            <p>
+                                                               @m.Content
+                                                            </p>
+                                                            <!-- <span class="time">18:06 PM | July 24</span> -->
+                                                        </div>
+                                                    </div>
+                                                </div>
                             }
-                            else if (m.Role == "user")
+                            else if (m.Role == "user" || m.Role == "userOT")
                             {
-                                <div class="outgoing-chats">
-                                    <div class="outgoing-chats-img">
-                                        <img src="~/img/User.png" />
-                                    </div>
-                                    <div class="outgoing-msg">
-                                        <div class="outgoing-chats-msg">
-                                            <p class="multi-msg">
-                                                @m.Content
-                                            </p>
+                                                <div class="outgoing-chats">
+                                                    <div class="outgoing-chats-img">
+                                                        <img src="~/img/User.png" />
+                                                    </div>
+                                                    <div class="outgoing-msg">
+                                                        <div class="outgoing-chats-msg">
+                                                            <p class="multi-msg">
+                                                                @m.Content
+                                                            </p>
 
-                                            <!-- <span class="time">18:30 PM | July 24</span> -->
-                                        </div>
-                                    </div>
-                                </div>
+                                                            <!-- <span class="time">18:30 PM | July 24</span> -->
+                                                        </div>
+                                                    </div>
+                                                </div>
                             }
                         }
                     }

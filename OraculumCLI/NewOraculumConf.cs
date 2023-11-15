@@ -19,11 +19,23 @@ namespace OraculumCLI
         [Parameter]
         public string? WeaviateApiKey { get; set; }
 
-        [Parameter(Mandatory = true)]
+        [Parameter]
+        public GPTProvider GPTProvider { get; set; } = GPTProvider.OpenAI;
+
+        [Parameter]
         public string? OpenAIApiKey { get; set; }
 
         [Parameter]
         public string? OpenAIOrgId { get; set; }
+
+        [Parameter]
+        public string? AzureApiKey { get; set; }
+
+        [Parameter]
+        public string? AzureResourceName { get; set; }
+
+        [Parameter]
+        public string? AzureDeploymentId { get; set; }
 
         protected override void ProcessRecord()
         {
@@ -31,8 +43,12 @@ namespace OraculumCLI
             {
                 WeaviateEndpoint = WeaviateEndpoint,
                 WeaviateApiKey = WeaviateApiKey,
+                GPTProvider = GPTProvider.OpenAI,
                 OpenAIApiKey = OpenAIApiKey,
-                OpenAIOrgId = OpenAIOrgId
+                OpenAIOrgId = OpenAIOrgId,
+                AzureApiKey = AzureApiKey,
+                AzureResourceName = AzureResourceName,
+                AzureDeploymentId = AzureDeploymentId
             };
             WriteObject(config);
         }

@@ -17,7 +17,7 @@ namespace OraculumCLI
         protected override void ProcessRecord()
         {
             base.ProcessRecord();
-            var j = Connection.AddFact(Facts);
+            var j = Connection.AddFact(Facts!);
             j.Wait();
             WriteObject(j.Result);
         }

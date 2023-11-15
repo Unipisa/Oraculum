@@ -366,5 +366,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Visual studio code .vscode
+# Editors config files
+.idea/
 .vscode/

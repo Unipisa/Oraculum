@@ -1,0 +1,115 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "API for data augmentation, evaluation, retrieval, and reporting.",
+    "version": "1.0.0",
+    "title": "Data Processing API"
+  },
+  "host": "localhost:5000",
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/augment": {
+      "post": {
+        "summary": "Augment JSON data.",
+        "description": "Endpoint for augmenting JSON data.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "input_data",
+            "description": "JSON data to be augmented.",
+            "required": true,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/evaluate": {
+      "get": {
+        "summary": "Evaluate data by id.",
+        "description": "Endpoint for evaluating data by id.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "description": "ID of the data to be evaluated.",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/retrieve": {
+      "get": {
+        "summary": "Retrieve processed data.",
+        "description": "Endpoint for retrieving processed data.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "description": "ID of the data to be retrieved.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/report": {
+      "get": {
+        "summary": "Save report as xlsx by id.",
+        "description": "Endpoint for saving a report as xlsx by id.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "description": "ID of the data to generate a report for.",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "type": "file"
+            }
+          }
+        }
+      }
+    }
+  }
+}

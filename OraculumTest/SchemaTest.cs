@@ -23,8 +23,12 @@ namespace OraculumTest
             oraculum = new Oraculum.Oraculum(new Configuration() { 
                 WeaviateApiKey = conf["Weaviate:ApiKey"],
                 WeaviateEndpoint = conf["Weaviate:ServiceEndpoint"],
+                Provider = conf["GPTProvider"] == "Azure" ? OpenAI.ProviderType.Azure : OpenAI.ProviderType.OpenAi,
                 OpenAIApiKey = conf["OpenAI:ApiKey"],
-                OpenAIOrgId = conf["OpenAI:OrgId"]
+                OpenAIOrgId = conf["OpenAI:OrgId"],
+                AzureOpenAIApiKey = conf["Azure:ApiKey"],
+                AzureResourceName = conf["Azure:ResourceName"],
+                AzureDeploymentId = conf["Azure:DeploymentId"]
             });
         }
 
@@ -40,6 +44,13 @@ namespace OraculumTest
             await oraculum.Connect();
             Assert.IsTrue(true);
 #endif
+        }
+
+        [TestMethod]
+        public async Task TestUpgradeDB()
+        {
+            Assert.IsNotNull(oraculum);
+            await oraculum.UpgradeDB();
         }
 
         [TestMethod]

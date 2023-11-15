@@ -12,7 +12,7 @@
 RootModule = 'lib/net7.0/OraculumCLI.dll'
 
 # Version number of this module.
-ModuleVersion = '1.0.2'
+ModuleVersion = '1.1.0.4'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -72,7 +72,7 @@ PowerShellVersion = '7.3.0'
 FunctionsToExport = @()
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-CmdletsToExport = @('Add-Fact', 'Add-Facts', 'Test-Schema', 'Connect-Oraculum', 'Remove-Fact', 'Find-RelevantFacts', 'Get-Fact', 'Get-TotalFact', 'Reset-Schema', 'Get-Facts', 'New-SibyllaConf', 'New-SibyllaSession')
+CmdletsToExport = @('Add-Fact', 'Add-Facts', 'Test-Schema', 'Connect-Oraculum', 'Remove-Fact', 'Find-RelevantFacts', 'Get-Fact', 'Push-Fact', 'Get-TotalFact', 'Reset-Schema', 'Get-Facts', 'New-SibyllaConf', 'New-SibyllaSession')
 
 # Variables to export from this module
 VariablesToExport = '*'

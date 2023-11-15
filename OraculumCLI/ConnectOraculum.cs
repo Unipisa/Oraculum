@@ -8,6 +8,12 @@ using System.Threading.Tasks;
 
 namespace OraculumCLI
 {
+    public enum GPTProvider
+    {
+        OpenAI,
+        Azure
+    }
+
     public class OraculumConfiguration
     {
         public static OraculumConfiguration? FromJson(string json)
@@ -17,8 +23,12 @@ namespace OraculumCLI
 
         public string? WeaviateEndpoint { get; set; }
         public string? WeaviateApiKey { get; set; }
+        public GPTProvider GPTProvider { get; set; } = GPTProvider.OpenAI;
         public string? OpenAIApiKey { get; set; }
         public string? OpenAIOrgId { get; set; }
+        public string? AzureApiKey { get; set; }
+        public string? AzureResourceName { get; set; }
+        public string? AzureDeploymentId { get; set; }
     }
 
     [Cmdlet(VerbsCommunications.Connect, "Oraculum")]
