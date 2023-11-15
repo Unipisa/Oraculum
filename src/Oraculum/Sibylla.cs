@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json;
+using System.Reflection.Metadata;
 
 namespace Oraculum
 {
@@ -65,13 +66,13 @@ namespace Oraculum
         internal const string AssistantOT = "assistantOT";
     }
 
-public class KnowledgeFilter
-{
-    public string[]? FactTypeFilter = null;
-    public string[]? CategoryFilter = null;
-    public string[]? TagsFilter = null;
-    public int? Limit = null;
-}
+    public class KnowledgeFilter
+    {
+        public string[]? FactTypeFilter = null;
+        public string[]? CategoryFilter = null;
+        public string[]? TagsFilter = null;
+        public int? Limit = 5;
+    }
 
     public class Sibylla
     {
@@ -105,25 +106,11 @@ public class KnowledgeFilter
             {
                 new ChatMessage(Actor.Assistant, sybillaConf.BaseAssistantPrompt!)
             });
-    }
+        }
 
-    public SibyllaConf Configuration { get { return _conf; } }
+        public SibyllaConf Configuration { get { return _conf; } }
 
-    public async Task Connect()
-    {
-        if (!_memory.Oraculum.IsConnected)
-            await _memory.Oraculum.Connect();
-    }
-
-    public ICollection<ChatMessage> History => _memory.History.ToList();
-
-    public async IAsyncEnumerable<string> AnswerAsync(string message, KnowledgeFilter? filter = null)
-    {
-        await PrepreAnswer(message, filter);
-
-        var m = new StringBuilder();
-
-        await foreach (var fragment in _openAiService.ChatCompletion.CreateCompletionAsStream(_chat))
+        public async Task Connect()
         {
             _logger.Log(LogLevel.Trace, $"Sibylla: Connect");
             if (!_memory.Oraculum.IsConnected)
@@ -165,7 +152,8 @@ public class KnowledgeFilter
                 _logger.Log(LogLevel.Trace, $"Sibylla: message '{message}' with no answer");
             }
         }
-        if (m.Length > 0)
+
+        public async Task<string?> Answer(string message, KnowledgeFilter? filter = null)
         {
             await PrepreAnswer(message, filter);
 
@@ -184,7 +172,9 @@ public class KnowledgeFilter
 
                 _memory.History.Add(new ChatMessage(actor, msg));
                 return msg;
-            } else {
+            }
+            else
+            {
                 _logger.Log(LogLevel.Trace, $"Sibylla: message '{message}' with no answer");
             }
             return null;
@@ -209,41 +199,4 @@ public class KnowledgeFilter
             _memory.History.Add(new ChatMessage(Actor.User, message));
         }
     }
-
-    public async Task<string?> Answer(string message, KnowledgeFilter? filter = null)
-    {
-        await PrepreAnswer(message, filter);
-
-        var result = await _openAiService.ChatCompletion.CreateCompletion(_chat);
-        if (result.Successful)
-        {
-            var ret = result.Choices.First().Message.Content;
-            _chat.Messages.Add(new ChatMessage(Actor.Assistant, ret));
-            _memory.History.Add(new ChatMessage(Actor.Assistant, ret));
-            return ret;
-        }
-        return null;
-    }
-
-    private async Task PrepreAnswer(string message, KnowledgeFilter? filter = null)
-    {
-        if (filter == null)
-            filter = new KnowledgeFilter()
-            {
-                Limit = _conf.Limit
-            };
-
-        var (xml, msg) = await _memory.Recall(message, filter);
-        _chat.Messages.Clear();
-        _chat.Messages.Add(new ChatMessage(Actor.System, _conf.BaseSystemPrompt!));
-        _chat.Messages.Add(new ChatMessage(Actor.System, xml.OuterXml));
-        _chat.Messages.Add(new ChatMessage(Actor.Assistant, _conf.BaseAssistantPrompt!));
-        foreach (var m in msg)
-            _chat.Messages.Add(m);
-        _chat.Messages.Add(new ChatMessage(Actor.User, message));
-        // add base system prompt again to make sure the assistant responds to the user correctly
-        _chat.Messages.Add(new ChatMessage(Actor.System, _conf.BaseSystemPrompt!));
-        _memory.History.Add(new ChatMessage(Actor.User, message));
-    }
-}
 }

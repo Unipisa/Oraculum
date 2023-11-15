@@ -33,7 +33,7 @@ namespace Oraculum
             _oraculum = new Oraculum(oraculumConf);
         }
 
-        private string ConfFile(string name, bool checkIfExists=true)
+        private string ConfFile(string name, bool checkIfExists = true)
         {
             var path = Path.Combine(_dataDir, $"{name}.json");
             if (!File.Exists(path))
@@ -247,8 +247,9 @@ namespace Oraculum
                 throw new IOException("The configuration file already exist");
             }
             await using var configOut = File.Create(path);
-            await JsonSerializer.SerializeAsync(configOut, sibyllaConf, new JsonSerializerOptions { 
-                WriteIndented = true 
+            await JsonSerializer.SerializeAsync(configOut, sibyllaConf, new JsonSerializerOptions
+            {
+                WriteIndented = true
             });
             return true;
         }
@@ -256,191 +257,6 @@ namespace Oraculum
         public void RemoveSibylla(string name, Guid id)
         {
             _sibyllae.Remove((name, id));
-        }
-
-        public async Task<Fact?> GetFactById(Guid id)
-        {
-            // check Oraculum connection
-            if (!_oraculum.IsConnected)
-                await _oraculum.Connect();
-            //try catch keynotfound, return null
-            try
-            {
-                Fact? fact = await _oraculum.GetFact(id) ?? throw new KeyNotFoundException($"Fact with id {id} not found.");
-                return fact;
-            }
-            catch (KeyNotFoundException)
-            {
-                return null;
-            }
-        }
-
-        //delete fact by id
-        public async Task DeleteFactById(Guid id)
-        {
-            // check Oraculum connection
-            if (!_oraculum.IsConnected)
-                await _oraculum.Connect();
-            //try catch keynotfound, return null
-            try
-            {
-                await _oraculum.DeleteFact(id);
-            }
-            catch (KeyNotFoundException)
-            {
-                return;
-            }
-        }
-
-        // find relevant facts
-        public async Task<ICollection<Fact>> FindRelevantFacts(string query, float? distance = null, int? limit = null, int? autoCut = null, string[]? factTypeFilter = null, string[]? categoryFilter = null, string[]? tagsFilter = null)
-        {
-            // check Oraculum connection
-            if (!_oraculum.IsConnected)
-                await _oraculum.Connect();
-            if (string.IsNullOrEmpty(query))
-            {
-                return new List<Fact>();
-            }
-
-            var factFilter = new FactFilter()
-            {
-                Limit = limit,
-                Distance = distance,
-                Autocut = autoCut,
-                FactTypeFilter = factTypeFilter,
-                CategoryFilter = categoryFilter,
-                TagsFilter = tagsFilter
-            };
-
-            var facts = await _oraculum.FindRelevantFacts(query, factFilter);
-            return facts;
-        }
-
-        // Get all facts
-        public async Task<ICollection<Fact>> GetAllFacts(int limit = 0, int offset = 0, string? sort = null, string? order = null)
-        {
-            // check Oraculum connection
-            if (!_oraculum.IsConnected)
-                await _oraculum.Connect();
-
-            var facts = await _oraculum.ListFacts(limit: limit, offset: offset, sort: sort, order: order);
-
-            return facts;
-        }
-
-        // Add List of facts
-        public async Task<int> AddFacts(ICollection<Fact> facts)
-        {
-            // check Oraculum connection
-            if (!_oraculum.IsConnected)
-                await _oraculum.Connect();
-
-            var newFacts = await _oraculum.AddFact(facts);
-
-            return newFacts;
-        }
-
-        // get all Sibyllae Configurations
-        public Task<List<SibyllaConf>> GetSibyllae()
-        {
-            var sibyllaeConfigs = new List<SibyllaConf>();
-            DirectoryInfo di = new DirectoryInfo(_dataDir);
-            FileInfo[] confFiles = di.GetFiles("*.json");
-            if (confFiles.Length != 0)
-            {
-                foreach (FileInfo fi in confFiles)
-                {
-                    var name = Path.GetFileNameWithoutExtension(fi.Name);
-                    try
-                    {
-                        var s = SibyllaConf.FromJson(File.ReadAllText(ConfFile(name))) ?? throw new Exception($"Configuration file {ConfFile(name)} is not valid.");
-                        // TODO: this manages the Id
-                        s.Title = name;
-                        sibyllaeConfigs.Add(s);
-                    }
-                    catch (System.Text.Json.JsonException)
-                    {
-                        return null;
-                    }
-                }
-            }
-            return Task.FromResult(sibyllaeConfigs);
-        }
-
-        // get a Sibylla configuration by Id
-        public async Task<SibyllaConf> GetSibyllaById(String sibyllaId)
-        {
-            var sibyllae = await Task.Run(() => GetSibyllae());
-            return sibyllae.FirstOrDefault(f => f.Title != null && f.Title.Equals(sibyllaId));
-        }
-
-        // delete a Sibylla by Id
-        public async Task<Boolean> DeleteSibyllaById(String sibyllaId)
-        {
-            var sibyllae = await Task.Run(() => GetSibyllae());
-            var s = sibyllae.FirstOrDefault(f => f.Title != null && f.Title.Equals(sibyllaId));
-            if (s != null)
-            {
-                // build the right path for the file
-                var sepChar = Path.DirectorySeparatorChar.ToString();
-                var altChar = Path.AltDirectorySeparatorChar.ToString();
-                var path = _dataDir;
-                if (!path.EndsWith(sepChar) && !path.EndsWith(altChar))
-                {
-                    path += sepChar;
-                }
-                path += s.Title;
-                path += ".json";
-                // if the file doesn't exist in the case of an Id different than the Title attribute
-                if (!File.Exists(path))
-                {
-                    return false;
-                }
-                File.Delete(path);
-                return true;
-            }
-            return false;
-        }
-
-        // save a Sibylla configuration by Id
-        public async Task<Boolean> SaveSibylla(SibyllaConf sibyllaConf)
-        {
-            return await SaveOrUpdateSibyllaConfigFile(sibyllaConf, false);
-        }
-
-        // update the configuration of a Sibylla 
-        public async Task<Boolean> UpdateSibylla(SibyllaConf sibyllaConf)
-        {
-            return await SaveOrUpdateSibyllaConfigFile(sibyllaConf, true); ;
-        }
-
-        private async Task<Boolean> SaveOrUpdateSibyllaConfigFile(SibyllaConf sibyllaConf, Boolean update)
-        {
-            // remeber that the title attribute must be unique as is being used as an Id or file name in this case
-            if (sibyllaConf.Title == null)
-            {
-                return false;
-            }
-            // build the right path for the file
-            var sepChar = Path.DirectorySeparatorChar.ToString();
-            var altChar = Path.AltDirectorySeparatorChar.ToString();
-            var path = _dataDir;
-            if (!path.EndsWith(sepChar) && !path.EndsWith(altChar))
-            {
-                path += sepChar;
-            }
-            path += sibyllaConf.Title;
-            path += ".json";
-            if (File.Exists(path) && !update)
-            {
-                // the file already exist
-                throw new IOException("The configuration file already exist");
-            }
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            await using FileStream createStream = File.Create(path);
-            await JsonSerializer.SerializeAsync(createStream, sibyllaConf, options);
-            return true;
         }
 
         public Sibylla GetSibylla(string name, Guid id)
