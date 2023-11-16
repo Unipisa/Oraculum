@@ -55,6 +55,7 @@ namespace Oraculum
         public int FactMemoryTTL { get; set; } = 4; // 4 turns implies a maximum of 11 facts in memory
         public int MemorySpan { get; set; } = 4;
         public string? OutOfScopePrefix = "*&oo&* ";
+        public IList<FunctionDefinition>? Functions { get; set; } = null;
     }
 
     internal class Actor
@@ -95,6 +96,7 @@ namespace Oraculum
             _chat.TopP = sybillaConf.TopP;
             _chat.FrequencyPenalty = sybillaConf.FrequencyPenalty;
             _chat.PresencePenalty = sybillaConf.PresencePenalty;
+            _chat.Functions = sybillaConf.Functions;
             _chat.Model = sybillaConf.Model;
             _chat.Messages = new List<ChatMessage>()
             {
