@@ -65,6 +65,7 @@ namespace Oraculum
         internal const string Assistant = "assistant";
         internal const string UserOT = "userOT";
         internal const string AssistantOT = "assistantOT";
+        internal const string Function = "function";
     }
 
     public class KnowledgeFilter
@@ -162,6 +163,31 @@ namespace Oraculum
             var result = await _openAiService.ChatCompletion.CreateCompletion(_chat);
             if (result.Successful)
             {
+                // fn
+                // log full response
+                Console.WriteLine($"Response:       {JsonConvert.SerializeObject(result)}");
+                var choice = result.Choices.First();
+                Console.WriteLine($"Message:        {choice.Message.Content}");
+                var fn = choice.Message.FunctionCall;
+                if (fn != null)
+                {
+                    Console.WriteLine($"Function call:  {fn.Name}");
+                    foreach (var entry in fn.ParseArguments())
+                    {
+                        Console.WriteLine($"  {entry.Key}: {entry.Value}");
+                    }
+                    // call function and give gpt the result
+                    var functionArguments = fn.ParseArguments();
+                    // Execute the function and get the result
+                    var functionResult = ExecuteFunction(fn.Name, functionArguments);
+                    // add the result to the chat
+                    _chat.Messages.Add(new ChatMessage(Actor.Function, functionResult?.ToString() ?? string.Empty, fn.Name));
+                    // send new completion request
+                    result = await _openAiService.ChatCompletion.CreateCompletion(_chat);
+                    // log full response
+                    Console.WriteLine($"Response:       {JsonConvert.SerializeObject(result)}");
+                }
+                // end fn
                 var msg = result.Choices.First().Message.Content;
                 _logger.Log(LogLevel.Trace, $"Sibylla: message '{message}' with answer '{msg}'");
                 var actor = Actor.Assistant;
@@ -180,6 +206,27 @@ namespace Oraculum
                 _logger.Log(LogLevel.Trace, $"Sibylla: message '{message}' with no answer");
             }
             return null;
+        }
+
+        // TODO: this code is basically hardcoded, function usage should be defined by the user
+        private object ExecuteFunction(string? name, Dictionary<string, object> functionArguments)
+        {
+            // switch case on name
+            switch (name)
+            {
+                case "check_and_answer":
+                    if (functionArguments.TryGetValue("valutazione", out var valutazione))
+                    {
+                        return valutazione;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Argument 'valutazione' is missing or not a boolean.");
+                    }
+
+                default:
+                    throw new ArgumentException($"Function '{name}' not recognized.");
+            }
         }
 
         private async Task PrepreAnswer(string message, KnowledgeFilter? filter = null)
