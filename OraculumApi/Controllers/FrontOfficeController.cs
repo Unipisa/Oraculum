@@ -39,6 +39,19 @@ public class FrontOfficeController : Controller
         return View(sibylla);
     }
 
+    private object CheckAndAnswerFunction(Dictionary<string, object> args)
+    {
+        // Implementation of your function
+        if (args.TryGetValue("valutazione", out var valutazione))
+        {
+            return valutazione;
+        }
+        else
+        {
+            throw new ArgumentException("Argument 'valutazione' is missing or not a boolean.");
+        }
+    }
+
     //only to temporarily make the apis work
     //TODO: simply copied from the SibyllaSandbox controller, need to investigating on how it works
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -53,6 +66,7 @@ public class FrontOfficeController : Controller
             sibyllaKey = id.ToString();
         }
         var sibylla = _sibyllaManager.GetSibylla(sibyllaName, Guid.Parse(sibyllaKey));
+        sibylla.RegisterFunction("check_and_answer", CheckAndAnswerFunction, false);
         return sibylla;
     }
 

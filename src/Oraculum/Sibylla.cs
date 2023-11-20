@@ -83,6 +83,8 @@ namespace Oraculum
         private Memory _memory;
         private SibyllaConf _conf;
         private ILogger _logger;
+        public delegate object FunctionDelegate(Dictionary<string, object> args);
+        private Dictionary<string, FunctionDelegate> _functions = new Dictionary<string, FunctionDelegate>();
 
         public Sibylla(Configuration conf, SibyllaConf sybillaConf, ILogger? logger = null)
         {
@@ -109,6 +111,33 @@ namespace Oraculum
             {
                 new ChatMessage(Actor.Assistant, sybillaConf.BaseAssistantPrompt!)
             });
+        }
+
+        public void RegisterFunction(string name, FunctionDelegate function, bool updateIfExists = true)
+        {
+            if (_functions.ContainsKey(name))
+            {
+                if (updateIfExists)
+                {
+                    _functions[name] = function;
+                    _logger.LogInformation($"Function '{name}' updated.");
+                }
+            }
+            else
+            {
+                _functions.Add(name, function);
+                _logger.LogInformation($"Function '{name}' added.");
+            }
+        }
+
+        // Method to unregister a function
+        public void UnregisterFunction(string name)
+        {
+            if (_functions.ContainsKey(name))
+            {
+                _functions.Remove(name);
+                _logger.LogInformation($"Function '{name}' removed.");
+            }
         }
 
         public SibyllaConf Configuration { get { return _conf; } }
@@ -171,21 +200,7 @@ namespace Oraculum
                 var fn = choice.Message.FunctionCall;
                 if (fn != null)
                 {
-                    Console.WriteLine($"Function call:  {fn.Name}");
-                    foreach (var entry in fn.ParseArguments())
-                    {
-                        Console.WriteLine($"  {entry.Key}: {entry.Value}");
-                    }
-                    // call function and give gpt the result
-                    var functionArguments = fn.ParseArguments();
-                    // Execute the function and get the result
-                    var functionResult = ExecuteFunction(fn.Name, functionArguments);
-                    // add the result to the chat
-                    _chat.Messages.Add(new ChatMessage(Actor.Function, functionResult?.ToString() ?? string.Empty, fn.Name));
-                    // send new completion request
-                    result = await _openAiService.ChatCompletion.CreateCompletion(_chat);
-                    // log full response
-                    Console.WriteLine($"Response:       {JsonConvert.SerializeObject(result)}");
+                    result = await HandleFunctionExecution(fn);
                 }
                 // end fn
                 var msg = result.Choices.First().Message.Content;
@@ -208,24 +223,46 @@ namespace Oraculum
             return null;
         }
 
-        // TODO: this code is basically hardcoded, function usage should be defined by the user
-        private object ExecuteFunction(string? name, Dictionary<string, object> functionArguments)
+        private async Task<OpenAI.ObjectModels.ResponseModels.ChatCompletionCreateResponse?> HandleFunctionExecution(FunctionCall fn)
         {
-            // switch case on name
-            switch (name)
+            if (fn == null || fn.Name == null)
             {
-                case "check_and_answer":
-                    if (functionArguments.TryGetValue("valutazione", out var valutazione))
-                    {
-                        return valutazione;
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Argument 'valutazione' is missing or not a boolean.");
-                    }
+                return null;
+            }
+            Console.WriteLine($"Function call:  {fn.Name}");
+            foreach (var entry in fn.ParseArguments())
+            {
+                Console.WriteLine($"  {entry.Key}: {entry.Value}");
+            }
 
-                default:
-                    throw new ArgumentException($"Function '{name}' not recognized.");
+            var functionArguments = fn.ParseArguments();
+            var functionResult = ExecuteFunction(fn.Name, functionArguments);
+
+            // add the result to the chat
+            _chat.Messages.Add(new ChatMessage(Actor.Function, functionResult?.ToString() ?? string.Empty, fn.Name));
+
+            // send new completion request and return the result
+            var result = await _openAiService.ChatCompletion.CreateCompletion(_chat);
+            if (result.Successful)
+            {
+                // concole log full response
+                Console.WriteLine($"Response:       {JsonConvert.SerializeObject(result)}");
+                return result;
+            }
+
+            return null;
+        }
+
+        // TODO: this code is basically hardcoded, function usage should be defined by the user
+        private object ExecuteFunction(string name, Dictionary<string, object> functionArguments)
+        {
+            if (_functions.TryGetValue(name, out var function))
+            {
+                return function(functionArguments);
+            }
+            else
+            {
+                throw new ArgumentException($"Function '{name}' not recognized.");
             }
         }
 

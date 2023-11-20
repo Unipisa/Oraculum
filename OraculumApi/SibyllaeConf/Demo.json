@@ -5,7 +5,7 @@
   "FactFilter": null,
   "TagFilter": null,
   "FactMemoryTTL": 4,
-  "Model": "gpt-3.5-turbo",
+  "Model": "gpt-3.5-turbo-1106",
   "MaxTokens": 1024,
   "TopP": 1,
   "Temperature": 0.1,
@@ -15,17 +15,13 @@
   "Functions": [
     {
       "name": "check_and_answer",
-      "description": "Valuta se la domanda è inerente al contesto di Scienze delle costruzioni e rispondi di conseguenza",
+      "description": "Valuta se la domanda è inerente al contesto del sistema UWeb Missioni e valuta con true o false",
       "parameters": {
         "type": "object",
         "properties": {
           "valutazione": {
             "type": "boolean",
-            "description": "True se la domanda è inerente al contesto di Scienze delle costruzioni, False altrimenti"
-          },
-          "risposta": {
-            "type": "string",
-            "description": "Risposta alla domanda"
+            "description": "True se la domanda è inerente al contesto del sistema UWeb Missioni, False altrimenti"
           }
         },
         "required": ["valutazione"]

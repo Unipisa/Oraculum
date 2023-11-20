@@ -13,8 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SibyllaSandbox", "SibyllaSa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OraculumInteractive", "OraculumInteractive\OraculumInteractive.csproj", "{A58821AF-F27F-4E05-B364-1499988A5EFB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OraculumApi", "OraculumApi\OraculumApi.csproj", "{61242EA0-EC14-4DD8-8228-F336676A0853}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OraculumApi", "OraculumApi\OraculumApi.csproj", "{E23516A2-65F7-46E3-B0EF-C3029AD46309}"
 EndProject
 Global
