@@ -159,6 +159,18 @@ namespace Oraculum
 
             await foreach (var fragment in _openAiService.ChatCompletion.CreateCompletionAsStream(_chat, cancellationToken: cancellationToken))
             {
+                if (fragment.Successful && fragment.Choices.First().Message.FunctionCall != null)
+                {
+                    var fn = fragment.Choices.First().Message.FunctionCall;
+                    if (fn != null)
+                    {
+                        await foreach ( var result in HandleFunctionExecution(fn)){
+                            var txt = result.Choices.First().Message.Content;
+                            m.Append(txt);
+                            yield return txt;
+                        }
+                    }
+                }
                 if (fragment.Successful && fragment.Choices.Count > 0)
                 {
                     var txt = fragment.Choices.First().Message.Content;
@@ -198,12 +210,20 @@ namespace Oraculum
                 var choice = result.Choices.First();
                 Console.WriteLine($"Message:        {choice.Message.Content}");
                 var fn = choice.Message.FunctionCall;
+                var msg = result.Choices.First().Message.Content;
                 if (fn != null)
                 {
-                    result = await HandleFunctionExecution(fn);
+                    var m = new StringBuilder();
+                    await foreach (var functionExecResult in HandleFunctionExecution(fn))
+                    {
+                        var txt = functionExecResult?.Choices?.First()?.Message?.Content;
+                        if (txt != null)
+                        {
+                            m.Append(txt);
+                        }
+                    }
+                    msg = m.ToString();
                 }
-                // end fn
-                var msg = result.Choices.First().Message.Content;
                 _logger.Log(LogLevel.Trace, $"Sibylla: message '{message}' with answer '{msg}'");
                 var actor = Actor.Assistant;
                 if (_conf.OutOfScopePrefix != null && msg.StartsWith(_conf.OutOfScopePrefix))
@@ -223,11 +243,11 @@ namespace Oraculum
             return null;
         }
 
-        private async Task<OpenAI.ObjectModels.ResponseModels.ChatCompletionCreateResponse?> HandleFunctionExecution(FunctionCall fn)
+        private async IAsyncEnumerable<OpenAI.ObjectModels.ResponseModels.ChatCompletionCreateResponse?> HandleFunctionExecution(FunctionCall fn)
         {
             if (fn == null || fn.Name == null)
             {
-                return null;
+                yield break;
             }
             Console.WriteLine($"Function call:  {fn.Name}");
             foreach (var entry in fn.ParseArguments())
@@ -241,19 +261,12 @@ namespace Oraculum
             // add the result to the chat
             _chat.Messages.Add(new ChatMessage(Actor.Function, functionResult?.ToString() ?? string.Empty, fn.Name));
 
-            // send new completion request and return the result
-            var result = await _openAiService.ChatCompletion.CreateCompletion(_chat);
-            if (result.Successful)
+            // send new completion request and yield the result
+            await foreach (var result in _openAiService.ChatCompletion.CreateCompletionAsStream(_chat))
             {
-                // concole log full response
-                Console.WriteLine($"Response:       {JsonConvert.SerializeObject(result)}");
-                return result;
+                yield return result;
             }
-
-            return null;
         }
-
-        // TODO: this code is basically hardcoded, function usage should be defined by the user
         private object ExecuteFunction(string name, Dictionary<string, object> functionArguments)
         {
             if (_functions.TryGetValue(name, out var function))
