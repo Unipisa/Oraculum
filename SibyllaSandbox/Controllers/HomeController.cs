@@ -58,7 +58,21 @@ namespace SibyllaSandbox.Controllers
                 await HttpContext.Session.CommitAsync();
             }
             var sibylla = _sibyllaManager.GetSibylla(sibyllaName, Guid.Parse(sibyllaKey));
+            sibylla.RegisterFunction("check_and_answer", CheckAndAnswerFunction, false);
             return sibylla;
+        }
+
+        private object CheckAndAnswerFunction(Dictionary<string, object> args)
+        {
+            // Implementation of your function
+            if (args.TryGetValue("valutazione", out var valutazione))
+            {
+                return valutazione;
+            }
+            else
+            {
+                throw new ArgumentException("Argument 'valutazione' is missing or not a boolean.");
+            }
         }
 
         [HttpPost]

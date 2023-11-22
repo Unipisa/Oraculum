@@ -156,24 +156,28 @@ namespace Oraculum
             await PrepreAnswer(message, filter);
 
             var m = new StringBuilder();
+            var fn = new FunctionCall();
 
             await foreach (var fragment in _openAiService.ChatCompletion.CreateCompletionAsStream(_chat, cancellationToken: cancellationToken))
             {
                 if (fragment.Successful && fragment.Choices.First().Message.FunctionCall != null)
                 {
-                    var fn = fragment.Choices.First().Message.FunctionCall;
+                    fn = fragment.Choices.First().Message.FunctionCall;
                     if (fn != null)
-                    {
-                        await foreach ( var result in HandleFunctionExecution(fn)){
-                            var txt = result.Choices.First().Message.Content;
-                            m.Append(txt);
-                            yield return txt;
-                        }
-                    }
+                        break;
                 }
                 if (fragment.Successful && fragment.Choices.Count > 0)
                 {
                     var txt = fragment.Choices.First().Message.Content;
+                    m.Append(txt);
+                    yield return txt;
+                }
+            }
+            if (fn != null)
+            {
+                await foreach (var result in HandleFunctionExecution(fn))
+                {
+                    var txt = result.Choices.First().Message.Content;
                     m.Append(txt);
                     yield return txt;
                 }
