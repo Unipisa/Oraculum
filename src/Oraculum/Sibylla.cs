@@ -56,6 +56,8 @@ namespace Oraculum
         public int MemorySpan { get; set; } = 4;
         public string? OutOfScopePrefix = "*&oo&* ";
         public IList<FunctionDefinition>? Functions { get; set; } = null;
+        //force the use of a function call
+        public string? FunctionCall { get; set; } = null;
     }
 
     internal class Actor
@@ -154,6 +156,9 @@ namespace Oraculum
         public async IAsyncEnumerable<string> AnswerAsync(string message, KnowledgeFilter? filter = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             await PrepreAnswer(message, filter);
+            // force model to use specific function at answer time
+            if (_conf.FunctionCall != null)
+                _chat.FunctionCall = new Dictionary<string, string> { { "name", _conf.FunctionCall } };
 
             var m = new StringBuilder();
             var fn = new FunctionCall();
@@ -193,7 +198,7 @@ namespace Oraculum
                 if (_conf.OutOfScopePrefix != null && msg.StartsWith(_conf.OutOfScopePrefix))
                 {
                     actor = Actor.AssistantOT;
-                    _memory.MarkLastHistoryMessageAsOT();
+                    MarkLastHistoryMessageAsOT();
                     msg = msg.Replace(_conf.OutOfScopePrefix, "");
                 }
                 _memory.History.Add(new ChatMessage(actor, msg));
@@ -207,6 +212,9 @@ namespace Oraculum
         public async Task<string?> Answer(string message, KnowledgeFilter? filter = null)
         {
             await PrepreAnswer(message, filter);
+            // force model to use specific function at answer time
+            if (_conf.FunctionCall != null)
+                _chat.FunctionCall = new Dictionary<string, string> { { "name", _conf.FunctionCall } };
 
             var result = await _openAiService.ChatCompletion.CreateCompletion(_chat);
             if (result.Successful)
@@ -236,7 +244,7 @@ namespace Oraculum
                 if (_conf.OutOfScopePrefix != null && msg.StartsWith(_conf.OutOfScopePrefix))
                 {
                     actor = Actor.AssistantOT;
-                    _memory.MarkLastHistoryMessageAsOT();
+                    MarkLastHistoryMessageAsOT();
                     msg.Replace(_conf.OutOfScopePrefix, "");
                 }
 
@@ -264,9 +272,14 @@ namespace Oraculum
 
             var functionArguments = fn.ParseArguments();
             var functionResult = ExecuteFunction(fn.Name, functionArguments);
+            // log function result
+            Console.WriteLine($"Function result: {functionResult}");
 
             // add the result to the chat
             _chat.Messages.Add(new ChatMessage(Actor.Function, functionResult?.ToString() ?? string.Empty, fn.Name));
+            // reverts to default function call
+            if (_conf.FunctionCall != null)
+                _chat.FunctionCall = "auto";
 
             // send new completion request and yield the result
             await foreach (var result in _openAiService.ChatCompletion.CreateCompletionAsStream(_chat))
@@ -303,6 +316,11 @@ namespace Oraculum
                 _chat.Messages.Add(m);
             _chat.Messages.Add(new ChatMessage(Actor.User, message));
             _memory.History.Add(new ChatMessage(Actor.User, message));
+        }
+
+        public void MarkLastHistoryMessageAsOT()
+        {
+            _memory.MarkLastHistoryMessageAsOT();
         }
     }
 }

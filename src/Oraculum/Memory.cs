@@ -24,7 +24,7 @@ namespace Oraculum
 
         internal Oraculum Oraculum => _oraculum;
 
-        internal Memory(Oraculum oraculum, int ttl=5, int memorySpan = 4, ILogger? logger = null)
+        internal Memory(Oraculum oraculum, int ttl = 5, int memorySpan = 4, ILogger? logger = null)
         {
             _logger = logger ?? NullLogger.Instance;
             _memory = new Dictionary<Guid, (Fact, int, DateTime)>();

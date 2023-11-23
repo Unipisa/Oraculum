@@ -8,6 +8,7 @@ using System.Text;
 using static OpenAI.ObjectModels.SharedModels.IOpenAiModels;
 using Lib.AspNetCore.ServerSentEvents;
 using Microsoft.Extensions.Options;
+using System.Dynamic;
 
 namespace SibyllaSandbox.Controllers
 {
@@ -64,16 +65,31 @@ namespace SibyllaSandbox.Controllers
 
         private object CheckAndAnswerFunction(Dictionary<string, object> args)
         {
-            // Implementation of your function
+            var sibylla = ConnectSibylla().Result;
+
+            // Check if 'valutazione' exists in the dictionary.
             if (args.TryGetValue("valutazione", out var valutazione))
             {
-                return valutazione;
+                // Safely perform the null check before calling ToString().
+                string? valutazioneString = valutazione?.ToString();
+
+                // Check if 'valutazioneString' is not null and equals "False".
+                if (valutazioneString != null && valutazioneString.Equals("False", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Execute the desired function or logic when valutazione is "False".
+                    sibylla.MarkLastHistoryMessageAsOT();
+                    Console.WriteLine("valutazione is False");
+                }
+
+                // Return the value of 'valutazione' regardless of the check.
+                return valutazione!;
             }
             else
             {
-                throw new ArgumentException("Argument 'valutazione' is missing or not a boolean.");
+                throw new ArgumentException("Argument 'valutazione' is missing.");
             }
         }
+
 
         [HttpPost]
         public async Task<string> Answer(string question)
