@@ -177,9 +177,12 @@ namespace Oraculum
             {
                 await foreach (var result in HandleFunctionExecution(fn))
                 {
-                    var txt = result.Choices.First().Message.Content;
-                    m.Append(txt);
-                    yield return txt;
+                    if (result != null && result.Choices.Count > 0)
+                    {
+                        var txt = result.Choices.First().Message.Content;
+                        m.Append(txt);
+                        yield return txt;
+                    }
                 }
             }
             _logger.Log(LogLevel.Trace, $"Sibylla: message '{message}' with answer '{m}'");
