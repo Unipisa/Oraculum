@@ -6,13 +6,14 @@
   "TagFilter": null,
   "OutOfScopePrefix": "*&oo&* ",
   "FactMemoryTTL": 4,
-  "Model": "gpt-3.5-turbo-1106",
+  "Model": "gpt-3.5-turbo-16k",
   "MaxTokens": 1024,
   "TopP": 1,
   "Temperature": 0.1,
   "PresencePenalty": 0,
   "FrequencyPenalty": 0,
   "Limit": 5,
+  "FunctionCall": "check_and_answer",
   "Functions": [
     {
       "name": "check_and_answer",
