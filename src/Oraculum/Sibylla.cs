@@ -277,7 +277,7 @@ namespace Oraculum
                 yield return result;
             }
         }
-        private object ExecuteFunction(string name, Dictionary<string, object> functionArguments)
+        private object? ExecuteFunction(string name, Dictionary<string, object> functionArguments)
         {
             if (_functions.TryGetValue(name, out var function))
             {
@@ -285,7 +285,8 @@ namespace Oraculum
             }
             else
             {
-                throw new ArgumentException($"Function '{name}' not recognized.");
+                _logger.Log(LogLevel.Error, $"Function '{name}' not found.");
+                return null;
             }
         }
 
