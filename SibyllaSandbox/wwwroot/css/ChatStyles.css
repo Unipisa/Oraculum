@@ -39,7 +39,6 @@ img {
 }
 
 .container1 {
-    /* min-width: 270px; */
     height: auto; 
     float: left;
     margin: 0;
@@ -94,12 +93,8 @@ img {
     }
 /* Styling the input field */
     .input-group {
-        /* float: right; */
-        /* margin-top: 13px; */
         margin-right: 20px;
         outline: none !important;
-        /* border-radius: 20px; */
-        /* width: 61% !important; */
         background-color: #fff;
         position: relative;
         display: flex;
