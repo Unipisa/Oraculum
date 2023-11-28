@@ -220,10 +220,7 @@ namespace Oraculum
             if (result.Successful)
             {
                 // fn
-                // log full response
-                Console.WriteLine($"Response:       {JsonConvert.SerializeObject(result)}");
                 var choice = result.Choices.First();
-                Console.WriteLine($"Message:        {choice.Message.Content}");
                 var fn = choice.Message.FunctionCall;
                 var msg = result.Choices.First().Message.Content;
                 if (fn != null)
@@ -264,16 +261,9 @@ namespace Oraculum
             {
                 yield break;
             }
-            Console.WriteLine($"Function call:  {fn.Name}");
-            foreach (var entry in fn.ParseArguments())
-            {
-                Console.WriteLine($"  {entry.Key}: {entry.Value}");
-            }
 
             var functionArguments = fn.ParseArguments();
             var functionResult = ExecuteFunction(fn.Name, functionArguments);
-            // log function result
-            Console.WriteLine($"Function result: {functionResult}");
 
             // add the result to the chat
             _chat.Messages.Add(new ChatMessage(Actor.Function, functionResult?.ToString() ?? string.Empty, fn.Name));
