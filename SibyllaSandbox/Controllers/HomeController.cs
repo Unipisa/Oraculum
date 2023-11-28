@@ -78,7 +78,6 @@ namespace SibyllaSandbox.Controllers
                 {
                     // Execute the desired function or logic when valutazione is "False".
                     sibylla.MarkLastHistoryMessageAsOT();
-                    Console.WriteLine("valutazione is False");
                 }
 
                 // Return the value of 'valutazione' regardless of the check.
