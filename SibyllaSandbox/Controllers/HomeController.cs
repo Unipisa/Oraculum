@@ -49,7 +49,7 @@ namespace SibyllaSandbox.Controllers
         private async Task<Sibylla> ConnectSibylla()
         {
             var sibyllaKey = HttpContext.Session.GetString(SibyllaRef);
-            var sibyllaName = _configuration["SibyllaConf"] ?? "Demo";
+            var sibyllaName = _configuration["SibyllaConf"] ?? DemoConf;
             if (sibyllaKey == null)
             {
                 // It would be nice to align the expiration of the Sibylla with the expiration of the session.
