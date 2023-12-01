@@ -59,34 +59,18 @@ namespace SibyllaSandbox.Controllers
                 await HttpContext.Session.CommitAsync();
             }
             var sibylla = _sibyllaManager.GetSibylla(sibyllaName, Guid.Parse(sibyllaKey));
-            sibylla.RegisterFunction("check_and_answer", CheckAndAnswerFunction, false);
+            sibylla.RegisterFunction("GetDestinationOfMission", GetDestinationOfMission);
             return sibylla;
         }
 
-        private object CheckAndAnswerFunction(Dictionary<string, object> args)
+        // Example of a custom function to register in Sibylla
+        private object GetDestinationOfMission(Dictionary<string, object> args)
         {
-            var sibylla = ConnectSibylla().Result;
-
-            // Check if 'valutazione' exists in the dictionary.
-            if (args.TryGetValue("valutazione", out var valutazione))
-            {
-                // Safely perform the null check before calling ToString().
-                string? valutazioneString = valutazione?.ToString();
-
-                // Check if 'valutazioneString' is not null and equals "False".
-                if (valutazioneString != null && valutazioneString.Equals("False", StringComparison.OrdinalIgnoreCase))
-                {
-                    // Execute the desired function or logic when valutazione is "False".
-                    sibylla.MarkLastHistoryMessageAsOT();
-                }
-
-                // Return the value of 'valutazione' regardless of the check.
-                return valutazione!;
-            }
-            else
-            {
-                throw new ArgumentException("Argument 'valutazione' is missing.");
-            }
+            // retuns a random destination for the mission of today based on the current date
+            var date = DateTime.Now;
+            var destinations = new List<string>() { "Moon", "Mars", "Jupiter", "Saturn", "Pluto" };
+            var destination = destinations[date.Day % destinations.Count];
+            return destination;
         }
 
 

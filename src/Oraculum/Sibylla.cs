@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json;
 using System.Reflection.Metadata;
+using System.Reflection;
 
 namespace Oraculum
 {
@@ -56,8 +57,7 @@ namespace Oraculum
         public int MemorySpan { get; set; } = 4;
         public string? OutOfScopePrefix = "*&oo&* ";
         public IList<FunctionDefinition>? Functions { get; set; } = null;
-        //force the use of a function call
-        public string? FunctionCall { get; set; } = null;
+        public IList<FunctionDefinition>? FunctionsBeforeHook { get; set; } = null;
     }
 
     internal class Actor
@@ -87,6 +87,7 @@ namespace Oraculum
         private ILogger _logger;
         public delegate object FunctionDelegate(Dictionary<string, object> args);
         private Dictionary<string, FunctionDelegate> _functions = new Dictionary<string, FunctionDelegate>();
+        private Dictionary<string, FunctionDelegate> _functionsBeforeHook = new Dictionary<string, FunctionDelegate>();
 
         public Sibylla(Configuration conf, SibyllaConf sybillaConf, ILogger? logger = null)
         {
@@ -113,22 +114,53 @@ namespace Oraculum
             {
                 new ChatMessage(Actor.Assistant, sybillaConf.BaseAssistantPrompt!)
             });
+            // Automatically register functions from the Functions namespace
+            RegisterFunctionsFromAssembly();
         }
 
-        public void RegisterFunction(string name, FunctionDelegate function, bool updateIfExists = true)
+        private void RegisterFunctionsFromAssembly()
         {
-            if (_functions.ContainsKey(name))
+            var functionType = typeof(IFunction);
+            var types = Assembly.GetExecutingAssembly().GetTypes()
+                        .Where(p => functionType.IsAssignableFrom(p) && !p.IsInterface);
+
+            foreach (var type in types)
+            {
+                if (Activator.CreateInstance(type, this) is IFunction functionInstance)
+                {
+                    //check if the function is a before hook by verifying if it is in the before hook list
+                    var isBeforeHook = _conf.FunctionsBeforeHook?.Any(f => f.Name == type.Name);
+                    RegisterFunction(type.Name, functionInstance.Execute, false, isBeforeHook ?? false);
+                    // writeline to log
+                    Console.WriteLine($"Function '{type.Name}' added.");
+                }
+            }
+        }
+
+        public void RegisterFunction(string name, FunctionDelegate function, bool updateIfExists = true, bool beforeHook = false)
+        {
+            if (_functions.ContainsKey(name) || _functionsBeforeHook.ContainsKey(name))
             {
                 if (updateIfExists)
                 {
-                    _functions[name] = function;
-                    _logger.LogInformation($"Function '{name}' updated.");
+                    if (beforeHook)
+                        _functionsBeforeHook[name] = function;
+                    else
+                        _functions[name] = function;
                 }
             }
             else
             {
-                _functions.Add(name, function);
-                _logger.LogInformation($"Function '{name}' added.");
+                if (beforeHook)
+                {
+                    _functionsBeforeHook[name] = function;
+                    _logger.LogInformation($"Function '{name}' added to before hook.");
+                }
+                else
+                {
+                    _functions[name] = function;
+                    _logger.LogInformation($"Function '{name}' added.");
+                }
             }
         }
 
@@ -140,6 +172,12 @@ namespace Oraculum
                 _functions.Remove(name);
                 _logger.LogInformation($"Function '{name}' removed.");
             }
+            if (_functionsBeforeHook.ContainsKey(name))
+            {
+                _functionsBeforeHook.Remove(name);
+                _logger.LogInformation($"Function '{name}' removed from before hook.");
+            }
+            else _logger.LogInformation($"Function '{name}' not found.");
         }
 
         public SibyllaConf Configuration { get { return _conf; } }
@@ -156,9 +194,8 @@ namespace Oraculum
         public async IAsyncEnumerable<string> AnswerAsync(string message, KnowledgeFilter? filter = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             await PrepreAnswer(message, filter);
-            // force model to use specific function at answer time
-            if (_conf.FunctionCall != null)
-                _chat.FunctionCall = new Dictionary<string, string> { { "name", _conf.FunctionCall } };
+            await PreFunctionHook(message, filter, cancellationToken);
+
 
             var m = new StringBuilder();
             var fn = new FunctionCall();
@@ -209,12 +246,47 @@ namespace Oraculum
             }
         }
 
+        private async Task PreFunctionHook(string message, KnowledgeFilter? filter, CancellationToken cancellationToken)
+        {
+            //for each function in the before hook _functionsBeforeHook
+            if (_functionsBeforeHook != null)
+            {
+                _chat.Functions = _conf.FunctionsBeforeHook;
+                foreach (var function in _functionsBeforeHook)
+                {
+                    var fn = new FunctionCall();
+                    _chat.FunctionCall = new Dictionary<string, string> { { "name", function.Key } };
+                    await foreach (var fragment in _openAiService.ChatCompletion.CreateCompletionAsStream(_chat, cancellationToken: cancellationToken))
+                    {
+                        if (fragment.Successful && fragment.Choices.First().Message.FunctionCall != null)
+                        {
+                            fn = fragment.Choices.First().Message.FunctionCall;
+                            if (fn != null)
+                                break;
+                        }
+                    }
+                    if (fn != null)
+                    {
+                        await foreach (var result in HandleFunctionExecution(fn, true))
+                        {
+                            if (result != null && result.Choices.Count > 0)
+                            {
+                                var txt = result.Choices.First().Message.Content;
+                            }
+                        }
+                    }
+                }
+                _chat.Functions = _conf.Functions;
+                // if functions empty, reset to null functionCall
+                if (_chat.Functions == null)
+                    _chat.FunctionCall = null;
+            }
+        }
+
         public async Task<string?> Answer(string message, KnowledgeFilter? filter = null)
         {
             await PrepreAnswer(message, filter);
-            // force model to use specific function at answer time
-            if (_conf.FunctionCall != null)
-                _chat.FunctionCall = new Dictionary<string, string> { { "name", _conf.FunctionCall } };
+            await PreFunctionHook(message, filter, default);
 
             var result = await _openAiService.ChatCompletion.CreateCompletion(_chat);
             if (result.Successful)
@@ -255,7 +327,7 @@ namespace Oraculum
             return null;
         }
 
-        private async IAsyncEnumerable<OpenAI.ObjectModels.ResponseModels.ChatCompletionCreateResponse?> HandleFunctionExecution(FunctionCall fn)
+        private async IAsyncEnumerable<OpenAI.ObjectModels.ResponseModels.ChatCompletionCreateResponse?> HandleFunctionExecution(FunctionCall fn, bool isBeforeHook = false, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             if (fn == null || fn.Name == null)
             {
@@ -267,21 +339,26 @@ namespace Oraculum
 
             // add the result to the chat
             _chat.Messages.Add(new ChatMessage(Actor.Function, functionResult?.ToString() ?? string.Empty, fn.Name));
-            // reverts to default function call
-            if (_conf.FunctionCall != null)
-                _chat.FunctionCall = "auto";
+            _chat.FunctionCall = "auto";
 
             // send new completion request and yield the result
-            await foreach (var result in _openAiService.ChatCompletion.CreateCompletionAsStream(_chat))
-            {
-                yield return result;
-            }
+            if (!isBeforeHook)
+                await foreach (var result in _openAiService.ChatCompletion.CreateCompletionAsStream(_chat))
+                {
+                    yield return result;
+                }
+            else
+                yield break;
         }
         private object? ExecuteFunction(string name, Dictionary<string, object> functionArguments)
         {
             if (_functions.TryGetValue(name, out var function))
             {
                 return function(functionArguments);
+            }
+            else if (_functionsBeforeHook.TryGetValue(name, out var functionBeforeHook))
+            {
+                return functionBeforeHook(functionArguments);
             }
             else
             {

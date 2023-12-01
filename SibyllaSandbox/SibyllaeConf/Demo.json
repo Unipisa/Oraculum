@@ -6,17 +6,16 @@
   "TagFilter": null,
   "OutOfScopePrefix": "*&oo&* ",
   "FactMemoryTTL": 4,
-  "Model": "gpt-3.5-turbo-16k",
+  "Model": "gpt-3.5-turbo-1106",
   "MaxTokens": 1024,
   "TopP": 1,
   "Temperature": 0.1,
   "PresencePenalty": 0,
   "FrequencyPenalty": 0,
   "Limit": 5,
-  "FunctionCall": "check_and_answer",
-  "Functions": [
+  "FunctionsBeforeHook": [
     {
-      "name": "check_and_answer",
+      "name": "CheckAndAnswer",
       "description": "Valuta se la domanda è inerente al contesto di U-web missioni e rispondi di conseguenza",
       "parameters": {
         "type": "object",
@@ -27,6 +26,22 @@
           }
         },
         "required": ["valutazione"]
+      }
+    }
+  ],
+  "Functions": [
+    {
+      "name": "GetDestinationOfMission",
+      "description": "Gets the destinations of the mission",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": "string",
+            "description": "The destination of the mission"
+          }
+        },
+        "required": ["destination"]
       }
     }
   ]
