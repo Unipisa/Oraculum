@@ -130,38 +130,26 @@ namespace Oraculum
                 {
                     //check if the function is a before hook by verifying if it is in the before hook list
                     var isBeforeHook = _conf.FunctionsBeforeAnswerHook?.Any(f => f.Name == type.Name);
-                    RegisterFunction(type.Name, functionInstance.Execute, false, isBeforeHook ?? false);
+                    RegisterFunction(type.Name, functionInstance.Execute, isBeforeHook ?? false);
                     // writeline to log
                     Console.WriteLine($"Function '{type.Name}' added.");
                 }
             }
         }
 
-        public void RegisterFunction(string name, FunctionDelegate function, bool updateIfExists = true, bool beforeHook = false)
+        public void RegisterFunction(string name, FunctionDelegate function, bool beforeHook = false)
         {
-            if (_functions.ContainsKey(name) || _functionsBeforeAnswerHook.ContainsKey(name))
+            if (beforeHook)
             {
-                if (updateIfExists)
-                {
-                    if (beforeHook)
-                        _functionsBeforeAnswerHook[name] = function;
-                    else
-                        _functions[name] = function;
-                }
+                _functionsBeforeAnswerHook[name] = function;
+                _logger.LogInformation($"Function '{name}' added to before hook.");
             }
             else
             {
-                if (beforeHook)
-                {
-                    _functionsBeforeAnswerHook[name] = function;
-                    _logger.LogInformation($"Function '{name}' added to before hook.");
-                }
-                else
-                {
-                    _functions[name] = function;
-                    _logger.LogInformation($"Function '{name}' added.");
-                }
+                _functions[name] = function;
+                _logger.LogInformation($"Function '{name}' added.");
             }
+
         }
 
         // Method to unregister a function
