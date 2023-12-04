@@ -59,18 +59,7 @@ namespace SibyllaSandbox.Controllers
                 await HttpContext.Session.CommitAsync();
             }
             var sibylla = _sibyllaManager.GetSibylla(sibyllaName, Guid.Parse(sibyllaKey));
-            sibylla.RegisterFunction("GetDestinationOfMission", GetDestinationOfMission);
             return sibylla;
-        }
-
-        // Example of a custom function to register in Sibylla
-        private object GetDestinationOfMission(Dictionary<string, object> args)
-        {
-            // retuns a random destination for the mission of today based on the current date
-            var date = DateTime.Now;
-            var destinations = new List<string>() { "Moon", "Mars", "Jupiter", "Saturn", "Pluto" };
-            var destination = destinations[date.Day % destinations.Count];
-            return destination;
         }
 
 

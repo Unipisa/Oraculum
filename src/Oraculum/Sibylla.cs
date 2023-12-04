@@ -80,12 +80,13 @@ namespace Oraculum
 
     public class Sibylla
     {
+        public delegate object FunctionDelegate(Dictionary<string, object> args);
+
         private OpenAIService _openAiService;
         private ChatCompletionCreateRequest _chat;
         private Memory _memory;
         private SibyllaConf _conf;
         private ILogger _logger;
-        public delegate object FunctionDelegate(Dictionary<string, object> args);
         private Dictionary<string, FunctionDelegate> _functions = new Dictionary<string, FunctionDelegate>();
         private Dictionary<string, FunctionDelegate> _functionsBeforeAnswerHook = new Dictionary<string, FunctionDelegate>();
 
@@ -121,18 +122,41 @@ namespace Oraculum
         private void RegisterFunctionsFromAssembly()
         {
             var functionType = typeof(IFunction);
-            var types = Assembly.GetExecutingAssembly().GetTypes()
-                        .Where(p => functionType.IsAssignableFrom(p) && !p.IsInterface);
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
+            var types = new List<Type>();
+
+            // Fetching types from all assemblies
+            foreach (var assembly in assemblies)
+            {
+                try
+                {
+                    types.AddRange(assembly.GetTypes().Where(t => functionType.IsAssignableFrom(t) && !t.IsInterface));
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    // Log the exceptions thrown during type loading
+                    foreach (var loaderException in ex.LoaderExceptions)
+                    {
+                        Console.WriteLine($"Error loading types from assembly '{assembly.FullName}': {loaderException?.Message}");
+                    }
+                }
+            }
 
             foreach (var type in types)
             {
-                if (Activator.CreateInstance(type, this) is IFunction functionInstance)
+                try
                 {
-                    //check if the function is a before hook by verifying if it is in the before hook list
-                    var isBeforeHook = _conf.FunctionsBeforeAnswerHook?.Any(f => f.Name == type.Name);
-                    RegisterFunction(type.Name, functionInstance.Execute, isBeforeHook ?? false);
-                    // writeline to log
-                    Console.WriteLine($"Function '{type.Name}' added.");
+                    if (Activator.CreateInstance(type, this) is IFunction functionInstance)
+                    {
+                        var isBeforeAnswerHook = _conf.FunctionsBeforeAnswerHook?.Any(f => f.Name == type.Name) ?? false;
+                        var isAnswerHook = _conf.Functions?.Any(f => f.Name == type.Name) ?? false;
+                        if (isBeforeAnswerHook || isAnswerHook)
+                            RegisterFunction(type.Name, functionInstance.Execute, isBeforeAnswerHook);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error creating instance of '{type.Name}': {ex.Message}");
                 }
             }
         }
@@ -143,11 +167,13 @@ namespace Oraculum
             {
                 _functionsBeforeAnswerHook[name] = function;
                 _logger.LogInformation($"Function '{name}' added to before hook.");
+                Console.WriteLine($"Function '{name}' added.");
             }
             else
             {
                 _functions[name] = function;
                 _logger.LogInformation($"Function '{name}' added.");
+                Console.WriteLine($"Function '{name}' added.");
             }
 
         }
@@ -255,13 +281,7 @@ namespace Oraculum
                     }
                     if (fn != null)
                     {
-                        await foreach (var result in HandleFunctionExecution(fn, true))
-                        {
-                            if (result != null && result.Choices.Count > 0)
-                            {
-                                var txt = result.Choices.First().Message.Content;
-                            }
-                        }
+                        await foreach (var result in HandleFunctionExecution(fn, true, cancellationToken)) ;
                     }
                 }
                 _chat.Functions = _conf.Functions;
@@ -315,7 +335,7 @@ namespace Oraculum
             return null;
         }
 
-        private async IAsyncEnumerable<OpenAI.ObjectModels.ResponseModels.ChatCompletionCreateResponse?> HandleFunctionExecution(FunctionCall fn, bool isBeforeHook = false, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        private async IAsyncEnumerable<OpenAI.ObjectModels.ResponseModels.ChatCompletionCreateResponse?> HandleFunctionExecution(FunctionCall fn, bool isBeforeAnswerHook = false, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             if (fn == null || fn.Name == null)
             {
@@ -323,14 +343,14 @@ namespace Oraculum
             }
 
             var functionArguments = fn.ParseArguments();
-            var functionResult = ExecuteFunction(fn.Name, functionArguments);
+            var functionResult = ExecuteFunction(fn.Name, functionArguments, isBeforeAnswerHook);
 
             // add the result to the chat
             _chat.Messages.Add(new ChatMessage(Actor.Function, functionResult?.ToString() ?? string.Empty, fn.Name));
             _chat.FunctionCall = "auto";
 
             // send new completion request and yield the result
-            if (!isBeforeHook)
+            if (!isBeforeAnswerHook)
                 await foreach (var result in _openAiService.ChatCompletion.CreateCompletionAsStream(_chat))
                 {
                     yield return result;
@@ -338,13 +358,13 @@ namespace Oraculum
             else
                 yield break;
         }
-        private object? ExecuteFunction(string name, Dictionary<string, object> functionArguments)
+        private object? ExecuteFunction(string name, Dictionary<string, object> functionArguments, bool isBeforeAnswerHook)
         {
-            if (_functions.TryGetValue(name, out var function))
+            if (!isBeforeAnswerHook && _functions.TryGetValue(name, out var function))
             {
                 return function(functionArguments);
             }
-            else if (_functionsBeforeAnswerHook.TryGetValue(name, out var functionBeforeHook))
+            else if (isBeforeAnswerHook && _functionsBeforeAnswerHook.TryGetValue(name, out var functionBeforeHook))
             {
                 return functionBeforeHook(functionArguments);
             }
