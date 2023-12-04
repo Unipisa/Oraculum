@@ -57,7 +57,7 @@ namespace Oraculum
         public int MemorySpan { get; set; } = 4;
         public string? OutOfScopePrefix = "*&oo&* ";
         public IList<FunctionDefinition>? Functions { get; set; } = null;
-        public IList<FunctionDefinition>? FunctionsBeforeHook { get; set; } = null;
+        public IList<FunctionDefinition>? FunctionsBeforeAnswerHook { get; set; } = null;
     }
 
     internal class Actor
@@ -87,7 +87,7 @@ namespace Oraculum
         private ILogger _logger;
         public delegate object FunctionDelegate(Dictionary<string, object> args);
         private Dictionary<string, FunctionDelegate> _functions = new Dictionary<string, FunctionDelegate>();
-        private Dictionary<string, FunctionDelegate> _functionsBeforeHook = new Dictionary<string, FunctionDelegate>();
+        private Dictionary<string, FunctionDelegate> _functionsBeforeAnswerHook = new Dictionary<string, FunctionDelegate>();
 
         public Sibylla(Configuration conf, SibyllaConf sybillaConf, ILogger? logger = null)
         {
@@ -129,7 +129,7 @@ namespace Oraculum
                 if (Activator.CreateInstance(type, this) is IFunction functionInstance)
                 {
                     //check if the function is a before hook by verifying if it is in the before hook list
-                    var isBeforeHook = _conf.FunctionsBeforeHook?.Any(f => f.Name == type.Name);
+                    var isBeforeHook = _conf.FunctionsBeforeAnswerHook?.Any(f => f.Name == type.Name);
                     RegisterFunction(type.Name, functionInstance.Execute, false, isBeforeHook ?? false);
                     // writeline to log
                     Console.WriteLine($"Function '{type.Name}' added.");
@@ -139,12 +139,12 @@ namespace Oraculum
 
         public void RegisterFunction(string name, FunctionDelegate function, bool updateIfExists = true, bool beforeHook = false)
         {
-            if (_functions.ContainsKey(name) || _functionsBeforeHook.ContainsKey(name))
+            if (_functions.ContainsKey(name) || _functionsBeforeAnswerHook.ContainsKey(name))
             {
                 if (updateIfExists)
                 {
                     if (beforeHook)
-                        _functionsBeforeHook[name] = function;
+                        _functionsBeforeAnswerHook[name] = function;
                     else
                         _functions[name] = function;
                 }
@@ -153,7 +153,7 @@ namespace Oraculum
             {
                 if (beforeHook)
                 {
-                    _functionsBeforeHook[name] = function;
+                    _functionsBeforeAnswerHook[name] = function;
                     _logger.LogInformation($"Function '{name}' added to before hook.");
                 }
                 else
@@ -172,9 +172,9 @@ namespace Oraculum
                 _functions.Remove(name);
                 _logger.LogInformation($"Function '{name}' removed.");
             }
-            if (_functionsBeforeHook.ContainsKey(name))
+            if (_functionsBeforeAnswerHook.ContainsKey(name))
             {
-                _functionsBeforeHook.Remove(name);
+                _functionsBeforeAnswerHook.Remove(name);
                 _logger.LogInformation($"Function '{name}' removed from before hook.");
             }
             else _logger.LogInformation($"Function '{name}' not found.");
@@ -248,11 +248,11 @@ namespace Oraculum
 
         private async Task BeforeAnswerHook(string message, KnowledgeFilter? filter, CancellationToken cancellationToken)
         {
-            //for each function in the before hook _functionsBeforeHook
-            if (_functionsBeforeHook != null)
+            //for each function in the before hook _functionsBeforeAnswerHook
+            if (_functionsBeforeAnswerHook != null)
             {
-                _chat.Functions = _conf.FunctionsBeforeHook;
-                foreach (var function in _functionsBeforeHook)
+                _chat.Functions = _conf.FunctionsBeforeAnswerHook;
+                foreach (var function in _functionsBeforeAnswerHook)
                 {
                     var fn = new FunctionCall();
                     _chat.FunctionCall = new Dictionary<string, string> { { "name", function.Key } };
@@ -356,7 +356,7 @@ namespace Oraculum
             {
                 return function(functionArguments);
             }
-            else if (_functionsBeforeHook.TryGetValue(name, out var functionBeforeHook))
+            else if (_functionsBeforeAnswerHook.TryGetValue(name, out var functionBeforeHook))
             {
                 return functionBeforeHook(functionArguments);
             }
