@@ -194,7 +194,7 @@ namespace Oraculum
         public async IAsyncEnumerable<string> AnswerAsync(string message, KnowledgeFilter? filter = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             await PrepreAnswer(message, filter);
-            await PreFunctionHook(message, filter, cancellationToken);
+            await BeforeAnswerHook(message, filter, cancellationToken);
 
 
             var m = new StringBuilder();
@@ -246,7 +246,7 @@ namespace Oraculum
             }
         }
 
-        private async Task PreFunctionHook(string message, KnowledgeFilter? filter, CancellationToken cancellationToken)
+        private async Task BeforeAnswerHook(string message, KnowledgeFilter? filter, CancellationToken cancellationToken)
         {
             //for each function in the before hook _functionsBeforeHook
             if (_functionsBeforeHook != null)
@@ -286,7 +286,7 @@ namespace Oraculum
         public async Task<string?> Answer(string message, KnowledgeFilter? filter = null)
         {
             await PrepreAnswer(message, filter);
-            await PreFunctionHook(message, filter, default);
+            await BeforeAnswerHook(message, filter, default);
 
             var result = await _openAiService.ChatCompletion.CreateCompletion(_chat);
             if (result.Successful)

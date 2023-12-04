@@ -22,20 +22,20 @@ namespace Oraculum
         private object CheckAndAnswerFunction(Dictionary<string, object> args)
         {
             // Your existing logic here
-            if (args.TryGetValue("valutazione", out var valutazione))
+            if (args.TryGetValue("evaluation", out var evaluation))
             {
-                string? valutazioneString = valutazione?.ToString();
+                string? evaluationString = evaluation?.ToString();
 
-                if (valutazioneString != null && valutazioneString.Equals("False", StringComparison.OrdinalIgnoreCase))
+                if (evaluationString != null && evaluationString.Equals("False", StringComparison.OrdinalIgnoreCase))
                 {
                     sibylla.MarkLastHistoryMessageAsOT();
                 }
 
-                return valutazione!;
+                return evaluation!;
             }
             else
             {
-                throw new ArgumentException("Argument 'valutazione' is missing.");
+                throw new ArgumentException("Argument 'evaluation' is missing.");
             }
         }
     }

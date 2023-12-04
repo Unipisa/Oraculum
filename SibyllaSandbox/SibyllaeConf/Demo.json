@@ -13,19 +13,19 @@
   "PresencePenalty": 0,
   "FrequencyPenalty": 0,
   "Limit": 5,
-  "FunctionsBeforeHook": [
+  "BeforeAnswerHook": [
     {
       "name": "CheckAndAnswer",
       "description": "Valuta se la domanda è inerente al contesto di U-web missioni e rispondi di conseguenza",
       "parameters": {
         "type": "object",
         "properties": {
-          "valutazione": {
+          "evaluation": {
             "type": "boolean",
             "description": "True se la domanda è inerente al contesto di U-web missioni, False altrimenti"
           }
         },
-        "required": ["valutazione"]
+        "required": ["evaluation"]
       }
     }
   ],
