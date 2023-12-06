@@ -21,12 +21,12 @@
       "parameters": {
         "type": "object",
         "properties": {
-          "valutazione": {
+          "evaluation": {
             "type": "boolean",
             "description": "True se la domanda è inerente al contesto di U-web missioni, False altrimenti"
           }
         },
-        "required": ["valutazione"]
+        "required": ["evaluation"]
       }
     }
   ]
