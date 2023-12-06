@@ -1,42 +1,44 @@
 ﻿@model Oraculum.Sibylla
 
 @{
-    ViewData["Title"] = "Home Page";
+    var config = Model.Configuration;
     var messages = Model.History;
+    ViewData["Title"] = "Home Page";
+    ViewData["SibyllaName"] = config.Title;
 }
 
 <link rel="stylesheet" href="~/css/ChatStyles.css" />
 <!-- Import this CDN to use icons -->
-<link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css" />
 
 <script type="text/javascript">
     var evt = new EventSource("/MessagesStream");
     evt.addEventListener('message', (e) => {
-        @if (Model.Configuration.OutOfScopePrefix != null)
-        {
+    @if (Model.Configuration.OutOfScopePrefix != null)
+    {
         <text>
-        var txt = $("#" + e.lastEventId)[0].innerHTML;
-        var pfx = '@(Model.Configuration.OutOfScopePrefix!)';
-        if (txt.startsWith(pfx)) {
-            $("#" + e.lastEventId)[0].innerHTML = txt.substring(pfx.length);
-        }
+                    var txt = $("#" + e.lastEventId)[0].innerHTML;
+                    var pfx = '@(Model.Configuration.OutOfScopePrefix!)';
+                    if (txt.startsWith(pfx)) {
+                        $("#" + e.lastEventId)[0].innerHTML = txt.substring(pfx.length);
+                }
         </text>
-        }
-        $("#" + e.lastEventId).append(e.data.replaceAll('\n', '<br/>'));
+    }
+            $("#" + e.lastEventId).append(e.data.replaceAll('\n', '<br/>'));
         $("#chat").scrollTop($("#chat")[0].scrollHeight);
     });
 
     function answer() {
         var text = $("#userreq").val();
-        $("#chat").append('<div class="outgoing-chats"><div class= "outgoing-chats-img" ><img src="/img/User.png" /></div><div class= "outgoing-msg"><div class="outgoing-chats-msg"><p class="multi-msg">'+text+'</p></div></div></div>');
+        if (text == "") return;
+        $("#chat").append('<div class="outgoing-chats"><div class= "outgoing-chats-img" ><img src="/img/User.png" /></div><div class= "outgoing-msg"><div class="outgoing-chats-msg"><p class="multi-msg">' + text + '</p></div></div></div>');
         $("#chat").scrollTop($("#chat")[0].scrollHeight);
         $.ajax({
             type: "POST",
             url: "/Home/Answer",
             data: { "question": text },
             success: function (data) {
-                $("#chat").append('<div class="received-chats"><div class="received-chats-img"><img src="/img/Logo.png" /></div><div class= "received-msg" ><div class="received-msg-inbox" ><p><span id="'+data+'"/></p></div></div></div>');
+                $("#chat").append('<div class="received-chats"><div class="received-chats-img"><img src="/img/Logo.png" /></div><div class= "received-msg" ><div class="received-msg-inbox" ><p><span id="' + data + '"/></p></div></div></div>');
                 $("#userreq").val("");
                 $("#chat").scrollTop($("#chat")[0].scrollHeight);
             }
@@ -51,7 +53,7 @@
         <div class="container1">
             <img src="~/img/Logo.png" class="msgimg" />
             <div class="active">
-                <p>Assistente di supporto alla procedura missioni</p>
+                <p>@(config.Title ?? "Virtual Assistant")</p>
             </div>
         </div>
     </div>
@@ -68,36 +70,36 @@
                         {
                             if (m.Role == "assistant" || m.Role == "assistantOT")
                             {
-                                                <div class="received-chats">
-                                                    <div class="received-chats-img">
-                                                        <img src="~/img/Logo.png" />
-                                                    </div>
-                                                    <div class="received-msg">
-                                                        <div class="received-msg-inbox">
-                                                            <p>
-                                                               @m.Content
-                                                            </p>
-                                                            <!-- <span class="time">18:06 PM | July 24</span> -->
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                <div class="received-chats">
+                                    <div class="received-chats-img">
+                                        <img src="~/img/Logo.png" />
+                                    </div>
+                                    <div class="received-msg">
+                                        <div class="received-msg-inbox">
+                                            <p>
+                                                @m.Content
+                                            </p>
+                                            <!-- <span class="time">18:06 PM | July 24</span> -->
+                                        </div>
+                                    </div>
+                                </div>
                             }
                             else if (m.Role == "user" || m.Role == "userOT")
                             {
-                                                <div class="outgoing-chats">
-                                                    <div class="outgoing-chats-img">
-                                                        <img src="~/img/User.png" />
-                                                    </div>
-                                                    <div class="outgoing-msg">
-                                                        <div class="outgoing-chats-msg">
-                                                            <p class="multi-msg">
-                                                                @m.Content
-                                                            </p>
+                                <div class="outgoing-chats">
+                                    <div class="outgoing-chats-img">
+                                        <img src="~/img/User.png" />
+                                    </div>
+                                    <div class="outgoing-msg">
+                                        <div class="outgoing-chats-msg">
+                                            <p class="multi-msg">
+                                                @m.Content
+                                            </p>
 
-                                                            <!-- <span class="time">18:30 PM | July 24</span> -->
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                            <!-- <span class="time">18:30 PM | July 24</span> -->
+                                        </div>
+                                    </div>
+                                </div>
                             }
                         }
                     }
@@ -108,11 +110,8 @@
 
             <div class="msg-bottom">
                 <div class="input-group">
-                    <input type="text"
-                           class="form-control"
-                           placeholder="Write message..."
-                           id="userreq"/>
-
+                    <input type="text" class="form-control" placeholder="Write a message..." id="userreq"
+                        onkeydown="if (event.keyCode == 13) answer()" />
                     <span class="input-group-text send-icon">
                         <i class="bi bi-send" onclick="answer()"></i>
                     </span>

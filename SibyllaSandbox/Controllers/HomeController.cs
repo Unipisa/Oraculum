@@ -8,6 +8,7 @@ using System.Text;
 using static OpenAI.ObjectModels.SharedModels.IOpenAiModels;
 using Lib.AspNetCore.ServerSentEvents;
 using Microsoft.Extensions.Options;
+using System.Dynamic;
 
 namespace SibyllaSandbox.Controllers
 {
@@ -19,6 +20,7 @@ namespace SibyllaSandbox.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly SibyllaManager _sibyllaManager;
         private readonly IServerSentEventsService _serverSentEventsService;
+        private readonly IConfiguration _configuration;
 
         private static void SaveClientId(object? sender, ServerSentEventsClientConnectedArgs e)
         {
@@ -26,7 +28,7 @@ namespace SibyllaSandbox.Controllers
             e.Request.HttpContext.Session.CommitAsync().Wait();
         }
 
-        public HomeController(ILogger<HomeController> logger, SibyllaManager sibyllaManager, IServerSentEventsService serverSentEventsService)
+        public HomeController(ILogger<HomeController> logger, SibyllaManager sibyllaManager, IServerSentEventsService serverSentEventsService, IConfiguration configuration)
         {
             _logger = logger;
             _sibyllaManager = sibyllaManager;
@@ -34,6 +36,7 @@ namespace SibyllaSandbox.Controllers
             // to avoid multiple subscriptions I remove the previous one if exists
             _serverSentEventsService.ClientConnected -= SaveClientId;
             _serverSentEventsService.ClientConnected += SaveClientId;
+            _configuration = configuration;
         }
 
 
@@ -46,17 +49,19 @@ namespace SibyllaSandbox.Controllers
         private async Task<Sibylla> ConnectSibylla()
         {
             var sibyllaKey = HttpContext.Session.GetString(SibyllaRef);
+            var sibyllaName = _configuration["SibyllaConf"] ?? DemoConf;
             if (sibyllaKey == null)
             {
                 // It would be nice to align the expiration of the Sibylla with the expiration of the session.
-                var (id, _) = await _sibyllaManager.AddSibylla(DemoConf, expiration: DateTime.Now.AddMinutes(60));
+                var (id, _) = await _sibyllaManager.AddSibylla(sibyllaName, expiration: DateTime.Now.AddMinutes(60));
                 HttpContext.Session.SetString(SibyllaRef, id.ToString());
                 sibyllaKey = id.ToString();
                 await HttpContext.Session.CommitAsync();
             }
-            var sibylla = _sibyllaManager.GetSibylla(DemoConf, Guid.Parse(sibyllaKey));
+            var sibylla = _sibyllaManager.GetSibylla(sibyllaName, Guid.Parse(sibyllaKey));
             return sibylla;
         }
+
 
         [HttpPost]
         public async Task<string> Answer(string question)
@@ -67,8 +72,9 @@ namespace SibyllaSandbox.Controllers
             var clientid = HttpContext.Session.GetString(SSEId);
             var answerid = Guid.NewGuid().ToString();
             var l = _serverSentEventsService.GetClients().Where(c => c.User == this.User).ToList();
-            var t = Task.Run(() => {
-                
+            var t = Task.Run(() =>
+            {
+
                 var ena = Sibylla.AnswerAsync(question);
                 var en = ena.GetAsyncEnumerator();
                 while (true)

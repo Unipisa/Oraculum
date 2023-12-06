@@ -33,7 +33,7 @@ namespace Oraculum
             _oraculum = new Oraculum(oraculumConf);
         }
 
-        private string ConfFile(string name, bool checkIfExists=true)
+        private string ConfFile(string name, bool checkIfExists = true)
         {
             var path = Path.Combine(_dataDir, $"{name}.json");
             if (!File.Exists(path))
@@ -247,8 +247,9 @@ namespace Oraculum
                 throw new IOException("The configuration file already exist");
             }
             await using var configOut = File.Create(path);
-            await JsonSerializer.SerializeAsync(configOut, sibyllaConf, new JsonSerializerOptions { 
-                WriteIndented = true 
+            await JsonSerializer.SerializeAsync(configOut, sibyllaConf, new JsonSerializerOptions
+            {
+                WriteIndented = true
             });
             return true;
         }
