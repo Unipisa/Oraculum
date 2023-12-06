@@ -28,21 +28,5 @@
         "required": ["evaluation"]
       }
     }
-  ],
-  "Functions": [
-    {
-      "name": "GetDestinationOfMission",
-      "description": "Gets the destinations of the mission",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "destination": {
-            "type": "string",
-            "description": "The destination of the mission"
-          }
-        },
-        "required": ["destination"]
-      }
-    }
   ]
 }

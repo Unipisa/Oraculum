@@ -56,7 +56,7 @@ namespace Oraculum
         public int FactMemoryTTL { get; set; } = 4; // 4 turns implies a maximum of 11 facts in memory
         public int MemorySpan { get; set; } = 4;
         public string? OutOfScopePrefix = "*&oo&* ";
-        public IList<FunctionDefinition>? Functions { get; set; } = null;
+        public IList<FunctionDefinition>? FunctionsDefaultAnswerHook { get; set; } = null;
         public IList<FunctionDefinition>? FunctionsBeforeAnswerHook { get; set; } = null;
     }
 
@@ -103,7 +103,7 @@ namespace Oraculum
             _chat.TopP = sybillaConf.TopP;
             _chat.FrequencyPenalty = sybillaConf.FrequencyPenalty;
             _chat.PresencePenalty = sybillaConf.PresencePenalty;
-            _chat.Functions = sybillaConf.Functions;
+            _chat.Functions = sybillaConf.FunctionsDefaultAnswerHook;
             _chat.Model = sybillaConf.Model;
             _chat.Messages = new List<ChatMessage>()
             {
@@ -149,7 +149,7 @@ namespace Oraculum
                     if (Activator.CreateInstance(type, this) is IFunction functionInstance)
                     {
                         var isBeforeAnswerHook = _conf.FunctionsBeforeAnswerHook?.Any(f => f.Name == type.Name) ?? false;
-                        var isAnswerHook = _conf.Functions?.Any(f => f.Name == type.Name) ?? false;
+                        var isAnswerHook = _conf.FunctionsDefaultAnswerHook?.Any(f => f.Name == type.Name) ?? false;
                         if (isBeforeAnswerHook || isAnswerHook)
                             RegisterFunction(type.Name, functionInstance.Execute, isBeforeAnswerHook);
                     }
@@ -284,10 +284,12 @@ namespace Oraculum
                         await foreach (var result in HandleFunctionExecution(fn, true, cancellationToken)) ;
                     }
                 }
-                _chat.Functions = _conf.Functions;
+                _chat.Functions = _conf.FunctionsDefaultAnswerHook;
                 // if functions empty, reset to null functionCall
                 if (_chat.Functions == null)
+                {
                     _chat.FunctionCall = null;
+                }
             }
         }
 
@@ -351,12 +353,17 @@ namespace Oraculum
 
             // send new completion request and yield the result
             if (!isBeforeAnswerHook)
+            {
                 await foreach (var result in _openAiService.ChatCompletion.CreateCompletionAsStream(_chat))
                 {
                     yield return result;
                 }
+            }
             else
+            {
                 yield break;
+            }
+
         }
         private object? ExecuteFunction(string name, Dictionary<string, object> functionArguments, bool isBeforeAnswerHook)
         {
