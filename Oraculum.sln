@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SibyllaSandbox", "SibyllaSa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OraculumInteractive", "OraculumInteractive\OraculumInteractive.csproj", "{A58821AF-F27F-4E05-B364-1499988A5EFB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OraculumApi", "OraculumApi\OraculumApi.csproj", "{E23516A2-65F7-46E3-B0EF-C3029AD46309}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OraculumApi", "OraculumApi\OraculumApi.csproj", "{E23516A2-65F7-46E3-B0EF-C3029AD46309}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,10 +41,10 @@ Global
 		{A58821AF-F27F-4E05-B364-1499988A5EFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A58821AF-F27F-4E05-B364-1499988A5EFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A58821AF-F27F-4E05-B364-1499988A5EFB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{61242EA0-EC14-4DD8-8228-F336676A0853}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{61242EA0-EC14-4DD8-8228-F336676A0853}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{61242EA0-EC14-4DD8-8228-F336676A0853}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{61242EA0-EC14-4DD8-8228-F336676A0853}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E23516A2-65F7-46E3-B0EF-C3029AD46309}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E23516A2-65F7-46E3-B0EF-C3029AD46309}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E23516A2-65F7-46E3-B0EF-C3029AD46309}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E23516A2-65F7-46E3-B0EF-C3029AD46309}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
