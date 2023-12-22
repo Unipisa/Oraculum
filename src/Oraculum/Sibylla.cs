@@ -36,7 +36,8 @@ namespace Oraculum
                 {
                     FactTypeFilter = FactFilter,
                     CategoryFilter = CategoryFilter,
-                    TagsFilter = TagFilter
+                    TagsFilter = TagFilter,
+                    Limit = Limit
                 };
             }
         }
@@ -51,6 +52,7 @@ namespace Oraculum
         public float? FrequencyPenalty { get; set; } = 0.0f;
         public float? PresencePenalty { get; set; } = 0.0f;
         public string[]? FactFilter { get; set; } = null;
+        public int? Limit { get; set; } = 5;
         public string[]? CategoryFilter { get; set; } = null;
         public string[]? TagFilter { get; set; } = null;
         public int FactMemoryTTL { get; set; } = 4; // 4 turns implies a maximum of 11 facts in memory
