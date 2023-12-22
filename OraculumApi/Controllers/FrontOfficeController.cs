@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Channels;
 using Microsoft.OpenApi.Any;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OraculumApi.Controllers;
 
@@ -67,6 +68,7 @@ public class FrontOfficeController : Controller
     [HttpDelete]
     [Route("sibylla/{sibyllaId}/chat/{chatId}")]
     [ValidateModelState]
+    [Authorize(Policy = "FrontOffice")]
     [SwaggerOperation("DeleteChatsChatId")]
     public virtual IActionResult DeleteChatsChatId([FromRoute][Required] string chatId, [FromRoute][Required] string sibyllaId)
     {
@@ -75,6 +77,7 @@ public class FrontOfficeController : Controller
 
     [HttpGet]
     [Route("sibylla")]
+    [Authorize(Policy = "FrontOffice")]
     public IActionResult GetAllSibyllae()
     {
         throw new NotImplementedException();
@@ -82,6 +85,7 @@ public class FrontOfficeController : Controller
 
     [HttpGet]
     [Route("sibylla/{sibyllaId}/chat")]
+    [Authorize(Policy = "FrontOffice")]
     public IActionResult GetChats([FromRoute] string sibyllaId)
     {
         throw new NotImplementedException();
@@ -89,6 +93,7 @@ public class FrontOfficeController : Controller
 
     [HttpPost]
     [Route("sibylla/{sibyllaId}/chat")]
+    [Authorize(Policy = "FrontOffice")]
     public IActionResult PostChat([FromRoute] string sibyllaId, [FromBody] Message message)
     {
         throw new NotImplementedException();
@@ -96,6 +101,7 @@ public class FrontOfficeController : Controller
 
     [HttpGet]
     [Route("sibylla/{sibyllaId}/chat/{chatId}")]
+    [Authorize(Policy = "FrontOffice")]
     public IActionResult GetChatById([FromRoute] string sibyllaId, [FromRoute] string chatId)
     {
         throw new NotImplementedException();
@@ -103,6 +109,7 @@ public class FrontOfficeController : Controller
 
     [HttpPost]
     [Route("sibylla/{sibyllaId}/chat/{chatId}/message")]
+    [Authorize(Policy = "FrontOffice")]
     public IActionResult PostMessage([FromRoute] string sibyllaId, [FromRoute] string chatId, [FromBody] Message message)
     {
         throw new NotImplementedException();
@@ -110,6 +117,7 @@ public class FrontOfficeController : Controller
 
     [HttpPost]
     [Route("sibylla/{sibyllaId}/chat/{chatId}/feedback")]
+    [Authorize(Policy = "FrontOffice")]
     public IActionResult PostFeedback([FromRoute] string sibyllaId, [FromRoute] string chatId, [FromBody] Feedback feedback)
     {
         throw new NotImplementedException();
@@ -117,6 +125,7 @@ public class FrontOfficeController : Controller
 
     [HttpGet]
     [Route("reference/{id}")]
+    [Authorize(Policy = "FrontOffice")]
     public IActionResult GetReferenceById([FromRoute] string id)
     {
         throw new NotImplementedException();
@@ -125,6 +134,7 @@ public class FrontOfficeController : Controller
 
     [HttpPost]
     [Route("answerStream/{question}")]
+    [Authorize(Policy = "FrontOffice")]
     public async Task<IActionResult> AnswerStream([FromRoute][Required] string question)
     {
         var Sibylla = await ConnectSibylla();
@@ -152,6 +162,7 @@ public class FrontOfficeController : Controller
 
     [HttpPost]
     [Route("answer/{question}")]
+    [Authorize(Policy = "FrontOffice")]
     public async Task<string> Answer(string question)
     {
         var Sibylla = await ConnectSibylla();
@@ -183,6 +194,7 @@ public class FrontOfficeController : Controller
 
     [HttpGet]
     [Route("getanswer/{answerid}")]
+    [Authorize(Policy = "FrontOffice")]
     public string GetAnswer(string answerid)
     {
         lock (_sibyllaManager.Response)
@@ -213,6 +225,7 @@ public class FrontOfficeController : Controller
     //api di debug per fare le metriche, metodo sincrono
     [HttpGet]
     [Route("getanswer/debug/{query}")]
+    [Authorize(Policy = "FrontOffice")]
     public async Task<IActionResult> GetAnswerDebugAsync(string query, int limit = 10)
     {
         var Sibylla = await ConnectSibylla();
