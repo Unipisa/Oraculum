@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.OpenApi.Any;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OraculumApi.Controllers;
 
@@ -64,6 +65,7 @@ public class BackOfficeController : Controller
     [HttpPost]
     [Route("sibylla-configs")]
     [ValidateModelState]
+    [Authorize(Policy = "SysAdmin")]
     [SwaggerOperation("AddSibyllaConfigDto")]
     public async Task<IActionResult> AddSibyllaConfigDtoAsync([FromBody] List<SibyllaConfigDto> body)
     {
@@ -99,6 +101,7 @@ public class BackOfficeController : Controller
     [HttpDelete]
     [Route("facts/{id}")]
     [ValidateModelState]
+    [Authorize(Policy = "BackOffice")]
     [SwaggerOperation("DeleteFactById")]
     public async Task<IActionResult> DeleteFactById([FromRoute][Required] string id)
     {
@@ -116,6 +119,7 @@ public class BackOfficeController : Controller
     [HttpDelete]
     [Route("facts")]
     [ValidateModelState]
+    [Authorize(Policy = "BackOffice")]
     [SwaggerOperation("DeleteFacts")]
     public virtual IActionResult DeleteFacts([FromQuery] string factType, [FromQuery] string category, [FromQuery] bool? expired)
     {
@@ -133,6 +137,7 @@ public class BackOfficeController : Controller
     [HttpDelete]
     [Route("sibylla-configs/{id}")]
     [ValidateModelState]
+    [Authorize(Policy = "SysAdmin")]
     [SwaggerOperation("DeleteSibyllaConfigDtoById")]
     public async Task<IActionResult> DeleteSibyllaConfigDtoById([FromRoute][Required] string id)
     {
@@ -156,6 +161,7 @@ public class BackOfficeController : Controller
     [Route("facts/query")]
     [ValidateModelState]
     [SwaggerOperation("FindRelevantFacts")]
+    [Authorize(Policy = "BackOffice")]
     [SwaggerResponse(statusCode: 200, type: typeof(List<Models.BackOffice.Fact>), description: "List of relevant facts")]
     public async Task<IActionResult> FindRelevantFacts([FromBody] SearchCriteria body)
     {
@@ -177,6 +183,7 @@ public class BackOfficeController : Controller
     [HttpGet]
     [Route("facts")]
     [ValidateModelState]
+    [Authorize(Policy = "BackOffice")]
     [SwaggerOperation("GetAllFacts")]
     [SwaggerResponse(statusCode: 200, type: typeof(List<Models.BackOffice.Fact>), description: "A list of facts")]
     public async Task<IActionResult> GetAllFacts([FromQuery] int? limit, [FromQuery] int? offset, [FromQuery] string? sort, [FromQuery] string? order)
@@ -197,6 +204,7 @@ public class BackOfficeController : Controller
     [HttpGet]
     [Route("sibylla-configs")]
     [ValidateModelState]
+    [Authorize(Policy = "BackOffice")]
     [SwaggerOperation("GetAllSibyllaConfigDtos")]
     [SwaggerResponse(statusCode: 200, type: typeof(List<SibyllaConfigDto>), description: "List of Sibylla configurations")]
     public async Task<IActionResult> GetAllSibyllaeConfigs()
@@ -222,6 +230,7 @@ public class BackOfficeController : Controller
     /// <response code="500">Internal server error</response>
     [HttpGet]
     [Route("facts/{id}")]
+    [Authorize(Policy = "BackOffice")]
     [SwaggerOperation("GetFactById")]
     [SwaggerResponse(statusCode: 200, type: typeof(Models.BackOffice.Fact), description: "Specific fact data")]
     public async Task<IActionResult> GetFactByIdAsync([FromRoute][Required] string id)
@@ -242,6 +251,7 @@ public class BackOfficeController : Controller
     [HttpGet]
     [Route("sibylla-configs/{id}")]
     [ValidateModelState]
+    [Authorize(Policy = "BackOffice")]
     [SwaggerOperation("GetSibyllaConfigDtoById")]
     [SwaggerResponse(statusCode: 200, type: typeof(SibyllaConfigDto), description: "Specific Sibylla configuration data")]
     public async Task<IActionResult> GetSibyllaConfigDtoById([FromRoute][Required] string id)
@@ -265,6 +275,7 @@ public class BackOfficeController : Controller
     [HttpPost]
     [Route("facts")]
     [ValidateModelState]
+    [Authorize(Policy = "BackOffice")]
     [SwaggerOperation("PostFacts")]
     public async Task<IActionResult> PostFacts([FromBody] ICollection<Models.BackOffice.Fact> body)
     {
@@ -296,6 +307,7 @@ public class BackOfficeController : Controller
     [HttpPut]
     [Route("facts")]
     [ValidateModelState]
+    [Authorize(Policy = "BackOffice")]
     [SwaggerOperation("PutFacts")]
     public virtual IActionResult PutFacts([FromBody] List<Models.BackOffice.Fact> body)
     {
@@ -314,6 +326,7 @@ public class BackOfficeController : Controller
     [HttpPut]
     [Route("sibylla-configs")]
     [ValidateModelState]
+    [Authorize(Policy = "SysAdmin")]
     [SwaggerOperation("PutSibyllaConfigDtos")]
     public async Task<IActionResult> PutSibyllaConfigDtos([FromBody] List<SibyllaConfigDto> body)
     {
