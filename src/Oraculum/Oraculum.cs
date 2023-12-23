@@ -28,20 +28,39 @@ public class Configuration
     internal OpenAIService CreateService()
     {
         if (Provider == ProviderType.OpenAi)
-            return new OpenAIService(new OpenAiOptions()
+        {
+            var opt = OpenAIEndPoint == null ? new OpenAiOptions()
             {
                 ProviderType = ProviderType.OpenAi,
                 ApiKey = OpenAIApiKey!,
                 Organization = OpenAIOrgId
-            });
+            } : new OpenAiOptions()
+            {
+                BaseDomain = OpenAIEndPoint,
+                ProviderType = ProviderType.OpenAi,
+                ApiKey = OpenAIApiKey!,
+                Organization = OpenAIOrgId
+            };
+            return new OpenAIService(opt);
+        }
         else if (Provider == ProviderType.Azure)
-            return new OpenAIService(new OpenAiOptions()
+        {
+            var opt = OpenAIEndPoint == null ? new OpenAiOptions()
             {
                 ProviderType = ProviderType.Azure,
                 ApiKey = AzureOpenAIApiKey!,
                 ResourceName = AzureResourceName!,
                 DeploymentId = AzureDeploymentId!
-            });
+            } : new OpenAiOptions()
+            {
+                BaseDomain = OpenAIEndPoint,
+                ProviderType = ProviderType.Azure,
+                ApiKey = AzureOpenAIApiKey!,
+                ResourceName = AzureResourceName!,
+                DeploymentId = AzureDeploymentId!
+            };
+            return new OpenAIService(opt);
+        }
         else
             throw new Exception($"Unknown provider {Provider}");
     }
@@ -61,6 +80,7 @@ public class Configuration
     public string? WeaviateEndpoint { get; set; }
     public string? WeaviateApiKey { get; set; }
     public OpenAI.ProviderType Provider { get; set; } = ProviderType.OpenAi;
+    public string? OpenAIEndPoint { get; set; } = null;
     public string? OpenAIApiKey { get; set; }
     public string? OpenAIOrgId { get; set; }
     public string? AzureDeploymentId { get; set; }
