@@ -27,7 +27,8 @@ builder.Services.AddSingleton<SibyllaManager>(new SibyllaManager(new Oraculum.Co
     OpenAIOrgId = _configuration["OpenAI:OrgId"],
     AzureOpenAIApiKey = _configuration["Azure:ApiKey"],
     AzureResourceName = _configuration["Azure:ResourceName"],
-    AzureDeploymentId = _configuration["Azure:DeploymentId"]
+    AzureDeploymentId = _configuration["Azure:DeploymentId"],
+    LocalProvider = _configuration["LocalProvider"]
 }, Path.Combine(_env.ContentRootPath, "SibyllaeConf")));
 
 builder.Services.AddServerSentEvents();

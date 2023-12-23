@@ -29,7 +29,7 @@ public class Configuration
     {
         if (Provider == ProviderType.OpenAi)
         {
-            var opt = OpenAIEndPoint == null ? new OpenAiOptions()
+            var opt = LocalProvider == null ? new OpenAiOptions()
             {
                 ProviderType = ProviderType.OpenAi,
                 ApiKey = OpenAIApiKey!,
@@ -45,7 +45,7 @@ public class Configuration
         }
         else if (Provider == ProviderType.Azure)
         {
-            var opt = OpenAIEndPoint == null ? new OpenAiOptions()
+            var opt = LocalProvider == null ? new OpenAiOptions()
             {
                 ProviderType = ProviderType.Azure,
                 ApiKey = AzureOpenAIApiKey!,
@@ -80,7 +80,7 @@ public class Configuration
     public string? WeaviateEndpoint { get; set; }
     public string? WeaviateApiKey { get; set; }
     public OpenAI.ProviderType Provider { get; set; } = ProviderType.OpenAi;
-    public string? OpenAIEndPoint { get; set; } = null;
+    public string? LocalProvider { get; set; } = null;
     public string? OpenAIApiKey { get; set; }
     public string? OpenAIOrgId { get; set; }
     public string? AzureDeploymentId { get; set; }
