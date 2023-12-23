@@ -24,7 +24,7 @@ namespace OraculumCLI
         public string? WeaviateEndpoint { get; set; }
         public string? WeaviateApiKey { get; set; }
         public GPTProvider GPTProvider { get; set; } = GPTProvider.OpenAI;
-        public string? OpenAIEndPoint { get; set; } = null;
+        public string? LocalProvider { get; set; } = null;
         public string? OpenAIApiKey { get; set; }
         public string? OpenAIOrgId { get; set; }
         public string? AzureApiKey { get; set; }
@@ -56,7 +56,7 @@ namespace OraculumCLI
             {
                 WeaviateEndpoint = Config.WeaviateEndpoint,
                 WeaviateApiKey = Config.WeaviateApiKey,
-                OpenAIEndPoint = Config.OpenAIEndPoint,
+                LocalProvider = Config.LocalProvider,
                 OpenAIApiKey = Config.OpenAIApiKey,
                 OpenAIOrgId = Config.OpenAIOrgId,
                 AzureOpenAIApiKey = Config.AzureApiKey,

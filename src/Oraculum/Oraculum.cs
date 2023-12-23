@@ -36,7 +36,7 @@ public class Configuration
                 Organization = OpenAIOrgId
             } : new OpenAiOptions()
             {
-                BaseDomain = OpenAIEndPoint,
+                BaseDomain = LocalProvider,
                 ProviderType = ProviderType.OpenAi,
                 ApiKey = OpenAIApiKey!,
                 Organization = OpenAIOrgId
@@ -53,7 +53,7 @@ public class Configuration
                 DeploymentId = AzureDeploymentId!
             } : new OpenAiOptions()
             {
-                BaseDomain = OpenAIEndPoint,
+                BaseDomain = LocalProvider,
                 ProviderType = ProviderType.Azure,
                 ApiKey = AzureOpenAIApiKey!,
                 ResourceName = AzureResourceName!,
