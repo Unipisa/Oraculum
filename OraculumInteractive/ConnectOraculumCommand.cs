@@ -46,7 +46,9 @@ namespace OraculumInteractive
             var categoryFilter = commandLineContext.ParseResult.GetValueForOption(categoryFilterOption);
             if (categoryFilter?.Length > 0 )
             {
-                sibyllaConfig.CategoryFilter = categoryFilter;
+                var conf = sibyllaConfig.MemoryConfiguration;
+                conf.CategoryFilter = categoryFilter;
+                sibyllaConfig.MemoryConfiguration = conf;
             }
             var kernel = new OraculumKernel(kernelName!, oraculumConfig, sibyllaConfig);
             return Task.FromResult<IEnumerable<Kernel>>(new[] { kernel });

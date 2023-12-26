@@ -65,5 +65,20 @@ namespace OraculumTest
             Assert.IsNotNull(facts);
         }
 
+        [TestMethod]
+        public async Task TestDistanceCheck()
+        {
+            Assert.IsNotNull(oraculum);
+            var facts = (await oraculum.FindRelevantFacts("Cosa sono i codici PASTG?", new FactFilter()
+            {
+                AutocutPercentage = 0.5f,
+                Limit = 100
+            })).ToArray();
+            var min = facts[0].distance;
+            var max = facts[facts.Length - 1].distance;
+            var norm = (from f in facts select (f.distance - min) / (max - min)).ToArray();
+            Assert.IsTrue(norm[0] < 0.1f);
+        }
+
     }
 }

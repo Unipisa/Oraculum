@@ -34,15 +34,17 @@ namespace Oraculum
             {
                 return new KnowledgeFilter()
                 {
-                    FactTypeFilter = FactFilter,
-                    CategoryFilter = CategoryFilter,
-                    TagsFilter = TagFilter,
-                    Limit = Limit
+                    FactTypeFilter = MemoryConfiguration.FactFilter,
+                    CategoryFilter = MemoryConfiguration.CategoryFilter,
+                    TagsFilter = MemoryConfiguration.TagFilter,
+                    Limit = MemoryConfiguration.Limit,
+                    AutoCutPercentage = MemoryConfiguration.AutoCutPercentage
                 };
             }
         }
 
         public string? Title { get; set; }
+        public MemoryConfiguration MemoryConfiguration { get; set; } = new MemoryConfiguration();
         public string? BaseSystemPrompt { get; set; }
         public string? BaseAssistantPrompt { get; set; }
         public int MaxTokens { get; set; } = 150;
@@ -51,12 +53,6 @@ namespace Oraculum
         public float? TopP { get; set; } = 1.0f;
         public float? FrequencyPenalty { get; set; } = 0.0f;
         public float? PresencePenalty { get; set; } = 0.0f;
-        public string[]? FactFilter { get; set; } = null;
-        public int? Limit { get; set; } = 5;
-        public string[]? CategoryFilter { get; set; } = null;
-        public string[]? TagFilter { get; set; } = null;
-        public int FactMemoryTTL { get; set; } = 4; // 4 turns implies a maximum of 11 facts in memory
-        public int MemorySpan { get; set; } = 4;
         public string? OutOfScopePrefix = "*&oo&* ";
         public IList<FunctionDefinition>? FunctionsDefaultAnswerHook { get; set; } = null;
         public IList<FunctionDefinition>? FunctionsBeforeAnswerHook { get; set; } = null;
@@ -78,6 +74,7 @@ namespace Oraculum
         public string[]? CategoryFilter = null;
         public string[]? TagsFilter = null;
         public int? Limit = 5;
+        public float? AutoCutPercentage = null;
     }
 
     public class Sibylla
@@ -112,7 +109,7 @@ namespace Oraculum
                 new ChatMessage(Actor.System, sybillaConf.BaseSystemPrompt!),
                 new ChatMessage(Actor.Assistant, sybillaConf.BaseAssistantPrompt!)
             };
-            _memory = new Memory(new Oraculum(conf), _conf.FactMemoryTTL, logger: _logger);
+            _memory = new Memory(new Oraculum(conf), _conf.MemoryConfiguration, logger: _logger);
             _memory.History.AddRange(new[]
             {
                 new ChatMessage(Actor.Assistant, sybillaConf.BaseAssistantPrompt!)
