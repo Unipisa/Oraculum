@@ -105,6 +105,7 @@ public class FactFilter
     public int? Limit = null;
     public float? Distance = null;
     public int? Autocut = null;
+    public float? AutocutPercentage = null;
     public string[]? FactTypeFilter = null;
     public string[]? CategoryFilter = null;
     public string[]? TagsFilter = null;
@@ -525,6 +526,16 @@ public class Oraculum
             ret.Add(o);
         }
 #pragma warning restore CS8602
+
+        if (factFilter.AutocutPercentage.HasValue)
+        {
+            var min = ret.First().distance;
+            var max = ret.Last().distance;
+            var top = (from fact in ret
+                       where (((fact.distance - min) / (max - min)) < factFilter.AutocutPercentage)
+                       select fact).Count();
+            ret = ret.Take(top).ToList();
+        }
 
         return ret;
     }
