@@ -19,7 +19,6 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect " Version="7.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Owin.Cors" Version="4.2.2" />
   </ItemGroup>
 
   <ItemGroup>
