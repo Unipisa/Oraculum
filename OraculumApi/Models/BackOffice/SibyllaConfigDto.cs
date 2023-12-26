@@ -46,11 +46,7 @@ namespace OraculumApi.Models.BackOffice
             SibyllaConfigDto.TopP = sibyllaConf.TopP;
             SibyllaConfigDto.FrequencyPenalty = sibyllaConf.FrequencyPenalty;
             SibyllaConfigDto.PresencePenalty = sibyllaConf.PresencePenalty;
-            SibyllaConfigDto.FactFilter = sibyllaConf.FactFilter;
-            SibyllaConfigDto.CategoryFilter = sibyllaConf.CategoryFilter;
-            SibyllaConfigDto.TagFilter = sibyllaConf.TagFilter;
-            SibyllaConfigDto.FactMemoryTTL = sibyllaConf.FactMemoryTTL;
-            SibyllaConfigDto.MemorySpan = sibyllaConf.MemorySpan;
+            SibyllaConfigDto.MemoryConfiguration = sibyllaConf.MemoryConfiguration;
             // SibyllaConfigDto.OutOfScopeTag = sibyllaConf.OutOfScopeTag;
             // SibyllaConfigDto.Limit = sibyllaConf.Limit;
             return SibyllaConfigDto;
@@ -68,11 +64,7 @@ namespace OraculumApi.Models.BackOffice
             SibyllaConf.TopP = sibyllaConfigDto.TopP;
             SibyllaConf.FrequencyPenalty = sibyllaConfigDto.FrequencyPenalty;
             SibyllaConf.PresencePenalty = sibyllaConfigDto.PresencePenalty;
-            SibyllaConf.FactFilter = sibyllaConfigDto.FactFilter;
-            SibyllaConf.CategoryFilter = sibyllaConfigDto.CategoryFilter;
-            SibyllaConf.TagFilter = sibyllaConfigDto.TagFilter;
-            SibyllaConf.FactMemoryTTL = sibyllaConfigDto.FactMemoryTTL;
-            SibyllaConf.MemorySpan = sibyllaConfigDto.MemorySpan;
+            SibyllaConf.MemoryConfiguration = sibyllaConfigDto.MemoryConfiguration;
             // SibyllaConf.OutOfScopeTag = sibyllaConfigDto.OutOfScopeTag;
             // SibyllaConf.Limit = sibyllaConfigDto.Limit;
             return SibyllaConf;
