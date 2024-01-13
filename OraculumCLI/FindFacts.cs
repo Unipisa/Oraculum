@@ -10,9 +10,6 @@ namespace OraculumCLI
     [Cmdlet(VerbsCommon.Find, "Facts")]
     public class FindFacts : OraculumPSCmdlet
     {
-        [Parameter(Mandatory = true)]
-        public string? Query { get; set; }
-
         [Parameter]
         public int? Limit { get; set; } = null;
 
@@ -31,11 +28,6 @@ namespace OraculumCLI
         protected override void ProcessRecord()
         {
             base.ProcessRecord();
-            if (Query == null)
-            {
-                WriteObject(false);
-                return;
-            }
             var facts = Connection.ListFilteredFacts(new Oraculum.FactFilter() 
             {
                 Limit = Limit,

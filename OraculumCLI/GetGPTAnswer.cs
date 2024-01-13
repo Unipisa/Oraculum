@@ -28,6 +28,9 @@ namespace OraculumCLI
         [Parameter(Mandatory = true, ValueFromPipeline = true, Position = 0)]
         public string? Prompt { get; set; } = null;
 
+        [Parameter]
+        public bool OutFullObject { get; set; } = false;
+
         protected override void ProcessRecord()
         {
             var msg = new List<ChatMessage>();
@@ -36,7 +39,7 @@ namespace OraculumCLI
                 msg.Add(new ChatMessage("system", SystemPrompt));
             }
             msg.Add(new ChatMessage("user", Prompt!));
-            var j = OpenAIService.ChatCompletion.CreateCompletion(new OpenAI.ObjectModels.RequestModels.ChatCompletionCreateRequest()
+            var j = OpenAIConnection.ChatCompletion.CreateCompletion(new OpenAI.ObjectModels.RequestModels.ChatCompletionCreateRequest()
             {
                 MaxTokens = MaxTokens,
                 Temperature = Temperature,
@@ -44,7 +47,12 @@ namespace OraculumCLI
                 Messages = msg
             });
             j.Wait();
-            WriteObject(j.Result);
+            if (j.Result.Successful)
+            {
+                WriteObject(OutFullObject ? j.Result : j.Result.Choices[0].Message.Content);
+                return;
+            }
+            WriteObject(j.Result.Error);
         }
     }
 }

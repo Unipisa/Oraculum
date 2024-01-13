@@ -31,6 +31,7 @@ namespace OraculumCLI
         public string? AzureApiKey { get; set; }
         public string? AzureResourceName { get; set; }
         public string? AzureDeploymentId { get; set; }
+        public string? UserName { get; set; }
     }
 
     [Cmdlet(VerbsCommunications.Connect, "Oraculum")]
@@ -63,7 +64,8 @@ namespace OraculumCLI
                 AzureOpenAIApiKey = Config.AzureApiKey,
                 AzureResourceName = Config.AzureResourceName,
                 AzureDeploymentId = Config.AzureDeploymentId,
-                Provider = Config.GPTProvider == GPTProvider.Azure ? OpenAI.ProviderType.Azure : OpenAI.ProviderType.OpenAi
+                Provider = Config.GPTProvider == GPTProvider.Azure ? OpenAI.ProviderType.Azure : OpenAI.ProviderType.OpenAi,
+                UserName = Config.UserName
             };
             var oraculum = new Oraculum.Oraculum(config);
             var j = oraculum.IsKBInitialized();

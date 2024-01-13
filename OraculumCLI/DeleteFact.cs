@@ -10,7 +10,7 @@ namespace OraculumCLI
     [Cmdlet(VerbsCommon.Remove, "Fact")]
     public class DeleteFact : OraculumPSCmdlet
     {
-        [Parameter(Mandatory = true)]
+        [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true)]
         public Guid? Id { get; set; }
 
         protected override void ProcessRecord()

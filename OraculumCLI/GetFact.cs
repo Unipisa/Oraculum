@@ -10,7 +10,7 @@ namespace OraculumCLI
     [Cmdlet(VerbsCommon.Get, "Fact")]
     public class GetFact : OraculumPSCmdlet
     {
-        [Parameter(Mandatory = true)]
+        [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true)]
         public Guid? Id { get; set; }
 
         protected override void ProcessRecord()

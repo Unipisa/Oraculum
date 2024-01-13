@@ -9,8 +9,8 @@ using WeaviateNET;
 
 namespace OraculumCLI
 {
-    [Cmdlet(VerbsCommon.Add, "Tag")]
-    public class AddTag : OraculumPSCmdlet
+    [Cmdlet(VerbsCommon.Add, "FactTag")]
+    public class AddFactTag : OraculumPSCmdlet
     {
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true)]
         public Fact? Fact { get; set; }

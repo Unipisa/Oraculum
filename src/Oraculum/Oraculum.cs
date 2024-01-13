@@ -552,10 +552,8 @@ public class Oraculum
         foreach (var f in res.Data["Get"]["Facts"])
         {
             Guid? id = f["_additional"]["id"] == null ? null : Guid.Parse(f["_additional"]["id"].ToString());
-            double? dist = f["_additional"]["distance"] == null ? null : f["_additional"]["distance"].ToObject<double>();
             var o = f.ToObject<Fact>();
             o.id = id;
-            o.distance = dist;
             ret.Add(o);
         }
 #pragma warning restore CS8602

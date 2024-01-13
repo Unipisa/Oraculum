@@ -28,7 +28,8 @@ namespace OraculumTest
                 OpenAIOrgId = conf["OpenAI:OrgId"],
                 AzureOpenAIApiKey = conf["Azure:ApiKey"],
                 AzureResourceName = conf["Azure:ResourceName"],
-                AzureDeploymentId = conf["Azure:DeploymentId"]
+                AzureDeploymentId = conf["Azure:DeploymentId"],
+                UserName = conf["UserName"]
             });
         }
 
@@ -76,5 +77,16 @@ namespace OraculumTest
 
             Assert.IsTrue(await oraculum.TotalFacts() >= 0);
         }
+
+        [TestMethod]
+        public async Task TestListFilteredFacts()
+        {
+            Assert.IsNotNull(oraculum);
+            if (!oraculum.IsConnected)
+                await oraculum.Connect();
+            var facts = await oraculum.ListFilteredFacts(new FactFilter() { CategoryFilter = new string[] { "test" } });
+            Assert.IsTrue(facts.Count() >= 0);
+        }
+
     }
 }

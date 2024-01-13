@@ -11,7 +11,7 @@ namespace OraculumCLI
     [Cmdlet(VerbsCommon.Add, "Facts")]
     public class AddFacts : OraculumPSCmdlet
     {
-        [Parameter(Mandatory = true)]
+        [Parameter(Mandatory = true, ValueFromPipeline = true)]
         public Fact[]? Facts { get; set; }
 
         protected override void ProcessRecord()
