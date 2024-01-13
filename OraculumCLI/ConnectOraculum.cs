@@ -1,4 +1,5 @@
-﻿using Oraculum;
+﻿using OpenAI.Managers;
+using Oraculum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,7 +71,10 @@ namespace OraculumCLI
             if (j.Result)
               oraculum.Connect().Wait();
 
+            var openai = config.CreateOpenAIService();
+
             SessionState.PSVariable.Set("Oraculum", oraculum);
+            SessionState.PSVariable.Set("OpenAIService", openai);
             WriteObject(oraculum);
         }
     }

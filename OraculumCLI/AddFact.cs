@@ -78,7 +78,9 @@ namespace OraculumCLI
                 validTo = ValidTo,
                 factAdded = FactAdded ?? DateTime.Now
             };
-            Connection.AddFact(fact).Wait();
+            var j = Connection.AddFact(fact);
+            j.Wait();
+            WriteObject(j.Result);
         }
     }
 }
