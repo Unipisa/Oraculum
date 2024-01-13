@@ -34,6 +34,12 @@ The project it's still in his infancy but it can be used in production if you wa
 
 ## What's new
 
+### Version 1.3.2
+- Added `UserName` option in `Oraculum` configuration to indicate the default owner id
+
+### Version 1.3.1
+- Exposed the Logger property in `Sibylla` and `Oraculum`
+
 ### Version 1.3.0
 - Improved the `FindRelevantFacts` algorithm in Oraculum to avoid adding unrelated facts to the prompt. Now distance is normalized and used to decide which facts are relevant under the assumption that the retrieved facts are more than those relevant.
 - Improved the memory management in Sibylla and changed the SibyllaConf (*breaking change in the file format*, look `Demo.json` file in `SibyllaSandbox` project)
