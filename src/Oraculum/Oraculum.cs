@@ -25,7 +25,7 @@ public class Configuration
         return System.Text.Json.JsonSerializer.Deserialize<Configuration>(json)!;
     }
 
-    internal OpenAIService CreateService()
+    public OpenAIService CreateOpenAIService()
     {
         if (Provider == ProviderType.OpenAi)
         {
@@ -86,6 +86,7 @@ public class Configuration
     public string? AzureDeploymentId { get; set; }
     public string? AzureResourceName { get; set; }
     public string? AzureOpenAIApiKey { get; set; }
+    public string? UserName { get; set; }
 }
 
 public class OraculumConfig
@@ -109,6 +110,7 @@ public class FactFilter
     public string[]? FactTypeFilter = null;
     public string[]? CategoryFilter = null;
     public string[]? TagsFilter = null;
+    public DateTime? AddedSince = null;
 }
 
 [IndexNullState]
@@ -188,6 +190,18 @@ public class Oraculum
         }
     }
 
+    public ILogger Logger
+    {
+        get
+        {
+            return _logger;
+        }
+        set
+        {
+            _logger = value ?? NullLogger.Instance;
+        }
+    }
+
     public Oraculum(Configuration conf, ILogger? logger = null)
     {
         _logger = logger ?? NullLogger.Instance;
@@ -198,7 +212,7 @@ public class Oraculum
             throw new ArgumentNullException(nameof(conf));
         }
         _kb = new WeaviateDB(conf.WeaviateEndpoint, conf.WeaviateApiKey);
-        _gpt = conf.CreateService();
+        _gpt = conf.CreateOpenAIService();
         _facts = null;
     }
 
@@ -227,6 +241,10 @@ public class Oraculum
     public async Task Connect()
     {
         _logger.Log(LogLevel.Trace, "Connect: Loading Weaviate schema and checking whether contains OraculumConfig and Facts classes");
+        if (Configuration.UserName != null)
+        {
+            _logger.Log(LogLevel.Trace, $"Connect: Default user name is set to {Configuration.UserName}");
+        }
         await _kb.Schema.Update();
         if (!_kb.Schema.Classes.Where(c => c.Name == Fact.ClassName).Any() || !_kb.Schema.Classes.Where(c => c.Name == OraculumConfig.ClassName).Any())
         {
@@ -324,6 +342,13 @@ public class Oraculum
     {
         ensureConnection();
         _logger.Log(LogLevel.Information, "AddFact: adding fact");
+        if (Configuration.UserName != null)
+        {
+            if (fact.editPrincipals == null)
+                fact.editPrincipals = new string[] { $"O:{Configuration.UserName}" };
+            else
+                fact.editPrincipals = fact.editPrincipals.Append(Configuration.UserName).ToArray();
+        }
         var f = _facts.Create();
         f.Properties = fact;
 
@@ -350,6 +375,13 @@ public class Oraculum
         var toadd = new List<WeaviateObject<Fact>>();
         foreach (var fact in facts)
         {
+            if (Configuration.UserName != null)
+            {
+                if (fact.editPrincipals == null)
+                    fact.editPrincipals = new string[] { $"O:{Configuration.UserName}" };
+                else
+                    fact.editPrincipals = fact.editPrincipals.Append(Configuration.UserName).ToArray();
+            }
             var f = _facts.Create();
             f.Properties = fact;
             toadd.Add(f);
@@ -478,6 +510,59 @@ public class Oraculum
         return ret;
     }
 
+    public async Task<ICollection<Fact>> ListFilteredFacts(FactFilter factFilter)
+    {
+        ensureConnection();
+        _logger.Log(LogLevel.Information, $"ListFilteredFacts: Filter '{JsonConvert.SerializeObject(factFilter)}'");
+
+        var qg = _facts.CreateGetQuery(selectall: true);
+        if (factFilter.Limit.HasValue) qg.Filter.Limit(factFilter.Limit.Value);
+        if (factFilter.Autocut.HasValue)
+            _logger.Log(LogLevel.Warning, $"ListFilteredFacts: Autocut is ignored in ListFilteredFacts");
+        if (factFilter.AutocutPercentage.HasValue)
+            _logger.Log(LogLevel.Warning, $"ListFilteredFacts: AutocutPercentage is ignored in ListFilteredFacts");
+        var andcond = new List<ConditionalAtom<Fact>>() {
+            Conditional<Fact>.Or(
+                When<Fact, DateTime>.GreaterThanEqual(nameof(Fact.expiration), DateTime.Now),
+                When<Fact, DateTime>.IsNull(nameof(Fact.expiration))
+            )};
+        if (factFilter.AddedSince.HasValue)
+            andcond.Add(When<Fact, DateTime>.GreaterThanEqual(nameof(Fact.factAdded), factFilter.AddedSince.Value));
+        if (factFilter.FactTypeFilter != null)
+            andcond.Add(When<Fact, string[]>.ContainsAny(nameof(Fact.factType), factFilter.FactTypeFilter));
+        if (factFilter.CategoryFilter != null)
+            andcond.Add(When<Fact, string[]>.ContainsAny(nameof(Fact.category), factFilter.CategoryFilter));
+        if (factFilter.TagsFilter != null)
+            andcond.Add(When<Fact, string[]>.ContainsAny(nameof(Fact.tags), factFilter.TagsFilter));
+        qg.Filter.Where(Conditional<Fact>.And(andcond.ToArray()));
+        qg.Fields.Additional.Add(Additional.Id, Additional.Distance);
+        var query = new GraphQLQuery();
+        query.Query = qg.ToString();
+
+        _logger.Log(LogLevel.Trace, $"FindRelevantFacts: query to Weaviate {query.Query}");
+
+        var res = await _kb.Schema.RawQuery(query);
+        if (res.Errors != null && res.Errors.Count > 0)
+        {
+            throw new Exception($"Error querying Weaviate");
+        }
+        _logger.Log(LogLevel.Trace, $"FindRelevantFacts: Query result {res.Data["Get"].ToString()}");
+        var ret = new List<Fact>();
+#pragma warning disable CS8602 // Disable warning for derefernce potentially null value since I know it should be ok.
+        foreach (var f in res.Data["Get"]["Facts"])
+        {
+            Guid? id = f["_additional"]["id"] == null ? null : Guid.Parse(f["_additional"]["id"].ToString());
+            double? dist = f["_additional"]["distance"] == null ? null : f["_additional"]["distance"].ToObject<double>();
+            var o = f.ToObject<Fact>();
+            o.id = id;
+            o.distance = dist;
+            ret.Add(o);
+        }
+#pragma warning restore CS8602
+
+        return ret;
+    }
+
     public async Task<ICollection<Fact>> FindRelevantFacts(string concept, FactFilter? factFilter = null)
     {
         ensureConnection();
@@ -495,6 +580,8 @@ public class Oraculum
                 When<Fact, DateTime>.GreaterThanEqual(nameof(Fact.expiration), DateTime.Now),
                 When<Fact, DateTime>.IsNull(nameof(Fact.expiration))
             )};
+        if (factFilter.AddedSince.HasValue)
+            andcond.Add(When<Fact, DateTime>.GreaterThanEqual(nameof(Fact.factAdded), factFilter.AddedSince.Value));
         if (factFilter.FactTypeFilter != null)
             andcond.Add(When<Fact, string[]>.ContainsAny(nameof(Fact.factType), factFilter.FactTypeFilter));
         if (factFilter.CategoryFilter != null)

@@ -21,6 +21,18 @@ namespace Oraculum
         private ILogger _logger;
         private Oraculum _oraculum;
 
+        public ILogger Logger
+        {
+            get
+            {
+                return _logger;
+            }
+            set
+            {
+                _logger = value ?? NullLogger.Instance;
+            }
+        }
+
         public SibyllaManager(Configuration oraculumConf, string configurationsPath, ILogger? logger = null)
         {
             _logger = logger ?? NullLogger.Instance;

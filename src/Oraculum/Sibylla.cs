@@ -89,12 +89,24 @@ namespace Oraculum
         private Dictionary<string, FunctionDelegate> _functions = new Dictionary<string, FunctionDelegate>();
         private Dictionary<string, FunctionDelegate> _functionsBeforeAnswerHook = new Dictionary<string, FunctionDelegate>();
 
+        public ILogger Logger
+        {
+            get
+            {
+                return _logger;
+            }
+            set
+            {
+                _logger = value ?? NullLogger.Instance;
+            }
+        }
+
         public Sibylla(Configuration conf, SibyllaConf sybillaConf, ILogger? logger = null)
         {
             _logger = logger ?? NullLogger.Instance;
 
             _conf = sybillaConf;
-            _openAiService = conf.CreateService();
+            _openAiService = conf.CreateOpenAIService();
             _logger.Log(LogLevel.Trace, $"Sibylla: Oraculum conf {JsonConvert.SerializeObject(conf)} Sibylla conf {JsonConvert.SerializeObject(_conf)}");
             _chat = new ChatCompletionCreateRequest();
             _chat.MaxTokens = sybillaConf.MaxTokens;
@@ -240,7 +252,7 @@ namespace Oraculum
                     }
                 }
             }
-            _logger.Log(LogLevel.Trace, $"Sibylla: message '{message}' with answer '{m}'");
+            _logger.Log(LogLevel.Trace, $"Sibylla[{Configuration.Title}|{this.GetHashCode()}]: message '{message}' with answer '{m}'");
             if (m.Length > 0)
             {
                 var msg = m.ToString();
