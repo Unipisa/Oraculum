@@ -12,7 +12,7 @@
 RootModule = 'lib/net7.0/OraculumCLI.dll'
 
 # Version number of this module.
-ModuleVersion = '1.3.3.0'
+ModuleVersion = '1.3.3.1'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -54,7 +54,7 @@ PowerShellVersion = '7.3.0'
 # RequiredModules = @()
 
 # Assemblies that must be loaded prior to importing this module
-# RequiredAssemblies = @()
+#RequiredAssemblies = @()
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module.
 # ScriptsToProcess = @()
@@ -72,7 +72,29 @@ PowerShellVersion = '7.3.0'
 FunctionsToExport = @()
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-CmdletsToExport = @('Add-Fact', 'Add-Facts', 'Test-Schema', 'Connect-Oraculum', 'Remove-Fact', 'Find-RelevantFacts', 'Get-Fact', 'Push-Fact', 'Get-TotalFact', 'Reset-Schema', 'Get-Facts', 'New-SibyllaConf', 'New-SibyllaSession', 'Add-FactTag', 'Remove-FactTag', 'Set-FactCategory', 'Get-TokenCount', 'Get-GPTAnswer', 'Find-Facts')
+CmdletsToExport = @(
+    'Add-Fact',
+    'Add-Facts',
+    'Test-Schema',
+    'Connect-Oraculum',
+    'Remove-Fact',
+    'Find-RelevantFacts',
+    'Get-Fact',
+    'Push-Fact',
+    'Get-TotalFact',
+    'Reset-Schema',
+    'Get-Facts',
+    'New-SibyllaConf',
+    'New-SibyllaSession',
+    'Add-FactTag',
+    'Remove-FactTag',
+    'Set-FactCategory',
+    'Get-TokenCount',
+    'Get-GPTAnswer',
+    'Find-Facts',
+    'Backup-FactsDB',
+    'Restore-FactsDB'
+)
 
 # Variables to export from this module
 VariablesToExport = '*'
