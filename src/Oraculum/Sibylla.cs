@@ -44,7 +44,6 @@ namespace Oraculum
         }
 
         public string? Title { get; set; }
-        public string? ModelDescription { get; set; }
         public MemoryConfiguration MemoryConfiguration { get; set; } = new MemoryConfiguration();
         public string? BaseSystemPrompt { get; set; }
         public string? BaseAssistantPrompt { get; set; }
