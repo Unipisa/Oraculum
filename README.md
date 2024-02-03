@@ -34,6 +34,9 @@ The project it's still in his infancy but it can be used in production if you wa
 
 ## What's new
 
+### Version 1.3.4
+- Added Backup and Restore functions to Oraculum to save and restore database
+
 ### Version 1.3.3
 - Added `UserName` option in `Oraculum` configuration to indicate the default owner id. Fixed minor bugs.
 
