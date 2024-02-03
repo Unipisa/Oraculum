@@ -494,6 +494,66 @@ public class Oraculum
         //await facts.Add(bk);
     }
 
+    public async Task<int> BackupFacts(string fn, Func<int, int, int>? progress = null)
+    {
+        var facts = _kb.Schema.GetClass<Fact>(Fact.ClassName);
+        var outf = new StreamWriter(fn);
+        var n = await facts!.CountObjects();
+        outf.WriteLine(n);
+        for (var i = 0; i < n; i += 100)
+        {
+            var r = await facts.ListObjects(100, offset: i);
+            var outt = JsonConvert.SerializeObject(r.Objects.ToList());
+            outf.WriteLine(outt.Length);
+            await outf.WriteLineAsync(outt);
+            progress?.Invoke(i, n);
+        }
+        outf.Close();
+        return n;
+    }
+
+    public async Task<int> RestoreFacts(string fn, Func<int, int, int>? progress = null)
+    {
+        var facts = _kb.Schema.GetClass<Fact>(Fact.ClassName);
+        await facts!.Delete();
+        facts = await _kb.Schema.NewClass<Fact>(Fact.ClassName);
+
+        var inf = new StreamReader(fn);
+
+        string? line;
+        line = inf.ReadLine();
+        var totalcount = int.Parse(line!);
+        var total = 0;
+        while ((line = inf.ReadLine()) != null)
+        {
+            var sz = int.Parse(line);
+            var buf = new char[sz];
+            await inf.ReadBlockAsync(buf, 0, sz);
+            var data = JsonConvert.DeserializeObject<List<WeaviateObject<Fact>>>(new string(buf));
+            var datacount = data!.Count;
+            var na = await facts!.Add(data!);
+            total += na.Count;
+            datacount -= na.Count;
+            var ids = na.Select(f => f.Id).ToList();
+            var errors = (from d in data where (!ids.Contains(d!.Id)) select d).ToList();
+            while (errors.Count > 0)
+            {
+                na = await facts.Add(errors);
+                total += na.Count;
+                datacount -= na.Count;
+                ids = na.Select(f => f.Id).ToList();
+                errors = (from d in errors where (!ids.Contains(d!.Id)) select d).ToList();
+            }
+            if (datacount > 0)
+            {
+                _logger.Log(LogLevel.Critical, $"Error adding facts, expected {data.Count} but added {na.Count}");
+            }
+            inf.ReadLine();
+            progress?.Invoke(total, totalcount);
+        }
+        return total;
+    }
+
     public async Task<ICollection<Fact>> ListFacts(long limit = 1024, long offset = 0, string? sort = null, string? order = null)
     {
         ensureConnection();
