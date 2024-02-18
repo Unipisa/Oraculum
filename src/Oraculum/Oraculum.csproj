@@ -35,7 +35,7 @@
 
   <ItemGroup>
     <PackageReference Include="Betalgo.OpenAI" Version="7.3.1" />
-    <PackageReference Include="WeaviateNET" Version="1.21.6.2" />
+    <PackageReference Include="WeaviateNET" Version="1.23.9.1" />
   </ItemGroup>
 
 </Project>
