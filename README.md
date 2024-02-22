@@ -34,6 +34,11 @@ The project it's still in his infancy but it can be used in production if you wa
 
 ## What's new
 
+### Version 1.3.5
+- **Schema change**: The `Fact` class now is annotated to allow `Weaviate.NET` to use OpenAI embeddings v3 (large model). 
+  The upgrade procedure can be explicit or if you connect to Weaviate. The upgrade procedure can be slow since all the data is exported and
+  reindexed. It is recommended to backup the database before upgrading.
+
 ### Version 1.3.4
 - Added Backup and Restore functions to Oraculum to save and restore database
 

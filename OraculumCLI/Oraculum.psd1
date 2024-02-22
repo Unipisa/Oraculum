@@ -12,7 +12,7 @@
 RootModule = 'lib/net7.0/OraculumCLI.dll'
 
 # Version number of this module.
-ModuleVersion = '1.3.3.1'
+ModuleVersion = '1.3.5.0'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -27,7 +27,7 @@ Author = 'Antonio Cisternino'
 CompanyName = 'Università di Pisa'
 
 # Copyright statement for this module
-Copyright = '(2023)'
+Copyright = '(2023-2024)'
 
 # Description of the functionality provided by this module
 Description = 'Oraculum command line interface'

@@ -12,6 +12,7 @@ using System.Reflection.Metadata;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using WeaviateNET;
+using WeaviateNET.Modules;
 using WeaviateNET.Query;
 using WeaviateNET.Query.AdditionalProperty;
 using WeaviateNET.Query.ConditionalOperator;
@@ -138,7 +139,7 @@ public class Fact_1_0
 }
 
 [IndexNullState]
-public class Fact
+public class Fact_1_1
 {
     internal const int MajorVersion = 1;
     internal const int MinorVersion = 1;
@@ -162,6 +163,40 @@ public class Fact
     public GeoCoordinates? location;
     public double? locationDistance;
     public string? locationName;
+    public string[]? editPrincipals;
+    public string? validFrom;
+    public string? validTo;
+    //public WeaviateRef[]? references;
+    public DateTime? factAdded;
+}
+
+[IndexNullState]
+[OpenAIVectorizerClass(model = "text-embedding-3-large", dimensions = 3072)]
+public class Fact
+{
+    internal const int MajorVersion = 1;
+    internal const int MinorVersion = 2;
+
+    [JsonIgnore]
+    public const string ClassName = "Facts";
+
+    [JsonIgnore]
+    public Guid? id;
+    [JsonIgnore]
+    public double? distance;
+
+    public string? factType;
+    public string? category;
+    public string[]? tags;
+    public string? title;
+    public string? content;
+    public string? citation;
+    public string? reference;
+    public DateTime? expiration;
+    public GeoCoordinates? location;
+    public double? locationDistance;
+    public string? locationName;
+    [OpenAIVectorizerProperty(skip = true)]
     public string[]? editPrincipals;
     public string? validFrom;
     public string? validTo;
@@ -486,6 +521,86 @@ public class Oraculum
             }
 
         }
+        else if (_oraculumConfig!.Properties.schemaMajorVersion == 1 && _oraculumConfig!.Properties.schemaMinorVersion == 1)
+        {
+            _logger.Log(LogLevel.Information, "UpgradeDB: upgrading from 1.1 to 1.2");
+            var facts = _kb.Schema.GetClass<Fact_1_1>(Fact_1_1.ClassName);
+            if (facts == null)
+            {
+                _logger.Log(LogLevel.Critical, "UpgradeDB: cannot get Facts class");
+                throw new Exception("Internal error: cannot get Facts class!");
+            }
+            var fn = Path.GetTempFileName();
+            var outf = new StreamWriter(fn);
+
+            _logger.Log(LogLevel.Trace, $"UpgradeDB: backing up facts into {fn}");
+
+            var n = await facts.CountObjects();
+            for (var i = 0; i < n; i += 100)
+            {
+                var r = await facts.ListObjects(100, offset: i);
+                var outt = JsonConvert.SerializeObject(r.Objects.ToList());
+                outf.WriteLine(outt.Length);
+                await outf.WriteLineAsync(outt);
+            }
+            outf.Close();
+
+            _logger.Log(LogLevel.Trace, $"UpgradeDB: exported {n} facts");
+
+            await facts.Delete();
+            var factsNew = await _kb.Schema.NewClass<Fact>(Fact.ClassName);
+
+            _oraculumConfig!.Properties.schemaMajorVersion = Fact.MajorVersion;
+            _oraculumConfig!.Properties.schemaMinorVersion = Fact.MinorVersion;
+            await _oraculumConfig!.Save();
+
+            var inf = new StreamReader(fn);
+
+            string? line;
+            var total = 0;
+            while ((line = inf.ReadLine()) != null)
+            {
+                _logger.Log(LogLevel.Trace, $"UpgradeDB: Written {total} facts");
+                var sz = int.Parse(line);
+                var buf = new char[sz];
+                await inf.ReadBlockAsync(buf, 0, sz);
+                var facts_1_1 = JsonConvert.DeserializeObject<List<WeaviateObject<Fact_1_1>>>(new string(buf));
+                var facts_1_2 = facts_1_1!.ConvertAll(f =>
+                {
+                    var o = factsNew.Create();
+                    o.Properties.category = f.Properties.category;
+                    o.Properties.citation = f.Properties.citation;
+                    o.Properties.content = f.Properties.content;
+                    o.Properties.expiration = f.Properties.expiration;
+                    o.Properties.factType = f.Properties.factType;
+                    o.Properties.reference = f.Properties.reference;
+                    o.Properties.tags = f.Properties.tags;
+                    o.Properties.title = f.Properties.title;
+                    o.Properties.location = f.Properties.location;
+                    o.Properties.locationDistance = f.Properties.locationDistance;
+                    o.Properties.locationName = f.Properties.locationName;
+                    o.Properties.editPrincipals = f.Properties.editPrincipals;
+                    o.Properties.validFrom = f.Properties.validFrom;
+                    o.Properties.validTo = f.Properties.validTo;
+                    o.Properties.factAdded = f.Properties.factAdded;
+
+                    return o;
+                });
+                var na = await factsNew.Add(facts_1_2);
+                total += na.Count;
+                if (na.Count != facts_1_2.Count)
+                {
+                    _logger.Log(LogLevel.Critical, $"UpgradeDB: error adding facts, expected {facts_1_2.Count} but added {na.Count}");
+                }
+                inf.ReadLine();
+            }
+            if (total != n)
+            {
+                _logger.Log(LogLevel.Critical, $"UpgradeDB: error adding facts, expected {n} but added {total}");
+            }
+
+        }
+
         //var facts = _kb.Schema.GetClass<Fact>(Fact.ClassName);
         //var r = await facts.ListObjects(100);
         //var bk = r.Objects.ToList();
