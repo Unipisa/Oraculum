@@ -1,0 +1,27 @@
+@import "../fact-dialog/fact-dialog.component.scss";
+
+.file-upload-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 42px;
+}
+
+.file-name {
+  border: none;
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+.upload-btn {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+input[type="file"] {
+  display: none;
+}

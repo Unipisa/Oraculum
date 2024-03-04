@@ -1,0 +1,30 @@
+@use "@angular/material" as mat;
+
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 48px;
+  padding: 48px;
+}
+
+mat-card {
+  width: 300px;
+  min-height: 130px;
+  justify-content: space-between;
+  @include mat.elevation(4);
+}
+
+.new-card {
+  border: 2px dashed lightblue;
+  @include mat.elevation(0);
+  button {
+    height: 100%;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 8px;
+    span,
+    mat-icon {
+      font-size: x-large;
+    }
+  }
+}

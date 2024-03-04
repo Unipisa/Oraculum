@@ -1,0 +1,19 @@
+<div class="card-container">
+  <ng-container *ngFor="let bot of myBots">
+    <mat-card *ngIf="!bot.hidden">
+      <mat-card-header>
+        <mat-card-title>{{ bot.title }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-actions align="end">
+        <button mat-flat-button color="primary" (click)="selectBot(bot)">
+          {{language.enter}}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </ng-container>
+
+  <!-- Nuovo card for creating new items -->
+  <!-- <mat-card class="new-card">
+    <button mat-button><span>Nuova</span><br /><mat-icon>add</mat-icon></button>
+  </mat-card> -->
+</div>

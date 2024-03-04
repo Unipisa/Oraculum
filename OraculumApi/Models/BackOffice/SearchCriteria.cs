@@ -1,10 +1,4 @@
-using System;
-using System.Linq;
-using System.IO;
 using System.Text;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
@@ -65,6 +59,9 @@ namespace OraculumApi.Models.BackOffice
 
         [DataMember(Name = "categoryFilter")]
         public string[]? CategoryFilter { get; set; }
+
+        [DataMember(Name = "autoCutPercentage")]
+        public float? AutoCutPercentage { get; set; }
 
         /// <summary>
         /// Filter facts by tags.

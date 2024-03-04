@@ -1,0 +1,68 @@
+
+  .conf-container {
+    width: 100%;
+    display: flex;
+    margin-top: 5%;
+  }
+
+  .modals-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, auto);
+    background-color: var(--grey-200);
+    margin: 3% auto;
+    padding: 20px;
+    margin-left: 5%;
+    border-radius: 2%;
+  }
+
+  .setvalutazione {
+    grid-column: 1 / span 1;
+    grid-row: 1 / span 1;
+  }
+
+  .ndomande {
+    grid-column: 1 / span 1;
+    grid-row: 2 / span 1;
+    padding-left: 6%;
+  }
+
+  .upload {
+    grid-column: 6 / span 1;
+    grid-row: 1 / span 1;
+  }
+
+  .esporta {
+    grid-column: 6 / span 1;
+    grid-row: 3 / span 1;
+  }
+
+
+  .button-eval-container {
+    width: 30%;
+    padding-left: 3%;
+    margin-top: 6%;
+  }
+
+  .button-eval-container .apply-button {
+    padding: 24px;
+  }
+
+
+  .buttonicon {
+    background-color: transparent;
+    color: black;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .result-container{
+    font-size: 18px;
+    font-weight: bold;
+    margin-left: 5%;
+    margin-right: 5%;
+  }
+
+  table {
+    width: 100%;
+  }

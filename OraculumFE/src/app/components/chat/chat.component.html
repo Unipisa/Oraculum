@@ -1,0 +1,163 @@
+<div class="chatbot-container">
+  <div class="chatbot-header">
+    <div class="chatbot-header-title">
+      <h4>{{ botInfo.title }}</h4>
+      <button mat-flat-button (click)="newChat()" [disabled]="buttonDisabled">
+        <mat-icon>add</mat-icon>
+        {{language.newChat}}
+      </button>
+    </div>
+  </div>
+  <div class="chatbot-body">
+    <div class="chatbot-body-messages scrollable" #messagesContainer>
+      <ng-container *ngIf="!loadingChats; else loadingBlock">
+        <br />
+        <div
+          class="chatbot-body-message"
+          *ngFor="let message of messages; let i = index"
+          [ngClass]="message.sender.includes('assistant') ? 'left' : 'right'"
+        >
+          <div class="chatbot-body-message-text">
+            <p
+              class="message-text"
+              [ngClass]="i == 0 ? 'welcome-text' : ''"
+              [innerHtml]="convertTextToLinks(message.text)"
+            >
+              {{ message.text }}
+            </p>
+
+            <!-- <span [innerHTML]="message.text"></span> -->
+            <ng-container *ngIf="message.url">
+              <button
+                mat-button
+                (click)="openUrl(message.url)"
+                class="chatbot-body-message-open"
+              >
+                APRI
+              </button>
+            </ng-container>
+            <div
+              class="chatbot-body-message-footer"
+              *ngIf="message.sender == 'assistant' && i !== 0"
+            >
+              <ng-container *ngIf="message.completed">
+                <button
+                  mat-icon-button
+                  class="small-icon-button"
+                  (click)="copyContent(message.text)"
+                >
+                  <mat-icon fontSet="material-icons-outlined">copy</mat-icon>
+                </button>
+                <div class="right-footer-container">
+                  <button
+                    mat-icon-button
+                    class="small-icon-button"
+                    (click)="giveFeedbackMessage(message.id, true)"
+                    *ngIf="
+                      message.feedback == true || message.feedback == undefined
+                    "
+                    [disabled]="message.feedback != undefined"
+                  >
+                    <mat-icon fontSet="material-icons-outlined"
+                      >thumb_up</mat-icon
+                    >
+                  </button>
+                  <button
+                    mat-icon-button
+                    class="small-icon-button"
+                    (click)="giveFeedbackMessage(message.id, false)"
+                    *ngIf="
+                      message.feedback == false || message.feedback == undefined
+                    "
+                    [disabled]="message.feedback != undefined"
+                  >
+                    <mat-icon fontSet="material-icons-outlined"
+                      >thumb_down</mat-icon
+                    >
+                  </button>
+                  <!-- <button
+                    mat-icon-button
+                    class="small-icon-button"
+                    (click)="readMessage(message.text)"
+                  >
+                    <mat-icon fontSet="material-icons-outlined">read</mat-icon>
+                  </button> -->
+                  <div
+                    class="chatbot-body-message-time"
+                    *ngIf="message.sender.includes('assistant')"
+                  >
+                    <span>
+                      {{ message.timestamp }}
+                      <!-- <mat-icon *ngIf="!message.sender.includes('assistant')"
+                        >done_all</mat-icon
+                      > -->
+                    </span>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+            <ng-template #feedback>
+              <div
+                class="chatbot-body-message-feedback"
+                *ngIf="!!message.feedback"
+              >
+                <div class="chatbot-body-message-feedback-text">
+                  <p>{{ language.thanksFeedback}}</p>
+                </div>
+              </div>
+            </ng-template>
+          </div>
+          <div
+            class="chatbot-body-message-time user-message-time"
+            *ngIf="!message.sender.includes('assistant')"
+          >
+            <p>
+              {{ message.timestamp }}
+              <!-- <mat-icon *ngIf="!message.sender.includes('assistant')"
+                >done_all</mat-icon
+              > -->
+            </p>
+          </div>
+        </div>
+        <!--sta scrivendo-->
+        <div
+          class="chatbot-header-title-writing"
+          *ngIf="loading"
+          style="margin-left: 24px"
+        >
+          {{ loadingText }}
+          <div class="dot-flashing"></div>
+        </div>
+      </ng-container>
+      <ng-template #loadingBlock>
+        <div class="spinner-container">
+          <mat-spinner></mat-spinner>
+        </div>
+      </ng-template>
+    </div>
+    <div class="chatbot-body-input">
+      <button
+        mat-icon-button
+        (click)="openRecognitionModal()"
+        class="mic-button"
+      >
+        <mat-icon>mic</mat-icon>
+      </button>
+      <input
+        type="text"
+        [placeholder]="language.askQuestion"
+        [(ngModel)]="chatInput"
+        (keypress)="onKey($event)"
+        autofocus
+      />
+      <button
+        mat-icon-button
+        (click)="sendMessage()"
+        [disabled]="!this.chatInput || this.chatInput.length == 0 || loading"
+        #textInput
+      >
+        <mat-icon>send</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

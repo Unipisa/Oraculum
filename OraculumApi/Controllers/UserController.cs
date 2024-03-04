@@ -1,14 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
 using OraculumApi.Attributes;
-using OraculumApi.Models.BackOffice;
-using Oraculum;
-using System.Text;
-using System.Runtime.CompilerServices;
-using Microsoft.OpenApi.Any;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
@@ -34,7 +26,7 @@ public class UserController : Controller
     [HttpGet]
     [Route("me")]
     [ValidateModelState]
-    [Authorize]
+    [DynamicAuthorize("frontoffice")]
     [SwaggerOperation("GetUserprofileInformations")]
     public Task<IActionResult> GetUserprofileInformations()
     {
@@ -50,5 +42,29 @@ public class UserController : Controller
         }
 
         return Task.FromResult<IActionResult>(Ok(userProfile));
+    }
+
+    [HttpGet]
+    [Route("login-oidc")]
+    public IActionResult LoginOIDC(String redirectUrl){
+        return Redirect(redirectUrl);   // TODO: revise me, check for security issues
+    }
+
+    [HttpGet]
+    [Route("oidc-info")]
+    public IActionResult OidcInfo(){
+        // get tenantId from context
+        var tenantId = HttpContext.Items["TenantId"] as string;
+
+        if(tenantId == null)
+            return StatusCode(StatusCodes.Status500InternalServerError, "TenantId not found in context");
+
+        if(!_configuration.GetSection("Tenants").GetChildren().Any(x => x.Key == tenantId))
+            return StatusCode(StatusCodes.Status500InternalServerError, "TenantId not found in configuration");
+
+        return Ok(new { 
+            Authority = _configuration.GetSection("Tenants").GetSection(tenantId)["Security:OIDC:Authority"],
+            ClientId = _configuration.GetSection("Tenants").GetSection(tenantId)["Security:OIDC:ClientId"],
+        });
     }
 }

@@ -1,0 +1,132 @@
+<div class="kpi-container">
+  <div class="conf-container">
+    <div class="modals-container">
+      <div class="setvalutazione">
+        <button mat-flat-button color="primary" class="buttonicon">
+          <mat-icon>edit_note</mat-icon>
+          <span>Set di valutazione</span>
+        </button>
+      </div>
+
+      <div class="ndomande">
+        <p>25 domande</p>
+      </div>
+
+      <div class="esporta">
+        <button
+          mat-flat-button
+          color="primary"
+          class="buttonicon"
+          (click)="importDialog.saveJsonToFile()"
+        >
+          <mat-icon>file_download</mat-icon>
+          <span>Esporta</span>
+        </button>
+      </div>
+
+      <div class="upload">
+        <button
+          mat-flat-button
+          color="primary"
+          class="buttonicon"
+          (click)="openDialog()"
+        >
+          <mat-icon>file_upload</mat-icon>
+          <span>Carica nuovo set</span>
+        </button>
+      </div>
+    </div>
+    <div class="button-eval-container">
+      <button mat-flat-button color="primary" class="apply-button">
+        Esegui valutazione
+      </button>
+    </div>
+  </div>
+
+  <div class="result-container">
+    <p>Valutazione</p>
+    <div class="tabella">
+      <div class="mat-elevation-z8">
+        <table mat-table [dataSource]="dataSource">
+          <!-- Data Column -->
+          <ng-container matColumnDef="Data">
+            <th mat-header-cell *matHeaderCellDef><b>Data</b></th>
+            <td mat-cell *matCellDef="let element">{{ element.Data }}</td>
+          </ng-container>
+
+          <!-- Faithfulness Column -->
+          <ng-container matColumnDef="Faithfulness">
+            <th mat-header-cell *matHeaderCellDef><b>Faithfulness</b></th>
+            <td mat-cell *matCellDef="let element">
+              {{ element.Faithfulness }}
+            </td>
+          </ng-container>
+
+          <!-- Answer Relevancy  Column -->
+          <ng-container matColumnDef="Answerrelevancy">
+            <th mat-header-cell *matHeaderCellDef><b>Answer Relevancy</b></th>
+            <td mat-cell *matCellDef="let element">
+              {{ element.Answerrelevancy }}
+            </td>
+          </ng-container>
+
+          <!-- Context Precision Column -->
+          <ng-container matColumnDef="Contextprecision">
+            <th mat-header-cell *matHeaderCellDef><b>Context Precision</b></th>
+            <td mat-cell *matCellDef="let element">
+              {{ element.Contextprecision }}
+            </td>
+          </ng-container>
+
+          <!-- Context Recall Column -->
+          <ng-container matColumnDef="Contextrecall">
+            <th mat-header-cell *matHeaderCellDef><b>Context Recall</b></th>
+            <td mat-cell *matCellDef="let element">
+              {{ element.Contextrecall }}
+            </td>
+          </ng-container>
+
+          <!-- Answer Similarity Column -->
+          <ng-container matColumnDef="Answersimilarity">
+            <th mat-header-cell *matHeaderCellDef><b>Answer Similarity</b></th>
+            <td mat-cell *matCellDef="let element">
+              {{ element.Answersimilarity }}
+            </td>
+          </ng-container>
+
+          <!--Answer Correctness Column -->
+          <ng-container matColumnDef="Answercorrectness">
+            <th mat-header-cell *matHeaderCellDef><b>Answer Correctness</b></th>
+            <td mat-cell *matCellDef="let element">
+              {{ element.Answercorrectness }}
+            </td>
+          </ng-container>
+
+          <!--Answer Correctness Column -->
+          <ng-container matColumnDef="Totalscore">
+            <th mat-header-cell *matHeaderCellDef><b>Total Score</b></th>
+            <td mat-cell *matCellDef="let element">{{ element.Totalscore }}</td>
+          </ng-container>
+
+          <!--Answer Correctness Column -->
+          <ng-container matColumnDef="Esporta">
+            <th mat-header-cell *matHeaderCellDef><b>Esporta</b></th>
+            <td mat-cell *matCellDef="let element">
+              <b>{{ element.Esporta }}</b>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+
+        <mat-paginator
+          [pageSizeOptions]="[5, 10, 20]"
+          showFirstLastButtons
+          aria-label="Select page of periodic elements"
+        >
+        </mat-paginator>
+      </div>
+    </div>
+  </div>
+</div>

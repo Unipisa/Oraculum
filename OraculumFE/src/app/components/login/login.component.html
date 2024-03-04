@@ -1,0 +1,42 @@
+<!-- <div class="login-container">
+  <form (ngSubmit)="onLogin()">
+    <div>
+      <label for="username">Username:</label>
+      <input type="text" id="username" [(ngModel)]="username" name="username" required>
+    </div>
+    <div>
+      <label for="password">Password:</label>
+      <input type="password" id="password" [(ngModel)]="password" name="password" required>
+    </div>
+    <button type="submit">Login</button>
+  </form>
+</div> -->
+<div class="container">
+  <h1 id="title">{{language.sibyllaBackoffice}}</h1>
+  <button class="button" (click)="login()">
+    <div class="button__content">
+      <!-- <mat-icon>login</mat-icon> -->
+      <div class="button__icon">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="feather feather-log-in"
+        >
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+          <polyline points="10 17 15 12 10 7"></polyline>
+          <line x1="15" y1="12" x2="3" y2="12"></line>
+        </svg>
+      </div>
+      <p class="button__text">{{language.enter}}</p>
+    </div>
+  </button>
+
+  <p class="credits"><strong>Cineca R&D 2024</strong></p>
+</div>

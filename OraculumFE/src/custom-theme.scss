@@ -1,0 +1,64 @@
+@use "@angular/material" as mat;
+// @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto:wght@100&display=swap");
+
+$purple-100: #6a6abd;
+$purple-200: #6868a7;
+$purple-300: #5f5d98;
+$purple-400: #4e4971;
+$purple-500: #3c354a;
+$purple-600: #312a40;
+$purple-700: #2c243b;
+$purple-800: #261e35;
+$purple-900: #565061;
+
+$grey-100: #e2e2e2;
+$grey-200: #d8d8d8;
+$grey-300: #bababa;
+$grey-400: #989898;
+$grey-500: #767676;
+$grey-600: #5a5a5a;
+$grey-700: #3c3c3c;
+$scrollbar-color: hsla(0, 0%, 100%, 0.2);
+
+$purple-palette: (
+  "100": $purple-100,
+  "200": $purple-200,
+  "300": $purple-300,
+  "400": $purple-400,
+  "500": $purple-500,
+  "600": $purple-600,
+  "700": $purple-700,
+  "800": $purple-800,
+  "900": $purple-900,
+);
+
+$grey-palette: (
+  "100": $grey-100,
+  "200": $grey-200,
+  "300": $grey-300,
+  "400": $grey-400,
+  "500": $grey-500,
+  "600": $grey-600,
+  "700": $grey-700,
+);
+
+// Define your own color palettes
+$app-primary: mat.define-palette(mat.$blue-palette, 700);
+$app-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+$app-warn: mat.define-palette(mat.$red-palette);
+$app-grey: mat.define-palette(mat.$grey-palette);
+
+$app-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: $app-primary,
+      accent: $app-accent,
+      warn: $app-warn,
+    ),
+  )
+);
+// Include the base styles for Angular Material
+@include mat.core();
+
+// Include all component themes using the custom theme
+@include mat.all-component-themes($app-theme);

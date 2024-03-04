@@ -7,9 +7,9 @@ using OraculumApi.Models.FrontOffice;
 using Oraculum;
 using System.Text;
 using System.Threading.Channels;
-using Microsoft.OpenApi.Any;
 using Asp.Versioning;
-using Microsoft.AspNetCore.Authorization;
+using OraculumApi.Models.BackOffice;
+using OraculumApi.Models;
 
 namespace OraculumApi.Controllers;
 
@@ -23,52 +23,35 @@ public class FrontOfficeController : Controller
     private readonly ILogger<FrontOfficeController> _logger;
     private readonly SibyllaManager _sibyllaManager;
     private readonly IConfiguration _configuration;
+    private ChatDetailService _chatDetailService;
+    private BaseService<Message> _messageService;
+    private BaseService<Feedback> _feedbackService;
+    private BaseService<SibyllaPersistentConfig> _sibyllaConfigService;
+    private FrontofficeService _frontofficeService;
 
-    public FrontOfficeController(ILogger<FrontOfficeController> logger, SibyllaManager sibyllaManager, IConfiguration configuration)
+    public FrontOfficeController(ILogger<FrontOfficeController> logger, SibyllaManager sibyllaManager, IConfiguration configuration, ChatDetailService chatDetailService, BaseService<Message> messageService, BaseService<Feedback> feedbackService, BaseService<SibyllaPersistentConfig> sibyllaConfigService)
     {
         _logger = logger;
         _sibyllaManager = sibyllaManager;
         _configuration = configuration;
+        _chatDetailService = chatDetailService;
+        _messageService = messageService;
+        _feedbackService = feedbackService;
+        _sibyllaConfigService = sibyllaConfigService;
+        _frontofficeService = new FrontofficeService(configuration, sibyllaManager, sibyllaConfigService, chatDetailService, messageService);
     }
 
-    //only to temporarily make the apis work
-    //TODO: simply copied from the SibyllaSandbox controller, need to investigating on how it works
     [ApiExplorerSettings(IgnoreApi = true)]
-    public async Task<IActionResult> Index()
+    public IActionResult ClearSession()
     {
-        Sibylla sibylla = await ConnectSibylla();
-        return View(sibylla);
+        HttpContext.Session.Clear();
+        return Ok();
     }
 
-    //only to temporarily make the apis work
-    //TODO: simply copied from the SibyllaSandbox controller, need to investigating on how it works
-    [ApiExplorerSettings(IgnoreApi = true)]
-    private async Task<Sibylla> ConnectSibylla()
-    {
-        var sibyllaName = _configuration["SibyllaConf"] ?? "Demo";
-        var sibyllaKey = HttpContext.Session.GetString("sibyllaRef");
-        if (sibyllaKey == null)
-        {
-            var (id, _) = await _sibyllaManager.AddSibylla(sibyllaName, expiration: DateTime.Now.AddMinutes(60));
-            HttpContext.Session.SetString("sibyllaRef", id.ToString());
-            sibyllaKey = id.ToString();
-        }
-        var sibylla = _sibyllaManager.GetSibylla(sibyllaName, Guid.Parse(sibyllaKey));
-        return sibylla;
-    }
-
-    /// <summary>
-    /// Delete a chat by id
-    /// </summary>
-    /// <param name="chatId"></param>
-    /// <param name="sibyllaId"></param>
-    /// <response code="200">OK</response>
-    /// <response code="404">Not Found</response>
-    /// <response code="500">Internal Server Error</response>
     [HttpDelete]
     [Route("sibylla/{sibyllaId}/chat/{chatId}")]
     [ValidateModelState]
-    [Authorize(Policy = "FrontOffice")]
+    [DynamicAuthorize("frontoffice")]
     [SwaggerOperation("DeleteChatsChatId")]
     public virtual IActionResult DeleteChatsChatId([FromRoute][Required] string chatId, [FromRoute][Required] string sibyllaId)
     {
@@ -77,200 +60,144 @@ public class FrontOfficeController : Controller
 
     [HttpGet]
     [Route("sibylla")]
-    [Authorize(Policy = "FrontOffice")]
-    public IActionResult GetAllSibyllae()
+    [DynamicAuthorize("frontoffice")]
+    public async Task<ActionResult<SibyllaInfoDto>> GetAllSibyllae()
     {
-        throw new NotImplementedException();
+        var sibyllae = await _frontofficeService.GetAllSibyllaeInfo();
+        return Ok(sibyllae);
     }
 
     [HttpGet]
     [Route("sibylla/{sibyllaId}/chat")]
-    [Authorize(Policy = "FrontOffice")]
-    public IActionResult GetChats([FromRoute] string sibyllaId)
+    [DynamicAuthorize("frontoffice")]
+    public async Task<IActionResult> GetChats([FromRoute] string sibyllaId)
     {
-        throw new NotImplementedException();
+        var chatDetails = await _chatDetailService.GetByProperty<string>("sibyllaId", sibyllaId);
+
+        if (chatDetails == null) return Ok(new List<ChatDetailDTO>());
+
+        var chatDetailDTOs = chatDetails.Select(chatDetail => new ChatDetailDTO
+        {
+            Id = chatDetail.id,
+            SibyllaId = chatDetail.sibyllaId,
+            CreationTimestamp = chatDetail.creationTimestamp,
+            IsActive = _sibyllaManager.IsSibyllaActive(sibyllaId, Guid.Parse(chatDetail.sibyllaRef!))
+        }).ToList();
+
+        return Ok(chatDetailDTOs);
     }
 
     [HttpPost]
     [Route("sibylla/{sibyllaId}/chat")]
-    [Authorize(Policy = "FrontOffice")]
-    public IActionResult PostChat([FromRoute] string sibyllaId, [FromBody] Message message)
+    [DynamicAuthorize("frontoffice")]
+    public async Task<IActionResult> PostChat([FromRoute] string sibyllaId)
     {
-        throw new NotImplementedException();
+        if (sibyllaId == null)
+            return BadRequest();
+            
+        var chatDetailDTO = await _frontofficeService.CreateChat(HttpContext, sibyllaId);
+        return Ok(chatDetailDTO);
     }
 
     [HttpGet]
     [Route("sibylla/{sibyllaId}/chat/{chatId}")]
-    [Authorize(Policy = "FrontOffice")]
-    public IActionResult GetChatById([FromRoute] string sibyllaId, [FromRoute] string chatId)
+    [DynamicAuthorize("frontoffice")]
+    public async Task<IActionResult> GetChatById([FromRoute] string sibyllaId, [FromRoute] string chatId)
     {
-        throw new NotImplementedException();
+        var chatDetailDTO = await _frontofficeService.GetChatById(sibyllaId, chatId);
+
+        if (chatDetailDTO == null) return NotFound();
+
+        return Ok(chatDetailDTO);
     }
 
     [HttpPost]
     [Route("sibylla/{sibyllaId}/chat/{chatId}/message")]
-    [Authorize(Policy = "FrontOffice")]
-    public IActionResult PostMessage([FromRoute] string sibyllaId, [FromRoute] string chatId, [FromBody] Message message)
+    [DynamicAuthorize("frontoffice")]
+    public async Task<IActionResult> PostMessage([FromRoute] string sibyllaId, [FromRoute] string chatId, [FromBody] MessageDTO message)
     {
-        throw new NotImplementedException();
+        return await _frontofficeService.AddMessageAndStreamAnswer(sibyllaId, chatId, message);
     }
 
     [HttpPost]
     [Route("sibylla/{sibyllaId}/chat/{chatId}/feedback")]
-    [Authorize(Policy = "FrontOffice")]
-    public IActionResult PostFeedback([FromRoute] string sibyllaId, [FromRoute] string chatId, [FromBody] Feedback feedback)
+    [DynamicAuthorize("frontoffice")]
+    public async Task<IActionResult> PostFeedback([FromRoute] string sibyllaId, [FromRoute] string chatId, [FromBody] FeedbackDTO feedback)
     {
-        throw new NotImplementedException();
+        if (feedback.Text == null && feedback.Rating == null) return BadRequest();
+        var chatDetail = await _chatDetailService.Get(Guid.Parse(chatId));
+        if (chatDetail == null || chatDetail.sibyllaId != sibyllaId) return BadRequest();
+        if (feedback.FactId != null && feedback.MessageId == null) return BadRequest();
+        if (feedback.MessageId != null)
+        {
+            if (chatDetail.messagesIds == null) return BadRequest();
+            if (!chatDetail.messagesIds.Any(m => m == feedback.MessageId)) return BadRequest();
+            if (feedback.FactId != null)
+            {
+                var message = await _messageService.Get(Guid.Parse(feedback.MessageId));
+                if (message == null) return StatusCode(StatusCodes.Status500InternalServerError);
+                if (message.factIds == null && message.extraFactIds == null) return BadRequest();
+                if (
+                    message.factIds != null && !message.factIds.Any(f => f == feedback.FactId)
+                    && message.extraFactIds != null && !message.extraFactIds.Any(f => f == feedback.FactId)
+                    ) return BadRequest();
+            }
+        }
+
+        var feedbackId = await _feedbackService.Add(new Feedback
+        {
+            text = feedback.Text,
+            rating = feedback.Rating,
+            sibyllaId = sibyllaId,
+            chatId = chatId,
+            messageId = feedback.MessageId,
+            factId = feedback.FactId,
+            timestamp = DateTime.Now
+        });
+
+        return Ok(new { id = feedbackId });
     }
 
     [HttpGet]
     [Route("reference/{id}")]
-    [Authorize(Policy = "FrontOffice")]
+    [DynamicAuthorize("frontoffice")]
     public IActionResult GetReferenceById([FromRoute] string id)
     {
         throw new NotImplementedException();
     }
 
-
-    [HttpPost]
-    [Route("answerStream/{question}")]
-    [Authorize(Policy = "FrontOffice")]
-    public async Task<IActionResult> AnswerStream([FromRoute][Required] string question)
-    {
-        var Sibylla = await ConnectSibylla();
-        var answerid = Guid.NewGuid().ToString();
-
-        var channel = Channel.CreateUnbounded<string>();
-
-        _ = WriteToChannel(Sibylla, question, answerid, channel.Writer);
-
-        // Stream the response as Server-Sent Events
-        return new PushStreamResult(
-            async (stream, _, cancellationToken) =>
-            {
-                var writer = new StreamWriter(stream);
-                await foreach (var chunk in channel.Reader.ReadAllAsync(cancellationToken))
-                {
-                    if (!string.IsNullOrEmpty(chunk))
-                    {
-                        await writer.WriteAsync($"data: {chunk}\n\n");
-                        await writer.FlushAsync();
-                    }
-                }
-            }, "text/event-stream");
-    }
-
-    [HttpPost]
-    [Route("answer/{question}")]
-    [Authorize(Policy = "FrontOffice")]
-    public async Task<string> Answer(string question)
-    {
-        var Sibylla = await ConnectSibylla();
-        var answerid = Guid.NewGuid().ToString();
-        _sibyllaManager.Response.Add(answerid, new List<string>());
-        var t = Task.Run(() =>
-        {
-            var ena = Sibylla.AnswerAsync(question);
-            var en = ena.GetAsyncEnumerator();
-            while (true)
-            {
-                var j = en.MoveNextAsync();
-                j.AsTask().Wait();
-                if (!j.Result)
-                    break;
-                lock (_sibyllaManager.Response)
-                {
-                    _sibyllaManager.Response[answerid].Add(en.Current);
-                }
-            }
-            lock (_sibyllaManager.Completed)
-            {
-                _sibyllaManager.Completed.Add(answerid);
-            }
-        }
-        );
-        return answerid;
-    }
-
-    [HttpGet]
-    [Route("getanswer/{answerid}")]
-    [Authorize(Policy = "FrontOffice")]
-    public string GetAnswer(string answerid)
-    {
-        lock (_sibyllaManager.Response)
-        {
-            if (!_sibyllaManager.Response.ContainsKey(answerid))
-            {
-                HttpContext.Response.StatusCode = 204;
-                return "";
-            }
-            var r = _sibyllaManager.Response[answerid];
-            if (r.Count == 0 && _sibyllaManager.Completed.Contains(answerid))
-            {
-                _sibyllaManager.Response.Remove(answerid);
-                _sibyllaManager.Completed.Remove(answerid);
-                HttpContext.Response.StatusCode = 204;
-                return "";
-            }
-            var ret = new StringBuilder();
-            foreach (var s in r)
-            {
-                ret.Append(s);
-            }
-            r.Clear();
-            return ret.ToString();
-        }
-    }
-
     //api di debug per fare le metriche, metodo sincrono
-    [HttpGet]
-    [Route("getanswer/debug/{query}")]
-    [Authorize(Policy = "FrontOffice")]
-    public async Task<IActionResult> GetAnswerDebugAsync(string query, int limit = 10)
+    [HttpPost]
+    [Route("debug/answer")]
+    [DynamicAuthorize("frontoffice")]
+    public async Task<IActionResult> GetAnswerDebugAsync([FromBody] DebugRequestModel model)
     {
-        var Sibylla = await ConnectSibylla();
-        var answer = await Sibylla.Answer(query);
+        if (model.OneShot)
+            this.ClearSession();
+        var (Sibylla, SibyllaRef) = await _frontofficeService.ConnectSibylla(HttpContext, _configuration["SibyllaConf"] ?? "Demo", HttpContext.Session.GetString("sibyllaRef"));
+        HttpContext.Session.SetString("sibyllaRef", SibyllaRef);
+        var answer = await Sibylla.Answer(model.Query);
         var prompt = Sibylla.Configuration.BaseSystemPrompt;
-        var facts = await _sibyllaManager.FindRelevantFacts(query, null, limit);
-        var factsList = facts.Select(f => Models.BackOffice.Fact.FromOraculumFact(f)).ToList();
+        var usedFacts = await _sibyllaManager.FindRelevantFacts(
+                model.Query,
+                factTypeFilter: Sibylla.Configuration.MemoryConfiguration.FactFilter,
+                categoryFilter: Sibylla.Configuration.MemoryConfiguration.CategoryFilter,
+                tagsFilter: Sibylla.Configuration.MemoryConfiguration.TagFilter,
+                limit: Sibylla.Configuration.MemoryConfiguration.Limit,
+                autoCutPercentage: Sibylla.Configuration.MemoryConfiguration.AutoCutPercentage
+            );
+        var factsList = usedFacts.Select(f => Models.BackOffice.Fact.FromOraculumFact(f)).ToList();
         return Ok(new { answer, prompt, factsList });
     }
 
-    private async Task WriteToChannel(Sibylla sibylla, string question, string answerid, ChannelWriter<string> writer)
+    [HttpPost]
+    [Route("sibylla/{sibyllaId}/chat-explain/{chatId}/message")]
+    [DynamicAuthorize("frontoffice")]
+    /* Known issue: Chatting on a chat previously used with the sibylla/{sibyllaId}/chat/{chatId}/message does not work due to issues with streamings. */
+    public async Task<IActionResult> PostMessageExplain([FromRoute] string sibyllaId, [FromRoute] string chatId, [FromBody] MessageDTO message)
     {
-        await foreach (var fragment in sibylla.AnswerAsync(question))
-        {
-            await writer.WriteAsync(fragment);
-        }
-        writer.TryComplete();
+        var (answer, prompt, userMessageId, assistantMessageId, usedFactsList, extraFactsList) = await _frontofficeService.AddMessageAndAnswerExplain(sibyllaId, chatId, message);
+
+        return Ok(new { answer, prompt, userMessageId, assistantMessageId, usedFactsList, extraFactsList });
     }
 }
-
-public class PushStreamResult : IActionResult
-{
-    private readonly Func<Stream, Action<Exception>, CancellationToken, Task> _onStreamAvailable;
-    private readonly string _contentType;
-
-    public PushStreamResult(Func<Stream, Action<Exception>, CancellationToken, Task> onStreamAvailable, string contentType = null)
-    {
-        _onStreamAvailable = onStreamAvailable ?? throw new ArgumentNullException(nameof(onStreamAvailable));
-        _contentType = contentType ?? "text/event-stream";
-    }
-
-    public async Task ExecuteResultAsync(ActionContext context)
-    {
-        if (context == null)
-            throw new ArgumentNullException(nameof(context));
-
-        var response = context.HttpContext.Response;
-        response.ContentType = _contentType;
-        response.Headers["Cache-Control"] = "no-store, no-cache";
-        response.Headers["Connection"] = "keep-alive";
-
-        await _onStreamAvailable(response.Body, ex =>
-        {
-            context.HttpContext.Abort();
-        }, context.HttpContext.RequestAborted);
-    }
-}
-

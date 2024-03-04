@@ -1,0 +1,75 @@
+@use "@angular/material" as mat;
+@use "./../../../custom-theme.scss" as theme;
+
+.main-container {
+  display: flex;
+  .search-container {
+    width: 35%;
+    padding: 16px 16px 0 24px;
+    .search-form {
+      display: flex;
+      flex-direction: column;
+      max-height: 150px;
+    }
+    .results-container {
+      max-height: calc(100vh - 140px - 150px - 16px);
+      padding-right: 16px;
+      overflow: auto;
+      .result {
+        background: #{mat.get-color-from-palette(theme.$app-primary, 500, 0.2)};
+        border-radius: 12px;
+        margin-bottom: 16px;
+        padding: 8px 10px;
+        box-sizing: border-box;
+        border: 3px solid transparent;
+        cursor: pointer;
+        .res-title {
+          margin: 0 0 8px 0;
+          font-weight: bold;
+        }
+        .res-citation {
+          margin: 0;
+        }
+        &.selected-result {
+          border: 3px solid orange;
+        }
+      }
+    }
+  }
+  .detail-container {
+    padding: 16px;
+    width: 65%;
+    .detail-header {
+      display: flex;
+      gap: 16px;
+      justify-content: flex-end;
+    }
+    .fact-detail {
+      padding: 16px;
+      background-color: #{mat.get-color-from-palette(
+          theme.$app-primary,
+          50,
+          0.8
+        )};
+      border-radius: 16px;
+      p {
+        margin: 0;
+      }
+      h2 {
+        margin: 0;
+      }
+      .title-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .score {
+          font-weight: bold;
+          font-size: large;
+          background: #{mat.get-color-from-palette(theme.$app-primary, 500, 0.3)};
+          padding: 4px 6px;
+          border-radius: 5px;
+        }
+      }
+    }
+  }
+}

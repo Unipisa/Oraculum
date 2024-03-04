@@ -87,10 +87,26 @@ namespace Oraculum
             }
         }
 
-        public async Task<(Guid, Sibylla)> AddSibylla(string name, Configuration? oraculumConf = null, DateTime? expiration = null, bool connect = true)
+        public Boolean IsSibyllaActive(string name, Guid id)
         {
-            var conf = SibyllaConf.FromJson(File.ReadAllText(ConfFile(name)));
-            var s = new Sibylla(oraculumConf ?? _oraculumConf, conf, logger: _logger);
+            if (!_sibyllae.ContainsKey((name, id)))
+                return false;
+            var (_, e) = _sibyllae[(name, id)];
+            if (e.HasValue && e.Value > DateTime.Now)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<(Guid, Sibylla)> AddSibylla(string name, Configuration? oraculumConf = null, SibyllaConf? sibyllaConf = null, DateTime? expiration = null, bool connect = true)
+        {
+            var s = new Sibylla
+                (
+                    oraculumConf ?? _oraculumConf,
+                    sibyllaConf ?? SibyllaConf.FromJson(File.ReadAllText(ConfFile(name))),
+                    logger: _logger
+                );
             var id = Guid.NewGuid();
             _sibyllae.Add((name, id), (s, expiration));
             if (connect)
@@ -149,7 +165,7 @@ namespace Oraculum
         }
 
         // find relevant facts
-        public async Task<ICollection<Fact>> FindRelevantFacts(string query, float? distance = null, int? limit = null, int? autoCut = null, string[]? factTypeFilter = null, string[]? categoryFilter = null, string[]? tagsFilter = null)
+        public async Task<ICollection<Fact>> FindRelevantFacts(string query, float? distance = null, int? limit = null, int? autoCut = null, string[]? factTypeFilter = null, string[]? categoryFilter = null, float? autoCutPercentage = null, string[]? tagsFilter = null)
         {
             // check Oraculum connection
             if (!_oraculum.IsConnected)
@@ -166,6 +182,7 @@ namespace Oraculum
                 Autocut = autoCut,
                 FactTypeFilter = factTypeFilter,
                 CategoryFilter = categoryFilter,
+                AutocutPercentage = autoCutPercentage,
                 TagsFilter = tagsFilter
             };
 
@@ -197,6 +214,15 @@ namespace Oraculum
             return newFacts;
         }
 
+        public async Task UpdateFact(Fact fact)
+        {
+            // check Oraculum connection
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
+
+            await _oraculum.UpdateFact(fact);
+        }
+
         // get all Sibyllae Configurations
         public List<SibyllaConf?> GetSibyllae()
         {
@@ -212,6 +238,22 @@ namespace Oraculum
                 return null;
             }
             return SibyllaConf.FromJson(File.ReadAllText(ConfFile(sibyllaId))) ?? throw new Exception($"Configuration file {ConfFile(sibyllaId)} is not valid.");
+        }
+
+        public Dictionary<string, SibyllaConf> GetSibyllaeDict()
+        {
+            var dictOfIdsAndSibyllaConfigs = new Dictionary<string, SibyllaConf>();
+
+            foreach (var id in AvailableConfigurations)
+            {
+                var sibyllaConfig = GetSibyllaConfById(id);
+                if (sibyllaConfig != null)
+                {
+                    dictOfIdsAndSibyllaConfigs[id] = sibyllaConfig;
+                }
+            }
+
+            return dictOfIdsAndSibyllaConfigs;
         }
 
         // delete a Sibylla by Id
@@ -308,6 +350,46 @@ namespace Oraculum
             {
                 return completed;
             }
+        }
+
+        // Method to add a new GenericObject
+        public async Task<Guid?> AddGenericObjectAsync(GenericObject genericObject)
+        {
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
+            return await _oraculum.AddGenericObject(genericObject);
+        }
+
+        // Method to get a GenericObject by ID
+        public async Task<GenericObject?> GetGenericObjectAsync(Guid id)
+        {
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
+            return await _oraculum.GetGenericObject(id);
+        }
+
+        // Method to list all GenericObjects
+        public async Task<ICollection<GenericObject>> ListGenericObjectsAsync(int limit = 1024, int offset = 0)
+        {
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
+            return await _oraculum.ListGenericObjects(limit, offset);
+        }
+
+        // Method to update a GenericObject
+        public async Task UpdateGenericObjectAsync(GenericObject genericObject)
+        {
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
+            await _oraculum.UpdateGenericObject(genericObject);
+        }
+
+        // Method to delete a GenericObject by ID
+        public async Task<bool> DeleteGenericObjectAsync(Guid id)
+        {
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
+            return await _oraculum.DeleteGenericObject(id);
         }
 
     }

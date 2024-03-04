@@ -102,6 +102,16 @@ public class OraculumConfig
     public int schemaMinorVersion;
 }
 
+public class GenericObject
+{
+    [JsonIgnore]
+    public const string ClassName = "GenericObject";
+    [JsonIgnore]
+    public Guid? id { get; set; }
+    public string? content { get; set; }
+    public DateTime? timestamp { get; set; }
+}
+
 public class FactFilter
 {
     public int? Limit = null;
@@ -215,6 +225,7 @@ public class Oraculum
     private WeaviateClass<Fact>? _facts;
     private WeaviateClass<OraculumConfig>? _oraculumConfigClass;
     private WeaviateObject<OraculumConfig>? _oraculumConfig;
+    private WeaviateClass<GenericObject>? _genericObjectClass;
     private ILogger _logger;
 
     public Configuration Configuration
@@ -601,6 +612,77 @@ public class Oraculum
 
         }
 
+        // If upgradeDB is invoked alone, without a previous call to Connect(), we need to read the schema metadata
+        if (_oraculumConfigClass == null)
+        {
+            await ReadSchemaMetadata();
+        }
+
+        if (_oraculumConfig!.Properties.schemaMajorVersion == 1 && _oraculumConfig!.Properties.schemaMinorVersion == 0)
+        {
+            var facts = _kb.Schema.GetClass<Fact_1_0>(Fact_1_0.ClassName);
+            if (facts == null)
+            {
+                _logger.Log(LogLevel.Critical, "UpgradeDB: cannot get Facts class");
+                throw new Exception("Internal error: cannot get Facts class!");
+            }
+            var fn = Path.GetTempFileName();
+            var outf = new StreamWriter(fn);
+
+            var n = await facts.CountObjects();
+            for (var i = 0; i < n; i += 100)
+            {
+                var r = await facts.ListObjects(100, offset: i);
+                var outt = JsonConvert.SerializeObject(r.Objects.ToList());
+                outf.WriteLine(outt.Length);
+                await outf.WriteLineAsync(outt);
+            }
+            outf.Close();
+
+            await facts.Delete();
+            var factsNew = await _kb.Schema.NewClass<Fact>(Fact.ClassName);
+
+            _oraculumConfig!.Properties.schemaMajorVersion = Fact.MajorVersion;
+            _oraculumConfig!.Properties.schemaMinorVersion = Fact.MinorVersion;
+            await _oraculumConfig!.Save();
+
+            var inf = new StreamReader(fn);
+
+            string? line;
+            var total = 0;
+            while ((line = inf.ReadLine()) != null)
+            {
+                var sz = int.Parse(line);
+                var buf = new char[sz];
+                await inf.ReadBlockAsync(buf, 0, sz);
+                var facts_1_0 = JsonConvert.DeserializeObject<List<WeaviateObject<Fact_1_0>>>(new string(buf));
+                var facts_1_1 = facts_1_0!.ConvertAll(f =>
+                {
+                    var o = factsNew.Create();
+                    o.Properties.category = f.Properties.category;
+                    o.Properties.citation = f.Properties.citation;
+                    o.Properties.content = f.Properties.content;
+                    o.Properties.expiration = f.Properties.expiration;
+                    o.Properties.factType = f.Properties.factType;
+                    o.Properties.reference = f.Properties.reference;
+                    o.Properties.tags = f.Properties.tags;
+                    o.Properties.title = f.Properties.title;
+                    return o;
+                });
+                var na = await factsNew.Add(facts_1_1);
+                total += na.Count;
+                if (na.Count != facts_1_1.Count)
+                {
+                    _logger.Log(LogLevel.Critical, $"UpgradeDB: error adding facts, expected {facts_1_1.Count} but added {na.Count}");
+                }
+                inf.ReadLine();
+            }
+            if (total != n)
+            {
+                _logger.Log(LogLevel.Critical, $"UpgradeDB: error adding facts, expected {n} but added {total}");
+            }
+
+        }
         //var facts = _kb.Schema.GetClass<Fact>(Fact.ClassName);
         //var r = await facts.ListObjects(100);
         //var bk = r.Objects.ToList();
@@ -798,5 +880,94 @@ public class Oraculum
         }
 
         return ret;
+    }
+    private async Task InitializeGenericObjectClass()
+    {
+        if (_genericObjectClass == null)
+        {
+            if (_kb.Schema.Classes.Where(c => c.Name == GenericObject.ClassName).Any())
+            {
+                _genericObjectClass = _kb.Schema.GetClass<GenericObject>(GenericObject.ClassName);
+                _genericObjectClass!.Properties.Where(p => p.Name == nameof(GenericObject.content)).First().IndexSearchable = true;
+            }
+            else
+            {
+                _genericObjectClass = await _kb.Schema.NewClass<GenericObject>(GenericObject.ClassName);
+                _genericObjectClass!.Properties.Where(p => p.Name == nameof(GenericObject.content)).First().IndexSearchable = true;
+                await _genericObjectClass.Update();
+            }
+        }
+
+    }
+
+    private async Task EnsureGenericObjectClassAsync()
+    {
+        if (_genericObjectClass == null)
+            await InitializeGenericObjectClass();
+    }
+
+    public async Task<Guid?> AddGenericObject(GenericObject genericObject)
+    {
+        ensureConnection();
+        await EnsureGenericObjectClassAsync();
+
+        ensureConnection();
+        _logger.Log(LogLevel.Information, "AddFact: adding GenricObject");
+        var obj = _genericObjectClass!.Create();
+        obj.Properties = genericObject;
+
+        await _genericObjectClass.Add(obj);
+        genericObject.id = obj.Id; // Assumption: Guid is generated by Create()
+        return obj.Id;
+    }
+
+    public async Task<GenericObject?> GetGenericObject(Guid id)
+    {
+        ensureConnection();
+        await EnsureGenericObjectClassAsync();
+
+        var obj = await _genericObjectClass!.Get(id);
+        return obj?.Properties;
+    }
+
+    public async Task<ICollection<GenericObject>> ListGenericObjects(long limit = 1024, long offset = 0, string? sort = null, string? order = null)
+    {
+        ensureConnection();
+        await EnsureGenericObjectClassAsync();
+
+        var objs = await _genericObjectClass!.ListObjects(limit, offset: offset, sort: sort, order: order);
+        if (objs == null) return new List<GenericObject>();
+        var ret = new List<GenericObject>();
+        foreach (var obj in objs.Objects)
+        {
+            obj.Properties.id = obj.Id;
+            ret.Add(obj.Properties);
+        }
+        return ret;
+    }
+
+    public async Task UpdateGenericObject(GenericObject genericObject)
+    {
+        ensureConnection();
+        await EnsureGenericObjectClassAsync();
+
+        var obj = await _genericObjectClass!.Get(genericObject.id!.Value);
+        if (obj == null)
+            throw new Exception($"Cannot find GenericObject with id {genericObject.id}");
+
+        obj.Properties = genericObject;
+        await obj.Save();
+    }
+
+    public async Task<bool> DeleteGenericObject(Guid id)
+    {
+        ensureConnection();
+        await EnsureGenericObjectClassAsync();
+
+        var obj = await _genericObjectClass!.Get(id);
+        if (obj == null) return false;
+
+        await obj.Delete();
+        return true;
     }
 }

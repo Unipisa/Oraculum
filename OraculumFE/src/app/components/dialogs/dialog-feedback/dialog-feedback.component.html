@@ -1,0 +1,27 @@
+<h1 mat-dialog-title>{{language.thanksFeedback}}</h1>
+<div mat-dialog-content>
+  <p>{{language.wantToLeaveAComment}}</p>
+  <mat-form-field appearance="outline" style="width: 100%;">
+    <!-- <mat-label>Scrivi un commento</mat-label> -->
+    <textarea
+      matInput
+      #input
+      [(ngModel)]="feedbackText"
+      maxlength="300"
+      cdkFocusInitial
+      cdkTextareaAutosize
+      #autosize="cdkTextareaAutosize"
+      cdkAutosizeMinRows="5"
+      cdkAutosizeMaxRows="8"
+      cols="200"
+    ></textarea>
+    <mat-hint align="start">{{language.max300Characters}}</mat-hint>
+    <mat-hint align="end">{{ input.value.length }}/300</mat-hint>
+  </mat-form-field>
+</div>
+<div mat-dialog-actions [align]="'end'">
+  <button mat-button (click)="onNoClick()">{{language.cancel}}</button>
+  <button mat-flat-button color="primary" [mat-dialog-close]="feedbackText">
+    Invia
+  </button>
+</div>
