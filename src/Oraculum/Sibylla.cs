@@ -56,6 +56,8 @@ namespace Oraculum
         public string? OutOfScopePrefix = "*&oo&* ";
         public IList<FunctionDefinition>? FunctionsDefaultAnswerHook { get; set; } = null;
         public IList<FunctionDefinition>? FunctionsBeforeAnswerHook { get; set; } = null;
+        public string? SibyllaName { get; set; }
+        public bool? Hidden { get; set; }
     }
 
     internal class Actor
@@ -415,6 +417,12 @@ namespace Oraculum
         public void MarkLastHistoryMessageAsOT()
         {
             _memory.MarkLastHistoryMessageAsOT();
+        }
+
+        // reset the memory
+        public void ResetMemory()
+        {
+            _memory.Reset();
         }
     }
 }

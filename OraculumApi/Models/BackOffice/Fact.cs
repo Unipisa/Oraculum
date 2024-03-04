@@ -1,10 +1,3 @@
-using System;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
@@ -22,7 +15,7 @@ namespace OraculumApi.Models.BackOffice
         /// </summary>
 
         [DataMember(Name = "id")]
-        public required Guid Id { get; set; }
+        public Guid? Id { get; set; }
 
         /// <summary>
         /// Type of the fact
@@ -47,7 +40,7 @@ namespace OraculumApi.Models.BackOffice
         /// <value>Tags associated with the fact</value>
 
         [DataMember(Name = "tags")]
-        public required List<string> Tags { get; set; }
+        public List<string>? Tags { get; set; }
 
         /// <summary>
         /// Title of the fact
@@ -72,7 +65,7 @@ namespace OraculumApi.Models.BackOffice
         /// <value>Citation associated with the fact</value>
 
         [DataMember(Name = "citation")]
-        public required string Citation { get; set; }
+        public string? Citation { get; set; }
 
         /// <summary>
         /// Reference for the fact
@@ -80,7 +73,7 @@ namespace OraculumApi.Models.BackOffice
         /// <value>Reference for the fact</value>
 
         [DataMember(Name = "reference")]
-        public required string Reference { get; set; }
+        public string? Reference { get; set; }
 
         /// <summary>
         /// Expiration date of the fact
@@ -89,6 +82,8 @@ namespace OraculumApi.Models.BackOffice
 
         [DataMember(Name = "expiration")]
         public DateTime? Expiration { get; set; }
+        public bool? OutOfLimit { get; internal set; }
+        public double? Distance { get; private set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -107,6 +102,8 @@ class Fact {{
     Citation: {Citation}
     Reference: {Reference}
     Expiration: {Expiration}
+    OutOfLimit: {OutOfLimit}
+    Distance: {Distance}
 }}
 ";
         }
@@ -132,7 +129,8 @@ class Fact {{
                 Content = oraculumFact.content ?? "",
                 Citation = oraculumFact.citation ?? "",
                 Reference = oraculumFact.reference ?? "",
-                Expiration = oraculumFact.expiration
+                Expiration = oraculumFact.expiration,
+                Distance = oraculumFact.distance ?? 0,
             };
         }
     }

@@ -1,0 +1,18 @@
+<div class="speech-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <button mat-icon-button class="close-button" (click)="onClose()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="text-container">
+        <h1>{{ speechData }}</h1>
+      </div>
+      <div class="microphone-icon">
+        <mat-icon>mic</mat-icon>
+        <div class="pulse"></div>
+      </div>
+    </div>
+  </div>
+</div>

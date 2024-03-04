@@ -1,0 +1,63 @@
+<h1 mat-dialog-title>{{language.writeAContent}}</h1>
+<div mat-dialog-content class="dialog-content">
+  <form [formGroup]="factForm" (ngSubmit)="onSubmit()" class="fact-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{language.title}}</mat-label>
+      <input matInput formControlName="title" />
+      <mat-error *ngIf="title?.hasError('required') && title?.touched">
+        {{language.titleIsRequired}}
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{language.content}}</mat-label>
+      <textarea
+        matInput
+        formControlName="content"
+        cdkTextareaAutosize
+        #autosize="cdkTextareaAutosize"
+        cdkAutosizeMinRows="5"
+        cdkAutosizeMaxRows="8"
+        cols="200"
+      ></textarea>
+      <mat-error *ngIf="content?.hasError('required') && content?.touched">
+        {{language.contentIsRequired}}
+      </mat-error>
+      <mat-error *ngIf="content?.hasError('minlength') && content?.touched">
+        {{language.contentMin10Characters}}
+      </mat-error>
+    </mat-form-field>
+  </form>
+</div>
+<div mat-dialog-actions align="end" class="action-buttons">
+  <button
+    *ngIf="data.id"
+    mat-button
+    color="warn"
+    class="delete-button"
+    (click)="onDelete()"
+  >
+    <mat-icon>delete</mat-icon>{{language.delete}}
+  </button>
+  <button mat-flat-button mat-dialog-close class="close-button">{{language.close}}</button>
+  <button
+    *ngIf="!data.id"
+    mat-flat-button
+    color="primary"
+    class="add-button"
+    type="submit"
+    (click)="onSubmit()"
+  >
+    {{language.add}}
+  </button>
+  <button
+    *ngIf="data.id"
+    mat-flat-button
+    color="primary"
+    class="add-button"
+    type="submit"
+    (click)="onEdit()"
+  >
+    {{language.edit}}
+  </button>
+</div>

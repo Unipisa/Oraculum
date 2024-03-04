@@ -1,20 +1,28 @@
 using System.Text.Json.Serialization;
-using Oraculum;
 using Asp.Versioning;
-using Asp.Versioning.ApiExplorer;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.IdentityModel.Tokens;
-using System.Reflection.Metadata.Ecma335;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-var authorizationAssertionRetriver = new AuthorizationAssertionRetriever();
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+});
 
 // Add services to the container.
 builder.Services.AddControllers()
-.AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+.AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 builder.Services.AddDistributedMemoryCache();
+builder.Services.AddHttpClient();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddApiVersioning(x =>
@@ -40,23 +48,40 @@ builder.Services.AddSession(builder =>
 
 builder.Services.AddEndpointsApiExplorer();
 
+var _configuration = builder.Configuration;
+
 builder.Services.AddSwaggerGen();
 
-var _configuration = builder.Configuration;
-var _env = builder.Environment;
-builder.Services.AddSingleton<SibyllaManager>(new SibyllaManager(new Oraculum.Configuration()
+if (!_configuration.GetSection("AllowAnonymous").Get<bool>())
 {
-    WeaviateEndpoint = _configuration["Weaviate:ServiceEndpoint"],
-    WeaviateApiKey = _configuration["Weaviate:ApiKey"],
-    Provider = _configuration["GPTProvider"] == "Azure" ? OpenAI.ProviderType.Azure : OpenAI.ProviderType.OpenAi,
-    OpenAIApiKey = _configuration["OpenAI:ApiKey"],
-    OpenAIOrgId = _configuration["OpenAI:OrgId"],
-    AzureOpenAIApiKey = _configuration["Azure:ApiKey"],
-    AzureResourceName = _configuration["Azure:ResourceName"],
-    AzureDeploymentId = _configuration["Azure:DeploymentId"]
-}, Path.Combine(_env.ContentRootPath, "SibyllaeConf")));
+    builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+}
 
-if (!_configuration.GetSection("OIDC").Exists())
+
+var _env = builder.Environment;
+builder.Services.AddSingleton<SibyllaManagerProvider>();
+builder.Services.AddScoped(provider =>
+{
+    var sibyllaManagerProvider = provider.GetRequiredService<SibyllaManagerProvider>();
+    return sibyllaManagerProvider.GetSibyllaManager();
+});
+
+builder.Services.AddSingleton<WeaviateDBProvider>();
+builder.Services.AddScoped(provider =>
+    {
+        var weaviateDBProvider = provider.GetRequiredService<WeaviateDBProvider>();
+        return weaviateDBProvider.GetDatabase();
+    });
+
+builder.Services.AddScoped(typeof(WeaviateRepository<>));
+builder.Services.AddScoped(typeof(BaseService<>));
+builder.Services.AddScoped(typeof(BaseController<,>));
+builder.Services.AddScoped(typeof(ChatDetailRepository));
+builder.Services.AddScoped(typeof(ChatDetailService));
+builder.Services.AddScoped(typeof(DataIngestionController));
+builder.Services.AddTransient<IDataIngestionService, DataIngestionService>();
+
+if (_configuration.GetSection("Tenants").GetChildren().Any(tenant => !tenant.GetSection("Security").Exists()))
 {
     if (!_configuration.GetSection("AllowAnonymous").Get<bool>())
     {
@@ -64,41 +89,17 @@ if (!_configuration.GetSection("OIDC").Exists())
     }
 }
 
-if (_configuration.GetSection("OIDC").Exists())
+MultitenantAuthBuilder authBuilder = new(builder.Services, _configuration);
+
+if (!_configuration.GetSection("AllowAnonymous").Get<bool>())
 {
-    builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-    })
-    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-    {
-        options.Events.OnRedirectToAccessDenied = context =>
-        {
-            context.Response.StatusCode = 403;
-            return Task.CompletedTask;
-        };
-    })
-    .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
-    {
-        options.Authority = _configuration["OIDC:Authority"];
-        options.ClientId = _configuration["OIDC:ClientId"];
-        options.ClientSecret = _configuration["OIDC:ClientSecret"];
-        options.GetClaimsFromUserInfoEndpoint = true;
-        options.ResponseType = "code";
-        options.Scope.Add("openid");
-        options.SaveTokens = true;
-    });
+    authBuilder.AddMultitenantAuthentication();
+    builder.Services.AddSingleton<IAuthenticationSchemeProvider, MultitenantAuthenticationSchemeProvider>();
 }
 
 try
 {
-    builder.Services.AddAuthorization(options =>
-        {
-            options.AddPolicy("SysAdmin", policy => authorizationAssertionRetriver.retrieveAssertion(policy, _configuration, "SysAdmin"));
-            options.AddPolicy("BackOffice", policy => authorizationAssertionRetriver.retrieveAssertion(policy, _configuration, "BackOffice"));
-            options.AddPolicy("FrontOffice", policy => authorizationAssertionRetriver.retrieveAssertion(policy, _configuration, "FrontOffice"));
-        });
+    authBuilder.AddMultitenantAuthorization();
 }
 catch (Exception)
 {
@@ -106,8 +107,16 @@ catch (Exception)
     throw;
 }
 
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<HttpResponseExceptionFilter>();
+});
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
+
+app.UseMiddleware<TenantIdentificationMiddleware>();
 
 app.UseCookiePolicy(new CookiePolicyOptions
 {
@@ -120,7 +129,20 @@ app.UseCookiePolicy(new CookiePolicyOptions
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    if (!_configuration.GetSection("AllowAnonymous").Get<bool>())
+    {
+        app.UseSwaggerUI(options =>
+        {
+            // SwaggerUi does not seem to support multiple OAuth2 configurations currently
+            // options.OAuthClientId(_configuration["Swagger:OIDC:ClientId"]);
+            options.OAuthScopes("openid", "profile", "offline_access");
+            options.OAuthUsePkce();
+        });
+    }
+    else
+    {
+        app.UseSwaggerUI();
+    }
     // May be this code is not needed anymore
     //   app.UseSwaggerUI(options =>
     //{

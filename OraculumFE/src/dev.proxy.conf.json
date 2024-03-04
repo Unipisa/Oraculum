@@ -1,0 +1,10 @@
+{
+  "/api/oraculum": {
+    "pathRewrite": {
+      "^/api/oraculum": "/api"
+    },
+    "target": "http://localhost:5009/",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

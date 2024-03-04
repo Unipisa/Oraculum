@@ -1,0 +1,72 @@
+<div class="config-container">
+  <div class="params-container">
+    <h2>Parametri di configurazione</h2>
+
+    <div class="config-setting">
+      <label for="contentsResponse"
+        >Contenuti utilizzati per comporre la risposta</label
+      >
+      <div class="input-container">
+        <button
+          mat-icon-button
+          (click)="contentsForResponse = contentsForResponse + 1"
+          [disabled]="contentsForResponse == totalContentsHome"
+        >
+          <mat-icon>expand_less</mat-icon>
+        </button>
+        <input
+          type="number"
+          id="contentsResponse"
+          [(ngModel)]="contentsForResponse"
+          [disabled]="true"
+        />
+        <button
+          mat-icon-button
+          (click)="contentsForResponse = contentsForResponse - 1"
+          [disabled]="contentsForResponse == 1"
+        >
+          <mat-icon>expand_more</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="config-setting">
+      <label for="totalContentsHome"
+        >Contenuti totali visualizzati in home</label
+      >
+      <div class="input-container">
+        <button
+          mat-icon-button
+          (click)="totalContentsHome = totalContentsHome + 1"
+          [disabled]="totalContentsHome > 100"
+        >
+          <mat-icon>expand_less</mat-icon>
+        </button>
+        <input
+          type="number"
+          id="totalContentsHome"
+          [(ngModel)]="totalContentsHome"
+          [disabled]="true"
+        />
+        <button
+          mat-icon-button
+          (click)="totalContentsHome = totalContentsHome - 1"
+          [disabled]="
+            totalContentsHome == 1 || totalContentsHome == contentsForResponse
+          "
+        >
+          <mat-icon>expand_more</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <button
+      mat-flat-button
+      color="primary"
+      class="apply-button"
+      (click)="applyChanges()"
+    >
+      Applica
+    </button>
+  </div>
+</div>

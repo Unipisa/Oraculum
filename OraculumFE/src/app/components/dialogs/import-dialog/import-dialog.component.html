@@ -1,0 +1,71 @@
+<h1 mat-dialog-title>Aggiunta Documento/Sito Web</h1>
+<div mat-dialog-content class="dialog-content">
+  <form [formGroup]="importForm" (ngSubmit)="onSubmit()" class="import-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Label</mat-label>
+      <mat-select formControlName="label">
+        <mat-option value="document">Documento</mat-option>
+        <mat-option value="url">Url</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div class="file-upload-container" *ngIf="isDocumentSelected()">
+      <input
+        type="text"
+        class="file-name"
+        placeholder="Carica documento"
+        value="{{ fileName }}"
+        readonly
+      />
+      <button class="upload-btn" (click)="fileInput.click()">
+        <mat-icon>file_upload</mat-icon>
+      </button>
+      <input
+        type="file"
+        #fileInput
+        style="display: none"
+        (change)="onFileSelected($event)"
+      />
+    </div>
+
+    <mat-form-field
+      appearance="outline"
+      class="full-width"
+      *ngIf="isUrlSelected()"
+    >
+      <mat-label>URL</mat-label>
+      <input matInput formControlName="url" />
+      <mat-error *ngIf="url?.hasError('required') && url?.touched">
+        URL is required.
+      </mat-error>
+      <mat-error *ngIf="url?.hasError('pattern') && url?.touched">
+        Enter a valid URL.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Tipo</mat-label>
+      <input matInput formControlName="type" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Scadenza</mat-label>
+      <input
+        matInput
+        [matDatepicker]="expirationPicker"
+        formControlName="expiration"
+      />
+      <mat-datepicker-toggle
+        matSuffix
+        [for]="expirationPicker"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #expirationPicker></mat-datepicker>
+    </mat-form-field>
+  </form>
+</div>
+<div mat-dialog-actions align="end" class="action-buttons">
+  <button mat-button mat-dialog-close class="close-button">Chiudi</button>
+  <button mat-button color="primary" class="add-button" type="submit">
+    Importa
+  </button>
+</div>

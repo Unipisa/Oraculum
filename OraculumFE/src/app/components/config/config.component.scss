@@ -1,0 +1,63 @@
+.config-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  height: 100%;
+  width: 100%;
+  .params-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 75%;
+    .config-setting {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+      padding: 40px;
+      background-color: var(--grey-200);
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      textarea:focus,
+      input:focus {
+        outline: none;
+      }
+      input {
+        border: none;
+        background-color: transparent;
+        width: 50px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.4rem;
+      }
+      /* Chrome, Safari, Edge, Opera */
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      /* Firefox */
+      input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
+      .input-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        mat-icon {
+          font-weight: bold;
+          font-size: 1.2 rem;
+        }
+      }
+    }
+    .apply-button {
+      width: 30%;
+      align-self: flex-end;
+    }
+  }
+}

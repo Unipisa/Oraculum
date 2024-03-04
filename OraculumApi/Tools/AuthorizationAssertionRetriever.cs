@@ -1,40 +1,27 @@
-using System.Net;
 using Microsoft.AspNetCore.Authorization;
 
-public class AuthorizationAssertionRetriever
+public static class AuthorizationAssertionRetriever
 {
-    public AuthorizationPolicyBuilder retrieveAssertion(AuthorizationPolicyBuilder authorizationPolicyBuilder, ConfigurationManager configurationManager, string role)
+    public static AuthorizationPolicyBuilder retrieveAssertion(AuthorizationPolicyBuilder authorizationPolicyBuilder, string role, IConfiguration? securityConfiguration = null, bool AllowAnonymous = false)
     {
 
-        if (configurationManager.GetSection("AllowAnonymous").Get<bool>())
+        if (AllowAnonymous)
         {
-            return anonymousPolicy(authorizationPolicyBuilder);
+            return authorizationPolicyBuilder.RequireAssertion(context => { return true; });
         }
 
-        var anonymousRoles = configurationManager.GetSection("AnonymousRoles").Get<string[]>();
-        var isAnonymous = false;
-
-        if (anonymousRoles != null)
+        if (securityConfiguration == null)
         {
-            isAnonymous = anonymousRoles.Contains(role);
+            throw new ArgumentNullException(nameof(securityConfiguration));
         }
 
-        if (isAnonymous)
+        var roleName = securityConfiguration.GetSection("Security").GetSection("AuthorizationRolesMap").GetSection(role).Get<string[]>();
+
+        if (roleName == null)
         {
-            return anonymousPolicy(authorizationPolicyBuilder);
+            throw new Exception($"Missing role {role} in a tentant's AuthorizationRolesMap.");
         }
 
-        return authorizationPolicyBuilder.RequireAuthenticatedUser().RequireRole(
-                    configurationManager.GetSection("AuthorizationRolesMap").GetSection(role).Get<string[]>()!
-                );
-    }
-
-    private AuthorizationPolicyBuilder anonymousPolicy(AuthorizationPolicyBuilder authorizationPolicyBuilder)
-    {
-        authorizationPolicyBuilder.RequireAssertion(context =>
-        {
-            return true;
-        });
-        return authorizationPolicyBuilder;
+        return authorizationPolicyBuilder.RequireAuthenticatedUser().RequireRole(roleName);
     }
 }

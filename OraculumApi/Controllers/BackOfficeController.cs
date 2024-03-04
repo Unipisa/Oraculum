@@ -6,11 +6,10 @@ using OraculumApi.Attributes;
 using OraculumApi.Models.BackOffice;
 using Oraculum;
 using System.Text;
-using System.Runtime.CompilerServices;
-using Microsoft.OpenApi.Any;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Asp.Versioning;
-using Microsoft.AspNetCore.Authorization;
+using System.Threading.Channels;
+using OraculumApi.Models.FrontOffice;
+using OraculumApi.Models;
 
 namespace OraculumApi.Controllers;
 
@@ -19,38 +18,19 @@ namespace OraculumApi.Controllers;
 [ApiVersion("1")]
 public class BackOfficeController : Controller
 {
-
     private readonly ILogger<BackOfficeController> _logger;
     private readonly SibyllaManager _sibyllaManager;
     private readonly IConfiguration _configuration;
+    private BaseService<Feedback> _feedbackService;
+    private BaseService<SibyllaPersistentConfig> _sibyllaConfigService;
 
-    public BackOfficeController(ILogger<BackOfficeController> logger, SibyllaManager sibyllaManager, IConfiguration configuration)
+    public BackOfficeController(ILogger<BackOfficeController> logger, SibyllaManager sibyllaManager, IConfiguration configuration, BaseService<Feedback> feedbackService, BaseService<SibyllaPersistentConfig> sibyllaConfigService)
     {
         _logger = logger;
         _sibyllaManager = sibyllaManager;
         _configuration = configuration;
-    }
-
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public async Task<IActionResult> Index()
-    {
-        Sibylla sibylla = await ConnectSibylla();
-        return View(sibylla);
-    }
-
-    [ApiExplorerSettings(IgnoreApi = true)]
-    private async Task<Sibylla> ConnectSibylla()
-    {
-        var sibyllaName = _configuration["SibyllaConf"] ?? "Demo";
-        var sibyllaKey = HttpContext.Session.GetString("sibyllaRef");
-        if (sibyllaKey == null)
-        {
-            var (id, _) = await _sibyllaManager.AddSibylla(sibyllaName, expiration: DateTime.Now.AddMinutes(60));
-            HttpContext.Session.SetString("sibyllaRef", id.ToString());
-            sibyllaKey = id.ToString();
-        }
-        var sibylla = _sibyllaManager.GetSibylla(sibyllaName, Guid.Parse(sibyllaKey));
-        return sibylla;
+        _feedbackService = feedbackService;
+        _sibyllaConfigService = sibyllaConfigService;
     }
 
     /// <summary>
@@ -65,7 +45,7 @@ public class BackOfficeController : Controller
     [HttpPost]
     [Route("sibylla-configs")]
     [ValidateModelState]
-    [Authorize(Policy = "SysAdmin")]
+    [DynamicAuthorize("sysadmin")]
     [SwaggerOperation("AddSibyllaConfigDto")]
     public async Task<IActionResult> AddSibyllaConfigDtoAsync([FromBody] List<SibyllaConfigDto> body)
     {
@@ -101,7 +81,7 @@ public class BackOfficeController : Controller
     [HttpDelete]
     [Route("facts/{id}")]
     [ValidateModelState]
-    [Authorize(Policy = "BackOffice")]
+    [DynamicAuthorize("backoffice")]
     [SwaggerOperation("DeleteFactById")]
     public async Task<IActionResult> DeleteFactById([FromRoute][Required] string id)
     {
@@ -119,7 +99,7 @@ public class BackOfficeController : Controller
     [HttpDelete]
     [Route("facts")]
     [ValidateModelState]
-    [Authorize(Policy = "BackOffice")]
+    [DynamicAuthorize("backoffice")]
     [SwaggerOperation("DeleteFacts")]
     public virtual IActionResult DeleteFacts([FromQuery] string factType, [FromQuery] string category, [FromQuery] bool? expired)
     {
@@ -137,7 +117,7 @@ public class BackOfficeController : Controller
     [HttpDelete]
     [Route("sibylla-configs/{id}")]
     [ValidateModelState]
-    [Authorize(Policy = "SysAdmin")]
+    [DynamicAuthorize("sysadmin")]
     [SwaggerOperation("DeleteSibyllaConfigDtoById")]
     public async Task<IActionResult> DeleteSibyllaConfigDtoById([FromRoute][Required] string id)
     {
@@ -161,11 +141,11 @@ public class BackOfficeController : Controller
     [Route("facts/query")]
     [ValidateModelState]
     [SwaggerOperation("FindRelevantFacts")]
-    [Authorize(Policy = "BackOffice")]
+    [DynamicAuthorize("backoffice")]
     [SwaggerResponse(statusCode: 200, type: typeof(List<Models.BackOffice.Fact>), description: "List of relevant facts")]
     public async Task<IActionResult> FindRelevantFacts([FromBody] SearchCriteria body)
     {
-        var facts = await _sibyllaManager.FindRelevantFacts(body.Query, body.Distance, body.Limit, body.AutoCut, body.FactTypeFilter, body.CategoryFilter, body.TagsFilter);
+        var facts = await _sibyllaManager.FindRelevantFacts(body.Query, body.Distance, body.Limit, body.AutoCut, body.FactTypeFilter, body.CategoryFilter, body.AutoCutPercentage, body.TagsFilter);
         var factsList = facts.Select(f => Models.BackOffice.Fact.FromOraculumFact(f)).ToList();
         return Ok(factsList);
     }
@@ -183,7 +163,7 @@ public class BackOfficeController : Controller
     [HttpGet]
     [Route("facts")]
     [ValidateModelState]
-    [Authorize(Policy = "BackOffice")]
+    [DynamicAuthorize("backoffice")]
     [SwaggerOperation("GetAllFacts")]
     [SwaggerResponse(statusCode: 200, type: typeof(List<Models.BackOffice.Fact>), description: "A list of facts")]
     public async Task<IActionResult> GetAllFacts([FromQuery] int? limit, [FromQuery] int? offset, [FromQuery] string? sort, [FromQuery] string? order)
@@ -204,20 +184,50 @@ public class BackOfficeController : Controller
     [HttpGet]
     [Route("sibylla-configs")]
     [ValidateModelState]
-    [Authorize(Policy = "BackOffice")]
+    [DynamicAuthorize("backoffice")]
     [SwaggerOperation("GetAllSibyllaConfigDtos")]
     [SwaggerResponse(statusCode: 200, type: typeof(List<SibyllaConfigDto>), description: "List of Sibylla configurations")]
     public async Task<IActionResult> GetAllSibyllaeConfigs()
     {
-        List<SibyllaConf> sibyllaeConfs = await Task.Run(() => _sibyllaManager.GetSibyllae());
-        if (sibyllaeConfs == null)
-            return StatusCode(500);
-        var result = getAllSibyllaeConfigs(sibyllaeConfs);
-        if (result == null)
+        var sibyllaeFromDB = await _sibyllaConfigService.List();
+        var sibyllae = sibyllaeFromDB.Select(persistentConf =>
         {
-            return StatusCode(500);
+            var sibyllaConf = SibyllaConf.FromJson(persistentConf.configJSON!);
+            return new SibyllaConfigDto(persistentConf.name!)
+            {
+                Title = sibyllaConf?.Title,
+                BaseAssistantPrompt = sibyllaConf?.BaseAssistantPrompt,
+                BaseSystemPrompt = sibyllaConf?.BaseSystemPrompt,
+                MaxTokens = sibyllaConf.MaxTokens,
+                Model = sibyllaConf.Model,
+                Temperature = sibyllaConf.Temperature,
+                TopP = sibyllaConf.TopP,
+                FrequencyPenalty = sibyllaConf.FrequencyPenalty,
+                PresencePenalty = sibyllaConf.PresencePenalty,
+                MemoryConfiguration = sibyllaConf.MemoryConfiguration,
+                Hidden = sibyllaConf?.Hidden ?? false
+            };
+        }).ToList();
+
+        if (_configuration.GetSection("DBSibyllaeConfigOnly").Get<bool>() != true)
+        {
+            sibyllae.AddRange(_sibyllaManager.GetSibyllaeDict().Select(conf => new SibyllaConfigDto(conf.Key)
+            {
+                Title = conf.Value.Title,
+                BaseSystemPrompt = conf.Value.BaseSystemPrompt,
+                BaseAssistantPrompt = conf.Value.BaseAssistantPrompt,
+                MaxTokens = conf.Value.MaxTokens,
+                Model = conf.Value.Model,
+                Temperature = conf.Value.Temperature,
+                TopP = conf.Value.TopP,
+                FrequencyPenalty = conf.Value.FrequencyPenalty,
+                PresencePenalty = conf.Value.PresencePenalty,
+                MemoryConfiguration = conf.Value.MemoryConfiguration,
+                Hidden = conf.Value.Hidden
+            }));
         }
-        return StatusCode(200, result);
+
+        return Ok(sibyllae);
     }
 
     /// <summary>
@@ -230,7 +240,7 @@ public class BackOfficeController : Controller
     /// <response code="500">Internal server error</response>
     [HttpGet]
     [Route("facts/{id}")]
-    [Authorize(Policy = "BackOffice")]
+    [DynamicAuthorize("backoffice")]
     [SwaggerOperation("GetFactById")]
     [SwaggerResponse(statusCode: 200, type: typeof(Models.BackOffice.Fact), description: "Specific fact data")]
     public async Task<IActionResult> GetFactByIdAsync([FromRoute][Required] string id)
@@ -251,7 +261,7 @@ public class BackOfficeController : Controller
     [HttpGet]
     [Route("sibylla-configs/{id}")]
     [ValidateModelState]
-    [Authorize(Policy = "BackOffice")]
+    [DynamicAuthorize("backoffice")]
     [SwaggerOperation("GetSibyllaConfigDtoById")]
     [SwaggerResponse(statusCode: 200, type: typeof(SibyllaConfigDto), description: "Specific Sibylla configuration data")]
     public async Task<IActionResult> GetSibyllaConfigDtoById([FromRoute][Required] string id)
@@ -275,7 +285,7 @@ public class BackOfficeController : Controller
     [HttpPost]
     [Route("facts")]
     [ValidateModelState]
-    [Authorize(Policy = "BackOffice")]
+    [DynamicAuthorize("backoffice")]
     [SwaggerOperation("PostFacts")]
     public async Task<IActionResult> PostFacts([FromBody] ICollection<Models.BackOffice.Fact> body)
     {
@@ -284,7 +294,7 @@ public class BackOfficeController : Controller
             id = f.Id,
             factType = f.FactType,
             category = f.Category,
-            tags = f.Tags.ToArray(),
+            tags = f.Tags?.ToArray(),
             title = f.Title,
             content = f.Content,
             citation = f.Citation,
@@ -307,11 +317,24 @@ public class BackOfficeController : Controller
     [HttpPut]
     [Route("facts")]
     [ValidateModelState]
-    [Authorize(Policy = "BackOffice")]
+    [DynamicAuthorize("backoffice")]
     [SwaggerOperation("PutFacts")]
-    public virtual IActionResult PutFacts([FromBody] List<Models.BackOffice.Fact> body)
+    public async Task<IActionResult> PutFacts([FromBody] Models.BackOffice.Fact body)
     {
-        throw new NotImplementedException();
+        await _sibyllaManager.UpdateFact(new Oraculum.Fact
+        {
+            id = body.Id,
+            factType = body.FactType,
+            category = body.Category,
+            tags = body.Tags?.ToArray(),
+            title = body.Title,
+            content = body.Content,
+            citation = body.Citation,
+            reference = body.Reference,
+            expiration = body.Expiration
+        });
+
+        return Ok();
     }
 
     /// <summary>
@@ -326,7 +349,7 @@ public class BackOfficeController : Controller
     [HttpPut]
     [Route("sibylla-configs")]
     [ValidateModelState]
-    [Authorize(Policy = "SysAdmin")]
+    [DynamicAuthorize("sysadmin")]
     [SwaggerOperation("PutSibyllaConfigDtos")]
     public async Task<IActionResult> PutSibyllaConfigDtos([FromBody] List<SibyllaConfigDto> body)
     {
@@ -365,5 +388,111 @@ public class BackOfficeController : Controller
             }
         }
         return result;
+    }
+
+    private async Task WriteToChannel(Sibylla sibylla, string question, string answerid, ChannelWriter<string> writer)
+    {
+        await foreach (var fragment in sibylla.AnswerAsync(question))
+        {
+            await writer.WriteAsync(fragment);
+        }
+        writer.TryComplete();
+    }
+
+    // Method to add a new GenericObject
+    [HttpPost]
+    [Route("generic-objects")]
+    public async Task<IActionResult> AddGenericObject([FromBody] GenericObject genericObject)
+    {
+        try
+        {
+            var id = await _sibyllaManager.AddGenericObjectAsync(genericObject);
+            return Ok(id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding GenericObject");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    // Method to get a GenericObject by ID
+    [HttpGet]
+    [Route("generic-objects/{id}")]
+    public async Task<IActionResult> GetGenericObject([FromRoute] Guid id)
+    {
+        try
+        {
+            var genericObject = await _sibyllaManager.GetGenericObjectAsync(id);
+            if (genericObject == null) return NotFound("GenericObject not found");
+
+            return Ok(genericObject);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving GenericObject");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    // Method to list all GenericObjects
+    [HttpGet]
+    [Route("generic-objects")]
+    public async Task<IActionResult> ListGenericObjects([FromQuery] int limit = 1024, [FromQuery] int offset = 0)
+    {
+        try
+        {
+            var objects = await _sibyllaManager.ListGenericObjectsAsync(limit, offset);
+            return Ok(objects);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error listing GenericObjects");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    // Method to update a GenericObject
+    [HttpPut]
+    [Route("generic-objects")]
+    public async Task<IActionResult> UpdateGenericObject([FromBody] GenericObject genericObject)
+    {
+        try
+        {
+            await _sibyllaManager.UpdateGenericObjectAsync(genericObject);
+            return Ok("GenericObject updated successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating GenericObject");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    // Method to delete a GenericObject by ID
+    [HttpDelete]
+    [Route("generic-objects/{id}")]
+    public async Task<IActionResult> DeleteGenericObject([FromRoute] Guid id)
+    {
+        try
+        {
+            var result = await _sibyllaManager.DeleteGenericObjectAsync(id);
+            if (!result) return NotFound("GenericObject not found");
+
+            return Ok("GenericObject deleted successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting GenericObject");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpGet]
+    [Route("feedback")]
+    public async Task<IActionResult> ListFeedback([FromQuery] int limit = 1024, [FromQuery] int offset = 0)
+    {
+        var objects = await _feedbackService.List(limit, offset);
+        return Ok(objects.Select(f => f.toDTO()).ToList());
     }
 }

@@ -218,5 +218,10 @@ namespace Oraculum
                     last.Role = Actor.AssistantOT;
             }
         }
+        public void Reset()
+        {
+            _memory.Clear();
+            _history.Clear();
+        }
     }
 }

@@ -1,0 +1,75 @@
+// Variables for consistent styling
+$font-stack: "Arial", sans-serif;
+$border-radius: 4px;
+$border-color: #ccc;
+$input-height: 48px;
+$font-color: #333;
+$button-bg-color: #f5f5f5;
+$button-font-color: #333;
+$content-bg-color: #fff;
+$content-border-color: #ccc;
+
+// Base styles for the form
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  font-family: $font-stack;
+  color: $font-color;
+  max-height: 80vh;
+  padding-top: 8px;
+
+  mat-form-field {
+    margin-bottom: 16px;
+    width: 100%;
+
+    .mat-form-field-wrapper {
+      padding-bottom: 0.25em; // Adjust padding to match the image
+    }
+
+    .mat-form-field-flex {
+      border-radius: $border-radius;
+      border: 1px solid $border-color;
+    }
+
+    .mat-form-field-infix {
+      border: none;
+      padding: 0 12px;
+      height: $input-height;
+      align-items: center;
+      display: flex;
+
+      input {
+        font-family: inherit;
+        color: inherit;
+        height: 100%;
+        border: none;
+        outline: none;
+        padding: 0;
+        width: 100%;
+        background-color: transparent;
+      }
+
+      textarea {
+        font-family: inherit;
+        color: inherit;
+        border: none;
+        outline: none;
+        padding: 12px;
+        width: 100%;
+        background-color: $content-bg-color;
+        border: 1px solid $content-border-color;
+        border-radius: $border-radius;
+        resize: none; // Disables resizing of the textarea
+      }
+    }
+
+    .mat-form-field-label {
+      margin: 0;
+    }
+
+    .mat-form-field-underline {
+      display: none; // Hide the underline to match the image
+    }
+  }
+}
+

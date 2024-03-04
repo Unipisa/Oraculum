@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>{{language.evaluationQuestions}}</h2>
+<mat-dialog-content class="mat-typography">
+  
+  <div
+    *ngIf="!file; else fileUploaded"
+    (drop)="onFileDropped($event)"
+    (dragover)="onDragOver($event)"
+    style="border: 2px dashed #ccc; padding: 120px; text-align: center; cursor: pointer;"
+  >
+  {{language.loadCsvInstructions}}
+  </div>
+
+  <ng-template #fileUploaded>
+    <div  style="border: 2px dashed #ccc; padding: 120px; text-align: center; cursor: pointer;">
+      <p>File  <b>{{ file?.name }} </b>{{language.successfullyUploaded}}</p>
+      <p>{{language.youCanCloseTheWindow}}</p>
+      <p></p>
+      <p><b>{{language.thanks}}</b></p>
+    </div>
+  </ng-template>
+
+
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>{{language.close}}</button>
+</mat-dialog-actions>

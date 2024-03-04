@@ -1,0 +1,94 @@
+<div class="main-container">
+  <div class="search-container">
+    <form [formGroup]="searchForm" class="search-form">
+      <mat-form-field
+        appearance="outline"
+        formControlName="searchInput"
+        ngDefaultControl
+      >
+        <mat-label>{{language.search}}</mat-label>
+        <input matInput (keyup.enter)="performSearch()" />
+        <!-- <mat-error *ngIf="searchInput.invalid">{{
+        getSearchErrorMessage()
+      }}</mat-error> -->
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="performSearch()"
+        >
+          <mat-icon>search</mat-icon>
+        </button>
+      </mat-form-field>
+      <mat-form-field
+        appearance="outline"
+        formControlName="tipoInput"
+        ngDefaultControl
+      >
+        <mat-label>{{language.type}} ({{language.optional}})</mat-label>
+        <input matInput (keyup.enter)="performSearch()" />
+        <!-- <mat-error *ngIf="tipoInput.invalid">{{ getTipoErrorMessage() }}</mat-error> -->
+      </mat-form-field>
+    </form>
+    <div class="results-container">
+      <p *ngIf="results">{{ results.length }} {{language.resultsFound}}</p>
+      <div
+        class="result"
+        *ngFor="let res of results"
+        (click)="clickOnResult(res)"
+        [class.selected-result]="selectedResult === res"
+      >
+        <p class="res-title">
+          {{ res.title }}
+        </p>
+        <p class="res-citation">
+          {{ res.citation }}
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="detail-container">
+    <div class="detail-header">
+      <button mat-flat-button color="primary" (click)="openFactDialog()">
+        {{language.add}}
+      </button>
+      <!--<button mat-flat-button color="primary" (click)="openImportDialog()">
+        Importa un documento
+      </button>-->
+    </div>
+    <br />
+    <div
+      class="fact-detail"
+      *ngIf="selectedResult"
+      (click)="openFactDialog(selectedResult)"
+      style="cursor: pointer"
+    >
+      <div class="title-container">
+        <h2>{{ selectedResult.title }}</h2>
+        <div style="display: flex; align-items: center; gap: 4px">
+          <button (click)="deleteFact(selectedResult)" mat-icon-button>
+            <mat-icon fontSet="material-icons-outlined">delete</mat-icon>
+          </button>
+          <span *ngIf="selectedResult.score" class="score">{{
+            selectedResult.score
+          }}</span>
+        </div>
+      </div>
+      <p><b>{{language.source}}: </b>{{ selectedResult.citation }}</p>
+      <p><b>{{language.category}}: </b>{{ selectedResult.category }}</p>
+      <p><b>{{language.type}}: </b>{{ selectedResult.factType }}</p>
+      <p *ngIf="selectedResult.expiration">
+        <b>{{language.expiration}}: </b>{{ selectedResult.expiration }}
+      </p>
+      <p *ngIf="selectedResult.tags?.length">
+        <b>{{language.tag}}: </b>{{ selectedResult.tags?.join(", ") }}
+      </p>
+      <br />
+      <p>{{ selectedResult.content }}</p>
+    </div>
+    <p *ngIf="!results">{{language.searchOnKnowledgebase}}</p>
+    <p *ngIf="results && !selectedResult">
+      {{language.selectResultToShowDetails}}
+    </p>
+  </div>
+</div>
