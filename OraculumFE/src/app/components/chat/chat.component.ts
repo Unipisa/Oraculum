@@ -145,52 +145,60 @@ export class ChatComponent implements OnInit {
       this.loading = true;
       //console.log('Question:', question);
 
-      this.oidcSecurityService
+      if(window.sessionStorage.getItem('needsAuthentication') === 'true'){
+        this.oidcSecurityService
         .getAccessToken()
         .subscribe((accessToken: string | undefined) => {
-          //console.log('Access Token:', accessToken);
-          this.streamService
-            .getStreamDataNew(
-              question,
-              this.activeChat.id,
-              this.activeChat.sibyllaId,
-              accessToken
-            )
-            .subscribe({
-              next: (streamMessage: {
-                AssistantMessageId: any;
-                Delta: { Content: string };
-              }) => {
-                //console.log(r);
-                if (this.loading) {
-                  this.messages.push({
-                    id: streamMessage.AssistantMessageId,
-                    text: '' + streamMessage.Delta?.Content,
-                    sender: 'assistant',
-                    timestamp: new Date().toLocaleTimeString().slice(0, 5),
-                    completed: false,
-                  });
-                  this.loading = false;
-                  this.clearSession = false;
-                } else {
-                  this.messages[this.messages.length - 1].text =
-                    this.messages[this.messages.length - 1].text +
-                    streamMessage.Delta?.Content;
-                }
-              },
-              error: (err: any) => {
-                console.error('Error receiving stream data:', err);
-                this.loading = false;
-              },
-              complete: () => {
-                //console.log('Stream data completed');
-                this.loading = false;
-                // if text parameter is defined, read the last message text with the WEB SPEECH API
-                this.setAllMessagesCompleted();
-              },
-            });
+          this.sendMessageAndResponseStream(question, accessToken);
         });
+      } else {
+        this.sendMessageAndResponseStream(question, undefined);
+      }
     }
+  }
+
+  sendMessageAndResponseStream(question: string, accessToken: string | undefined){
+    //console.log('Access Token:', accessToken);
+    this.streamService
+    .getStreamDataNew(
+      question,
+      this.activeChat.id,
+      this.activeChat.sibyllaId,
+      accessToken
+    )
+    .subscribe({
+      next: (streamMessage: {
+        AssistantMessageId: any;
+        Delta: { Content: string };
+      }) => {
+        //console.log(r);
+        if (this.loading) {
+          this.messages.push({
+            id: streamMessage.AssistantMessageId,
+            text: '' + streamMessage.Delta?.Content,
+            sender: 'assistant',
+            timestamp: new Date().toLocaleTimeString().slice(0, 5),
+            completed: false,
+          });
+          this.loading = false;
+          this.clearSession = false;
+        } else {
+          this.messages[this.messages.length - 1].text =
+            this.messages[this.messages.length - 1].text +
+            streamMessage.Delta?.Content;
+        }
+      },
+      error: (err: any) => {
+        console.error('Error receiving stream data:', err);
+        this.loading = false;
+      },
+      complete: () => {
+        //console.log('Stream data completed');
+        this.loading = false;
+        // if text parameter is defined, read the last message text with the WEB SPEECH API
+        this.setAllMessagesCompleted();
+      },
+    });
   }
   // readMessage(text: string) {
   //   if ('speechSynthesis' in window) {

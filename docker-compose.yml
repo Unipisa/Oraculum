@@ -1,0 +1,43 @@
+services:
+  oraculum-weaviate:
+    image: semitechnologies/weaviate:latest
+    ports:
+      - 8080:8080
+    volumes:
+      - weaviate_oraculum:/var/lib/weaviate
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      LOG_LEVEL: 'info'
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      DEFAULT_VECTORIZER_MODULE: 'text2vec-openai'
+      ENABLE_MODULES: 'text2vec-cohere,text2vec-huggingface,text2vec-palm,text2vec-openai,generative-openai,generative-cohere,generative-palm,ref2vec-centroid,reranker-cohere,qna-openai'
+      CLUSTER_HOSTNAME: 'node1'
+      OPENAI_APIKEY: 'your-api-key-here'
+    networks:
+      - oraculum-network
+
+  oraculum-api:
+    build:
+      dockerfile: OraculumAPI/Dockerfile
+      context: .
+    ports:
+      - 5009:80
+    networks:
+      - oraculum-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+ 
+  oraculum-fe:
+    build:
+      context: ./OraculumFE
+    ports:
+      - 80:80
+    networks:
+      - oraculum-network
+ 
+networks:
+  oraculum-network:
+
+volumes:
+  weaviate_oraculum:
