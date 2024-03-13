@@ -92,6 +92,7 @@ The core project is very small (less than 1k loc), and it is packaged as .NET li
 An important aspect considered in the design is CLI support: we firmly believe that knowledge management is essential and command line is a precious tool when you need to get knowledge from most disparate sources. For this reason we created a set of powershell cmdlets that you can run on any platform for inspecting the fact database and edit it using your favorite set of tools for spidering and preprocessing.
 
 ## Getting started
+### Initialize Weaviate
 The easiest way is to allocate a Weaviate instance on [Weaviate](https://weaviate.io) or to start a docker image if you have on-prem infrastructure. You can then install PowerShell core (7.3.0 or later) and then simply use the Oraculum powershell module from PowerShell gallery:
 
   Install-Module Oraculum
@@ -115,6 +116,7 @@ Now you can initialize the schema and start loading your knowledge:
 
 The *Get-Facts* cmdlet allows you to inspect the Fact class, you can use filters to select only facts with some meta-attributes.
 
+### Configure Sibylla
 You can configure an instance of *Sibylla* in a similar way:
 
     $c = New-SibyllaConf -SystemPrompt "You are an operator who answers questions from users of the X system. You will only respond to questions regarding missions on behalf of the Organization. For all other questions, you will reply with 'I am authorized to respond only to X-related matters.' To answer, you will use only true facts and information related to the facts in XML format that will follow in place of your knowledge. Facts with the 'faq' element address frequently asked questions, and facts with the 'reg' element pertain to regulation clauses. If you use information from an XML fact that has a 'cit' attribute, include the citation in parentheses in your response. Each question you receive will be from a user with an issue." -AssistantPrompt "Welcome to X support" -Model gpt-3.5-turbo -MaxTokens 256 -Temperature 0.1
@@ -125,6 +127,16 @@ Now you can start a Sibylla session:
     New-SibyllaSession -ConfigFile mysibylla.conf
 
 **Important**: The prompt of a Sibylla is up to you but the system will inject relevant facts from the Weaviate DB in XML format so you should always mention this in your prompt.
+
+## OraculumAPI / OraculumFE Stack quick start (local)
+If you want to quickly deploy the API/FE stack locally you need a Docker service up and running on your machine.
+
+Then follow these steps:
+1. Confiugure your OraculumAPI's appsettings.json with your Api Keys. Ignore the "Security" section if you don't need authentication.
+2. Set your Api Key in the `docker-compose.yml`
+3. Run the `docker compose up` command from the repository root folder
+4. Initialize the Weaviate instance as described in the "Initialize Weaviate" sub-section
+5. Open `http://localhost` in your browser
 
 ## Implementation status
 This is the first public release of the project, the strategy by which Sibylla adds facts to the prompt is still in its infancy and it will be needed more research and testing to find a policy respectful of the prompt size that still retain the important domain knowledge.

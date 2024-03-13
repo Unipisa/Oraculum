@@ -1,1 +1,11 @@
-{}
+{
+    "/api/oraculum": {
+      "pathRewrite": {
+        "^/api/oraculum": "/api"
+      },
+      "target": "http://oraculum-api/",
+      "secure": false,
+      "changeOrigin": true
+    }
+  }
+  

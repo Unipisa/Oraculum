@@ -70,6 +70,7 @@ export class AuthService {
       catchError((err: HttpErrorResponse) => {
         if (err.status === 401) {
           console.log(err);
+          window.sessionStorage.setItem('needsAuthentication', 'true')
           this.oidcSecurityService.authorize();
         } else {
           // go to login page on error
