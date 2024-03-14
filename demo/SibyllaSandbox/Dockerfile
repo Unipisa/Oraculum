@@ -8,18 +8,18 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["SibyllaSandbox/SibyllaSandbox.csproj", "SibyllaSandbox/"]
+COPY ["demo/SibyllaSandbox/SibyllaSandbox.csproj", "demo/SibyllaSandbox/"]
 COPY ["src/Oraculum/Oraculum.csproj", "src/Oraculum/"]
-RUN dotnet restore "./SibyllaSandbox/./SibyllaSandbox.csproj"
+RUN dotnet restore "./demo/SibyllaSandbox/./SibyllaSandbox.csproj"
 COPY . .
-WORKDIR "/src/SibyllaSandbox"
+WORKDIR "/src/demo/SibyllaSandbox"
 RUN dotnet build "./SibyllaSandbox.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./SibyllaSandbox.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-FROM base AS final
+FROM base AS bundle
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "SibyllaSandbox.dll"]

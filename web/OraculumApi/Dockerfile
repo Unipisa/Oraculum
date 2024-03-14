@@ -1,4 +1,5 @@
 #See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+FROM scratch AS test
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
@@ -17,7 +18,7 @@ RUN dotnet build "OraculumApi.csproj" -c Release -o /app/build
 FROM build AS publish
 RUN dotnet publish "OraculumApi.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-FROM base AS final
+FROM base AS bundle
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "OraculumApi.dll"]
