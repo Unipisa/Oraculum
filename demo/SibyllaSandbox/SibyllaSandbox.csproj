@@ -10,13 +10,9 @@
 
   <ItemGroup>
     <Content Remove="SibyllaeConf\Demo.json" />
-    <Content Remove="SibyllaeConf\Ollama.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="SibyllaeConf\Ollama.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="SibyllaeConf\Demo.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -28,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Oraculum\Oraculum.csproj" />
+    <ProjectReference Include="..\..\src\Oraculum\Oraculum.csproj" />
   </ItemGroup>
 
 </Project>
