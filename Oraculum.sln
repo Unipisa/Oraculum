@@ -5,15 +5,15 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Oraculum", "src\Oraculum\Oraculum.csproj", "{EEB1D86B-A59D-4958-A32A-7875C52F030A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OraculumTest", "OraculumTest\OraculumTest.csproj", "{0638F49B-CD93-47B0-8E2D-8B1C7CCDD8C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OraculumTest", "test\OraculumTest\OraculumTest.csproj", "{0638F49B-CD93-47B0-8E2D-8B1C7CCDD8C0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OraculumCLI", "OraculumCLI\OraculumCLI.csproj", "{6F3CC483-69DC-497C-9CCC-25A5DB90FDAB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OraculumCLI", "cli\OraculumCLI\OraculumCLI.csproj", "{6F3CC483-69DC-497C-9CCC-25A5DB90FDAB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SibyllaSandbox", "SibyllaSandbox\SibyllaSandbox.csproj", "{B4AC21A4-CE5F-4687-94B4-31718A7D97AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SibyllaSandbox", "demo\SibyllaSandbox\SibyllaSandbox.csproj", "{B4AC21A4-CE5F-4687-94B4-31718A7D97AA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OraculumInteractive", "OraculumInteractive\OraculumInteractive.csproj", "{A58821AF-F27F-4E05-B364-1499988A5EFB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OraculumInteractive", "cli\OraculumInteractive\OraculumInteractive.csproj", "{A58821AF-F27F-4E05-B364-1499988A5EFB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OraculumApi", "OraculumApi\OraculumApi.csproj", "{E23516A2-65F7-46E3-B0EF-C3029AD46309}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OraculumApi", "web\OraculumApi\OraculumApi.csproj", "{E23516A2-65F7-46E3-B0EF-C3029AD46309}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

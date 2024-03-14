@@ -16,7 +16,7 @@ namespace SibyllaSandbox.Controllers
     {
         private const string SSEId = "SSEId";
         private const string SibyllaRef = "sibyllaRef";
-        private const string DemoConf = "Demo";
+        private const string DemoConf = "Ollama";
         private readonly ILogger<HomeController> _logger;
         private readonly SibyllaManager _sibyllaManager;
         private readonly IServerSentEventsService _serverSentEventsService;
