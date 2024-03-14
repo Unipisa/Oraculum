@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Oraculum\Oraculum.csproj" />
+    <ProjectReference Include="..\..\src\Oraculum\Oraculum.csproj" />
   </ItemGroup>
 
 </Project>

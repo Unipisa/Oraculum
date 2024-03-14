@@ -7,11 +7,11 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["OraculumApi/OraculumApi.csproj", "OraculumApi/"]
+COPY ["web/OraculumApi/OraculumApi.csproj", "web/OraculumApi/"]
 COPY ["src/Oraculum/Oraculum.csproj", "src/Oraculum/"]
-RUN dotnet restore "OraculumApi/OraculumApi.csproj"
+RUN dotnet restore "web/OraculumApi/OraculumApi.csproj"
 COPY . .
-WORKDIR "/src/OraculumApi"
+WORKDIR "/src/web/OraculumApi"
 RUN dotnet build "OraculumApi.csproj" -c Release -o /app/build
 
 FROM build AS publish
