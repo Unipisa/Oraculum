@@ -1,0 +1,48 @@
+services:
+  oraculum-weaviate:
+    image: semitechnologies/weaviate:latest
+    ports:
+      - 8080:8080
+    volumes:
+      - weaviate_oraculum:/var/lib/weaviate
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      LOG_LEVEL: 'info'
+      AUTHENTICATION_APIKEY_ENABLED: 'true'
+      AUTHENTICATION_APIKEY_ALLOWED_KEYS: 'b0fb1f2a-211f-4ced-8cdf-6564ebe6fac5'
+      AUTHENTICATION_APIKEY_USERS: 'myuser@email.it'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      DEFAULT_VECTORIZER_MODULE: 'text2vec-openai'
+      ENABLE_MODULES: 'text2vec-cohere,text2vec-huggingface,text2vec-palm,text2vec-openai,generative-openai,generative-cohere,generative-palm,ref2vec-centroid,reranker-cohere,qna-openai'
+      CLUSTER_HOSTNAME: 'node1'
+      OPENAI_APIKEY: '<Your OpenAI API Key>'
+    networks:
+      - oraculum-network
+
+  oraculum-api:
+    build:
+      dockerfile: web/OraculumAPI/Dockerfile
+      context: ../..
+    ports:
+      - 5009:80
+    networks:
+      - oraculum-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./oraculumApiAppsettings.secret.json:/app/appsettings.json
+      - ./sibylla.conf:/app/SibyllaeConf/Demo.json
+ 
+  oraculum-fe:
+    build:
+      context: ../../web/OraculumFE
+    ports:
+      - 80:80
+    networks:
+      - oraculum-network
+ 
+networks:
+  oraculum-network:
+
+volumes:
+  weaviate_oraculum:

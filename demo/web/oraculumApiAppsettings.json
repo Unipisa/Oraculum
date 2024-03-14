@@ -1,0 +1,45 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "AllowAnonymous": true,
+  "DBSibyllaeConfigOnly": false,
+  "Tenants": {
+    "Default": {
+      "Weaviate": {
+        "ServiceEndpoint": "http://oraculum-weaviate:8080/v1",
+        "ApiKey": "b0fb1f2a-211f-4ced-8cdf-6564ebe6fac5"
+      },
+      "OpenAI": {
+        "ApiKey": "<your-openai-api-key-here>",
+        "OrgId": "<your-openai-org-id-here>"
+      },
+      "Security": {
+        "OIDC": {
+          "Authority": "your-oidc-authority-url-here",
+          "ClientId": "your-client-id-here",
+          "Audience": "your-valid-audience-here"
+        },
+        "AuthorizationRolesMap": {
+          "sysadmin": [
+            "sysadmin"
+          ],
+          "backoffice": [
+            "backoffice"
+          ],
+          "frontoffice": [
+            "frontoffice"
+          ]
+        }
+      }
+    }
+  },
+  "SibyllaConf": "Demo",
+  "DataIngestion": {
+    "TimeoutMinutes": 10
+  }
+}
