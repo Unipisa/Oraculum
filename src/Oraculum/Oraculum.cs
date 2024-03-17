@@ -1,21 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using OpenAI;
-using OpenAI.Extensions;
-using OpenAI.Managers;
-using OpenAI.ObjectModels;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Reflection.Metadata;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using WeaviateNET;
-using WeaviateNET.Modules;
-using WeaviateNET.Query;
-using WeaviateNET.Query.AdditionalProperty;
-using WeaviateNET.Query.ConditionalOperator;
 
 namespace Oraculum;
 
@@ -23,7 +7,8 @@ public class Oraculum
 {
     private Configuration _configuration;
     private ILogger _logger;
-    private Providers.Facts.Weaviate _provider;
+    private IPersistentKnowledgeProvider _provider;
+    private IPersistentGenericObjectProvider _genericObjectProvider;
 
     public Configuration Configuration
     {
@@ -54,10 +39,14 @@ public class Oraculum
             _logger.Log(LogLevel.Critical, "Oraculum: configuration not provided");
             throw new ArgumentNullException(nameof(conf));
         }
-        _provider = new Providers.Facts.Weaviate(new Providers.Facts.WeaviateOptions() { 
-            BaseUrl = conf.WeaviateEndpoint, 
-            ApiKey = conf.WeaviateApiKey, 
-            UserName = conf.UserName }, _logger);
+        var provider = new Providers.Facts.Weaviate(new Providers.Facts.WeaviateOptions()
+        {
+            BaseUrl = conf.WeaviateEndpoint,
+            ApiKey = conf.WeaviateApiKey,
+            UserName = conf.UserName
+        }, _logger);
+        _provider = provider;
+        _genericObjectProvider = provider;
     }
 
     public bool IsConnected
@@ -150,26 +139,26 @@ public class Oraculum
 
     public async Task<Guid?> AddGenericObject(GenericObject genericObject)
     {
-        return await _provider.AddGenericObject(genericObject);
+        return await _genericObjectProvider.AddGenericObject(genericObject);
     }
 
     public async Task<GenericObject?> GetGenericObject(Guid id)
     {
-        return await _provider.GetGenericObject(id);
+        return await _genericObjectProvider.GetGenericObject(id);
     }
 
     public async Task<ICollection<GenericObject>> ListGenericObjects(long limit = 1024, long offset = 0, string? sort = null, string? order = null)
     {
-        return await _provider.ListGenericObjects(limit, offset, sort, order);
+        return await _genericObjectProvider.ListGenericObjects(limit, offset, sort, order);
     }
 
     public async Task UpdateGenericObject(GenericObject genericObject)
     {
-        await _provider.UpdateGenericObject(genericObject);
+        await _genericObjectProvider.UpdateGenericObject(genericObject);
     }
 
     public async Task<bool> DeleteGenericObject(Guid id)
     {
-        return await _provider.DeleteGenericObject(id);
+        return await _genericObjectProvider.DeleteGenericObject(id);
     }
 }

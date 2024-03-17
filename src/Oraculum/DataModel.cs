@@ -105,6 +105,41 @@ public class GenericObject
 }
 
 [IndexNullState]
+[OpenAIVectorizerClass(model = "text-embedding-3-large", dimensions = 3072)]
+public class Fact
+{
+    internal const int MajorVersion = 1;
+    internal const int MinorVersion = 2;
+
+    [JsonIgnore]
+    public const string ClassName = "Facts";
+
+    [JsonIgnore]
+    public Guid? id;
+    [JsonIgnore]
+    public double? distance;
+
+    public string? factType;
+    public string? category;
+    public string[]? tags;
+    public string? title;
+    public string? content;
+    public string? citation;
+    public string? reference;
+    public DateTime? expiration;
+    public GeoCoordinates? location;
+    public double? locationDistance;
+    public string? locationName;
+    [OpenAIVectorizerProperty(skip = true)]
+    public string[]? editPrincipals;
+    public string? validFrom;
+    public string? validTo;
+    //public WeaviateRef[]? references;
+    public DateTime? factAdded;
+}
+
+#region Legacy Fact defintions
+[IndexNullState]
 public class Fact_1_0
 {
     internal const int MajorVersion = 1;
@@ -160,36 +195,4 @@ public class Fact_1_1
     public DateTime? factAdded;
 }
 
-[IndexNullState]
-[OpenAIVectorizerClass(model = "text-embedding-3-large", dimensions = 3072)]
-public class Fact
-{
-    internal const int MajorVersion = 1;
-    internal const int MinorVersion = 2;
-
-    [JsonIgnore]
-    public const string ClassName = "Facts";
-
-    [JsonIgnore]
-    public Guid? id;
-    [JsonIgnore]
-    public double? distance;
-
-    public string? factType;
-    public string? category;
-    public string[]? tags;
-    public string? title;
-    public string? content;
-    public string? citation;
-    public string? reference;
-    public DateTime? expiration;
-    public GeoCoordinates? location;
-    public double? locationDistance;
-    public string? locationName;
-    [OpenAIVectorizerProperty(skip = true)]
-    public string[]? editPrincipals;
-    public string? validFrom;
-    public string? validTo;
-    //public WeaviateRef[]? references;
-    public DateTime? factAdded;
-}
+#endregion

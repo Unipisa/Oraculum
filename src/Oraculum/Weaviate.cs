@@ -25,7 +25,7 @@ namespace Oraculum.Providers.Facts
         public string? UserName { get; set; }
     }
 
-    public class Weaviate
+    public class Weaviate : IPersistentKnowledgeProvider, IPersistentGenericObjectProvider
     {
         internal const int MajorVersion = 1;
         internal const int MinorVersion = 0;
@@ -110,6 +110,11 @@ namespace Oraculum.Providers.Facts
             }
 
             _facts = _kb.Schema.GetClass<Fact>(Fact.ClassName);
+        }
+
+        public void Disconnect()
+        {
+            _facts = null;
         }
 
         private async Task ReadSchemaMetadata()
