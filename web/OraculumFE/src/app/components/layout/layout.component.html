@@ -16,7 +16,11 @@
       <mat-icon fontSet="material-icons-outlined">account_circle</mat-icon>
     </button>
     <mat-menu #profileMenu="matMenu">
-      <a mat-menu-item *ngFor="let option of menuLinks" [routerLink]="option.url">
+      <a
+        mat-menu-item
+        *ngFor="let option of menuLinks"
+        [routerLink]="option.url"
+      >
         <mat-icon fontSet="material-icons-outlined">{{ option.icon }}</mat-icon>
         <span>{{ option.label }}</span>
       </a>
@@ -33,5 +37,5 @@
 </main>
 
 <footer>
-  <p><strong>Cineca</strong> R&D</p>
+  <p><strong>CINECA</strong></p>
 </footer>
