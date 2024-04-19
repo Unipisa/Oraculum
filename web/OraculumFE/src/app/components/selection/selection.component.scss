@@ -1,30 +1,11 @@
-@use "@angular/material" as mat;
+@import "bootstrap-italia/src/scss/utilities/colors_vars.scss";
 
-.card-container {
+:host{
   display: flex;
-  flex-wrap: wrap;
-  gap: 48px;
-  padding: 48px;
+  background-color: $dark;
+  min-height: 100%;
+  background-image: url('../../../assets/background.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
 }
-
-mat-card {
-  width: 300px;
-  min-height: 130px;
-  justify-content: space-between;
-  @include mat.elevation(4);
-}
-
-.new-card {
-  border: 2px dashed lightblue;
-  @include mat.elevation(0);
-  button {
-    height: 100%;
-    display: flex;
-    flex-direction: column-reverse;
-    gap: 8px;
-    span,
-    mat-icon {
-      font-size: x-large;
-    }
-  }
-}
+it-card{ display:flex; flex: 1; flex-basis: calc(100% / 4); max-width: 600px;}

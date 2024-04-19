@@ -8,11 +8,15 @@ using System.Diagnostics.CodeAnalysis;
 namespace OraculumApi.Models.BackOffice
 {
     /// <summary>
-    /// 
+    /// Represents the configuration DTO for Sibylla.
     /// </summary>
     [DataContract]
     public partial class SibyllaConfigDto : SibyllaConf
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SibyllaConfigDto"/> class.
+        /// </summary>
+        /// <param name="id">The unique identifier for the configuration</param>
         [SetsRequiredMembers]
         public SibyllaConfigDto(string id)
         {

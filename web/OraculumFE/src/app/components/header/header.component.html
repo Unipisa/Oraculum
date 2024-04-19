@@ -1,0 +1,128 @@
+<header
+  #headerWrapper
+  class="it-header-wrapper"
+  [class.it-header-sticky]="sticky"
+  data-bs-position-type="fixed"
+  data-bs-sticky-class-name="is-sticky"
+>
+  @if (showSlim) {
+  <div class="it-header-slim-wrapper" [class.theme-light]="light">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="it-header-slim-wrapper-content">
+            <ng-content select="[slimLeftZone]"></ng-content>
+            <h6 class="fw-normal m-0 d-none d-lg-block navbar-brand">
+              {{ slimTitle }}
+            </h6>
+
+            <div class="nav-mobile">
+              <nav
+                [attr.aria-label]="
+                  'it.navigation.secondary-navigation' | translate
+                "
+              >
+                <a
+                  class="it-opener d-lg-none"
+                  data-bs-toggle="collapse"
+                  href="#menuC1"
+                  role="button"
+                  aria-expanded="false"
+                  aria-controls="menuC1"
+                >
+                  <span>{{ slimTitle }}</span>
+                  <it-icon name="expand"></it-icon>
+                </a>
+                <div class="link-list-wrapper collapse" id="menuC1">
+                  <ng-content select="[slimLinkList]"></ng-content>
+                </div>
+              </nav>
+            </div>
+            <div class="it-header-slim-right-zone">
+              <ng-content select="[slimRightZone]"></ng-content>
+              @if (loginStyle === 'default') {
+              <div class="it-access-top-wrapper">
+                <a
+                  class="btn btn-primary btn-sm"
+                  (click)="emitLoginClick($event)"
+                  href="#"
+                >
+                  {{ "it.navigation.login" | translate }}
+                </a>
+              </div>
+              } @if (loginStyle === 'full') {
+              <a
+                itButton="primary"
+                class="btn-full btn-icon"
+                (click)="emitLoginClick($event)"
+                href="#"
+              >
+                <span class="rounded-icon">
+                  <it-icon name="user" color="primary"></it-icon>
+                </span>
+                <span class="d-none d-lg-block">{{
+                  "it.navigation.full-login" | translate
+                }}</span>
+              </a>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+  <div class="it-nav-wrapper">
+    <div
+      class="it-header-center-wrapper"
+      [class.it-small-header]="smallHeader"
+      [class.theme-light]="light"
+    >
+      <div class="container">
+        <div class="row">
+          <div class="col-12">
+            <div class="it-header-center-content-wrapper">
+              <div class="it-brand-wrapper">
+                <ng-content select="[brand]"></ng-content>
+              </div>
+              <div class="it-right-zone">
+                <ng-content select="[rightZone]"></ng-content>
+
+                @if (showSearch) {
+                <div class="it-search-wrapper">
+                  <span class="d-none d-md-block">{{
+                    "it.navigation.search" | translate
+                  }}</span>
+                  <a
+                    href="#"
+                    class="search-link rounded-icon"
+                    [attr.aria-label]="
+                      'it.navigation.website-search' | translate
+                    "
+                    (click)="emitSearchClick($event)"
+                  >
+                    <it-icon name="search"></it-icon>
+                  </a>
+                </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="it-header-navbar-wrapper" [class.theme-light-desk]="light">
+      <div class="container">
+        <div class="row">
+          <div class="col-12">
+            <it-navbar [megamenu]="megamenu" [expand]="expand">
+              <ng-container navItems>
+                <ng-content select="[navItems]"></ng-content>
+              </ng-container>
+            </it-navbar>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

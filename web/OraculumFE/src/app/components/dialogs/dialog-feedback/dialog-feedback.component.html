@@ -20,8 +20,7 @@
   </mat-form-field>
 </div>
 <div mat-dialog-actions [align]="'end'">
-  <button mat-button (click)="onNoClick()">{{language.cancel}}</button>
-  <button mat-flat-button color="primary" [mat-dialog-close]="feedbackText">
-    Invia
-  </button>
+  <button itButton="outline-secondary" class="me-2" (click)="onNoClick()">{{language.cancel}}</button>
+  <button itButton="primary" class="me-2" [mat-dialog-close]="feedbackText">{{language.enter}}</button>
+    
 </div>

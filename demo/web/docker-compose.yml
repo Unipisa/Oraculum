@@ -40,6 +40,24 @@ services:
       - 80:80
     networks:
       - oraculum-network
+
+  oraculum-evaluate:
+    build:
+      dockerfile: web/OraculumEvaluate/ragas_evaluate_api/Dockerfile
+      context: ../..
+    ports:
+      - 5001:80
+    networks:
+      - oraculum-network
+
+  oraculum-dataingestion:
+    build:
+      dockerfile: web/OraculumIngestion/Dockerfile
+      context: ../..
+    ports:
+      - 5002:80
+    networks:
+      - oraculum-network
  
 networks:
   oraculum-network:

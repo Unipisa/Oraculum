@@ -19,8 +19,7 @@ namespace Oraculum
             Fact = fact;
             TTL = ttl;
             LastAccess = lastAccess;
-
-            var nf = factsdata.CreateElement(Fact.factType!);
+            var nf = factsdata.CreateElement(Fact.factType!.Replace(" ", "-"));
             if (Fact.citation != null)
                 nf.SetAttribute("cit", Fact.citation);
             if (Fact.reference != null)
@@ -36,11 +35,12 @@ namespace Oraculum
         internal int TTL { get; set; }
         internal DateTime LastAccess { get; set; }
         internal XmlElement XmlFact { get; set; }
-        internal int Tokens { 
+        internal int Tokens
+        {
             get
             {
                 return TokenizerGpt3.TokenCount(XmlFact.OuterXml);
-            } 
+            }
         }
 
         internal string XmlFactToString()
@@ -125,7 +125,8 @@ namespace Oraculum
 
             var tokenpermsg = (int)(((double)maxtokens) / msg.Count);
 
-            msg = msg.Select(m => {
+            msg = msg.Select(m =>
+            {
                 var contentlen = TokenizerGpt3.TokenCount(m.Content);
                 var newlen = Math.Min(contentlen, tokenpermsg);
                 var content = m.Content;
@@ -136,7 +137,7 @@ namespace Oraculum
                     content = content.Substring(0, content.Length - cut);
                 }
                 return new ChatMessage(m.Role, content, m.Name, m.FunctionCall);
-                }).ToList();
+            }).ToList();
 
             return msg;
         }
@@ -176,7 +177,7 @@ namespace Oraculum
                     {
                         _memory.Add(fact.id!.Value, slot);
                         tokens += slot.Tokens;
-                    } 
+                    }
                     else
                     {
                         _logger.Log(LogLevel.Trace, $"Recall: memory full, skipping fact {fact.id}");

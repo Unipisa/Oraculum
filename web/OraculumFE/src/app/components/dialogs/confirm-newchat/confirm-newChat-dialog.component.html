@@ -1,0 +1,16 @@
+<div class="container">
+  <h1 mat-dialog-title>{{language.newchat}}</h1>
+  <div mat-dialog-content>
+    <p>{{language.newchatconfirm}}</p>
+  </div>
+  <div class="modal-footer">
+    <div class="container-button">
+      <div class="cancelButton">
+        <button itButton="outline-secondary" size="sm" type="button" (click)="onCancel()">{{ language.cancel }}</button>
+      </div>
+      <div class="confirmButton">
+        <button itButton="primary" size="sm" type="button" (click)="onConfirm()">{{ language.confirm }}</button>
+      </div>
+    </div>
+  </div>
+</div>

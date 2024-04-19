@@ -1,0 +1,63 @@
+services:
+  oraculum-weaviate:
+    image: semitechnologies/weaviate:latest
+    command:
+    - --host
+    - 0.0.0.0
+    - --port
+    - '8080'
+    - --scheme
+    - http
+    ports:
+      - 8080:8080
+      - 50051:50051
+    volumes:
+      - weaviate_oraculum:/var/lib/weaviate
+    restart: on-failure:0
+    environment:
+      TRANSFORMERS_INFERENCE_API: 'http://t2v-transformers:8080'
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      DEFAULT_VECTORIZER_MODULE: 'text2vec-transformers'
+      ENABLE_MODULES: 'text2vec-transformers'
+      CLUSTER_HOSTNAME: 'node1'
+    networks:
+      - oraculum-network
+
+  t2v-transformers:
+    image: cr.weaviate.io/semitechnologies/transformers-inference:sentence-transformers-paraphrase-multilingual-mpnet-base-v2
+    environment:
+      ENABLE_CUDA: '1'
+      NVIDIA_VISIBLE_DEVICES: 'all'
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - capabilities: 
+            - 'gpu'
+
+  oraculum-api:
+    build:
+      dockerfile: web/OraculumAPI/Dockerfile
+      context: ..
+    ports:
+      - 5009:80
+    networks:
+      - oraculum-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+ 
+  oraculum-fe:
+    build:
+      context: ./OraculumFE
+    ports:
+      - 80:80
+    networks:
+      - oraculum-network
+ 
+networks:
+  oraculum-network:
+
+volumes:
+  weaviate_oraculum:

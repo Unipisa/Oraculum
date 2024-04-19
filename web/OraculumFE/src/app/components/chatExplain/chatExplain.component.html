@@ -1,139 +1,13 @@
 <div class="main-container">
-  <div class="chatbot-container">
-    <div class="chatbot-body">
-      <div class="chatbot-body-messages scrollable" #messagesContainer>
-        <ng-container *ngIf="!loadingChats; else loadingBlock">
-          <br />
-          <div
-            class="chatbot-body-message"
-            *ngFor="let message of messages; let i = index"
-            [ngClass]="message.sender.includes('assistant') ? 'left' : 'right'"
-          >
-            <div class="chatbot-body-message-text">
-              <p class="message-text" [ngClass]="i == 0 ? 'welcome-text' : ''">
-                {{ message.text }}
-              </p>
-              <ng-container *ngIf="message.url">
-                <button
-                  mat-button
-                  (click)="openUrl(message.url)"
-                  class="chatbot-body-message-open"
-                >
-                  APRI
-                </button>
-              </ng-container>
-              <div
-                class="chatbot-body-message-footer"
-                *ngIf="message.sender == 'assistant' && i !== 0"
-              >
-                <ng-container *ngIf="message.completed">
-                  <button
-                    mat-icon-button
-                    class="small-icon-button"
-                    (click)="copyContent(message.text)"
-                  >
-                    <mat-icon fontSet="material-icons-outlined">copy</mat-icon>
-                  </button>
-                  <div class="right-footer-container">
-                    <button
-                      mat-icon-button
-                      class="small-icon-button"
-                      (click)="giveFeedbackMessage(message.id, true)"
-                      *ngIf="
-                        message.feedback == true ||
-                        message.feedback == undefined
-                      "
-                      [disabled]="message.feedback != undefined"
-                    >
-                      <mat-icon fontSet="material-icons-outlined"
-                        >thumb_up</mat-icon
-                      >
-                    </button>
-                    <button
-                      mat-icon-button
-                      class="small-icon-button"
-                      (click)="giveFeedbackMessage(message.id, false)"
-                      *ngIf="
-                        message.feedback == false ||
-                        message.feedback == undefined
-                      "
-                      [disabled]="message.feedback != undefined"
-                    >
-                      <mat-icon fontSet="material-icons-outlined"
-                        >thumb_down</mat-icon
-                      >
-                    </button>
-                    <div
-                      class="chatbot-body-message-time"
-                      *ngIf="message.sender.includes('assistant')"
-                    >
-                      <span>
-                        {{ message.timestamp }}
-                      </span>
-                    </div>
-                  </div>
-                </ng-container>
-              </div>
-              <ng-template #feedback>
-                <div
-                  class="chatbot-body-message-feedback"
-                  *ngIf="!!message.feedback"
-                >
-                  <div class="chatbot-body-message-feedback-text">
-                    <p>{{ language.thanksFeedback }}</p>
-                  </div>
-                </div>
-              </ng-template>
-            </div>
-            <div
-              class="chatbot-body-message-time user-message-time"
-              *ngIf="!message.sender.includes('assistant')"
-            >
-              <p>
-                {{ message.timestamp }}
-              </p>
-            </div>
-          </div>
-        </ng-container>
-        <ng-template #loadingBlock>
-          <div class="spinner-container">
-            <mat-spinner></mat-spinner>
-          </div>
-        </ng-template>
-        <div
-          class="chatbot-header-title-writing"
-          *ngIf="loading"
-          style="margin-left: 24px"
-        >
-          {{ loadingText }}
-          <div class="dot-flashing"></div>
-        </div>
-      </div>
-      <div class="chatbot-body-input">
-        <button
-          mat-icon-button
-          (click)="openRecognitionModal()"
-          class="mic-button"
-        >
-          <mat-icon>mic</mat-icon>
-        </button>
-        <input
-          type="text"
-          [placeholder]="language.askQuestion"
-          [(ngModel)]="chatInput"
-          (keypress)="onKey($event)"
-          autofocus
-        />
-        <button
-          mat-icon-button
-          (click)="sendMessage()"
-          [disabled]="!this.chatInput || this.chatInput.length == 0 || loading"
-          #textInput
-        >
-          <mat-icon>send</mat-icon>
-        </button>
-      </div>
-    </div>
+  <!-- CHAT -->
+  <div class="chatbot">
+    <app-chat-modular
+      [mode]="'explain'"
+      (factsChanged)="handleFactsChange($event)"
+      (updateUserMessage)="updateUserMessage($event)"
+      (updateAssistantMessage)="updateAssistantMessage($event)"
+      (updateActiveChat)="updateActiveChat($event)"
+    ></app-chat-modular>
   </div>
   <!-- CONTESTO -->
   <div class="context-container">
@@ -141,69 +15,71 @@
     <div class="context-header">
       <div style="display: flex; gap: 16px">
         <span class="number-info factsUsed" *ngIf="N_factsUsedForAnswer > 0"
-          >{{ N_factsUsedForAnswer }} {{language.usedForAnswering}}</span
+          >{{ N_factsUsedForAnswer }} {{ language.usedForAnswering }}</span
         >
         <span class="number-info factsTotal" *ngIf="N_totalFacts > 0"
-          >{{ N_totalFacts }} {{language.retrieved}}</span
+          >{{ N_totalFacts }} {{ language.retrieved }}</span
         >
       </div>
-      <button mat-flat-button (click)="newChat()" [disabled]="buttonDisabled">
-        <mat-icon>add</mat-icon>
-         {{ language.newChat }}
-      </button>
-      <button
-        class="add-content-button"
-        mat-flat-button
-        color="primary"
-        (click)="openFactDialog()"
-      >
-        {{language.add}}
-      </button>
+      <div class="addSource">
+        <div class="d-flex gap-2">
+          <button type="button" itButton="primary" (click)="openAddSourceDialog()">
+            {{ language.addSource }}
+          </button>
+        </div>
+      </div>
     </div>
     <br />
-    <div
-      class="fact"
-      *ngFor="let fact of facts; index as i"
-      [class.usedForAnswer]="!fact.outOfLimit"
-      (click)="openFactDialog(fact)"
-    >
-      <div class="title-container">
-        <strong>{{ fact.title }}</strong>
-        <span
-          class="score"
-          matTooltip="Similarità dell'informazione rispetto alla domanda"
-          matTooltipPosition="left"
-          >{{ fact.score }}</span
-        >
-      </div>
-      <div class="infoAndFeedContainer">
-        <div class="info-container">
-          <p>{{language.source}}: {{ fact.citation }}</p>
-          <p>{{language.category}}: {{ fact.category }}</p>
-          <p>{{language.type}}: {{ fact.factType }}</p>
-        </div>
-        <div class="feedback-buttons-fact">
-          <button
-            mat-icon-button
-            class="small-icon-button"
-            (click)="giveFeedBackFact(fact.id, true); $event.stopPropagation()"
-            *ngIf="fact.feedback == true || fact.feedback == undefined"
-            [disabled]="fact.feedback != undefined"
+    <ng-container *ngIf="false">
+      <div
+        class="fact"
+        *ngFor="let fact of facts; index as i"
+        [class.usedForAnswer]="!fact.outOfLimit"
+        (click)="openFactDialog(fact)"
+      >
+        <div class="title-container">
+          <strong>{{ fact.title }}</strong>
+          <span
+            class="score"
+            matTooltip="Similarità dell'informazione rispetto alla domanda"
+            matTooltipPosition="left"
+            >{{ fact.score }}</span
           >
-            <mat-icon fontSet="material-icons-outlined">thumb_up</mat-icon>
-          </button>
-          <button
-            mat-icon-button
-            class="small-icon-button"
-            (click)="giveFeedBackFact(fact.id, false); $event.stopPropagation()"
-            *ngIf="fact.feedback == false || fact.feedback == undefined"
-            [disabled]="fact.feedback != undefined"
-          >
-            <mat-icon fontSet="material-icons-outlined">thumb_down</mat-icon>
-          </button>
         </div>
+        <div class="infoAndFeedContainer">
+          <div class="info-container">
+            <p>{{ language.source }}: {{ fact.citation }}</p>
+            <p>{{ language.category }}: {{ fact.category }}</p>
+            <p>{{ language.type }}: {{ fact.factType }}</p>
+          </div>
+          <div class="feedback-buttons-fact">
+            <button
+              mat-icon-button
+              class="small-icon-button"
+              (click)="
+                giveFeedBackFact(fact.id, true); $event.stopPropagation()
+              "
+              *ngIf="fact.feedback == true || fact.feedback == undefined"
+              [disabled]="fact.feedback != undefined"
+            >
+              <mat-icon fontSet="material-icons-outlined">thumb_up</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              class="small-icon-button"
+              (click)="
+                giveFeedBackFact(fact.id, false); $event.stopPropagation()
+              "
+              *ngIf="fact.feedback == false || fact.feedback == undefined"
+              [disabled]="fact.feedback != undefined"
+            >
+              <mat-icon fontSet="material-icons-outlined">thumb_down</mat-icon>
+            </button>
+          </div>
+        </div>
+        <p>{{ fact.content }}</p>
       </div>
-      <p>{{ fact.content }}</p>
-    </div>
+    </ng-container>
+    <app-fact-list [facts]="facts" (onEditFact)="openFactDialog($event)" (onUpvoteFact)="buildFeedBackFact($event, true)" (onDownvoteFact)="buildFeedBackFact($event, false)"></app-fact-list>
   </div>
 </div>

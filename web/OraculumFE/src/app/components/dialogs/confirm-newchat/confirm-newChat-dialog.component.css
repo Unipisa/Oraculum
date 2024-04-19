@@ -1,0 +1,41 @@
+.container {
+    padding: 2em;
+    position: relative; /* Assicurati che il container della modale sia posizionato relativamente */
+    height: 100%; /* Assicurati che la modale occupi l'altezza necessaria */
+}
+
+.modal-footer {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: center; 
+}
+
+.container-button {
+    display: flex;
+    justify-content: center; 
+    width: 100%;
+}
+
+.cancelButton, .confirmButton {
+    flex: 1; 
+    max-width: 150px; 
+}
+
+
+@media (min-width: 768px) {
+    .modal-footer {
+        justify-content: flex-end; 
+    }
+
+    .container-button {
+        justify-content: flex-end; 
+    }
+
+    .cancelButton, .confirmButton {
+        margin-left: 10px; 
+    }
+}

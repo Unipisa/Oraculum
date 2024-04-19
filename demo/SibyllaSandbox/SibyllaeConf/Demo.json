@@ -13,7 +13,7 @@
     "MemorySpan": 4,
     "ContextTokens": 4096,
     "ChatMemoryMaxContextPerc": 25,
-    "CategoryFilter": [ "missioni" ],
+    "CategoryFilter": ["missioni"],
     "FactFilter": null,
     "TagFilter": null,
     "Limit": 20,
@@ -21,17 +21,17 @@
   },
   "FunctionsBeforeAnswerHook": [
     {
-      "name": "CheckAndAnswer",
+      "name": "check_and_answer",
       "description": "Valuta se la domanda è inerente al contesto di U-web missioni e rispondi di conseguenza",
       "parameters": {
         "type": "object",
         "properties": {
-          "evaluation": {
+          "valutazione": {
             "type": "boolean",
             "description": "True se la domanda è inerente al contesto di U-web missioni, False altrimenti"
           }
         },
-        "required": ["evaluation"]
+        "required": ["valutazione"]
       }
     }
   ]

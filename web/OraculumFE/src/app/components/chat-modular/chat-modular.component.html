@@ -1,0 +1,228 @@
+<div class="chatbot-container">
+  <div
+    class="chatbot-header-title bg-dark ps-3 py-3"
+    [ngClass]="isMobile ? 'mobile-header' : ''"
+  >
+    <ng-container *ngIf="mode == 'normal' && !isMobile">
+      <h5>{{ language.askSibylla + " - " + botInfo.title }}</h5>
+    </ng-container>
+    <ng-container *ngIf="mode == 'explain' || isMobile">
+      <h6 class="mobile-header-title">
+        {{ language.askSibylla + " - " + botInfo.title }}
+      </h6></ng-container
+    >
+
+    <button
+      itButton="outline-secondary"
+      (click)="newChat()"
+      [disabled]="buttonDisabled || loading || messages.length <= 1"
+      class="me-2"
+      [size]="mode == 'normal' ? 'sm' : 'xs'"
+      *ngIf="!isMobile"
+    >
+      <mat-icon
+        class="material-symbols-outlined new-chat-icon me-2 icon icon-light"
+        >edit_square</mat-icon
+      >
+      <span>{{ language.newChat }}</span>
+    </button>
+    <button
+      class="new-chat-button small-icon-button"
+      mat-icon-button
+      [itButton]="undefined"
+      (click)="newChat()"
+      *ngIf="isMobile"
+      [disabled]="buttonDisabled || loading || messages.length <= 1"
+    >
+      <mat-icon class="material-symbols-outlined new-chat-icon icon icon-light"
+        >edit_square</mat-icon
+      >
+    </button>
+  </div>
+
+  <div class="chatbot-body py-1">
+    <div
+      class="chatbot-body-messages scrollable"
+      [ngClass]="isMobile ? 'mobile' : ''"
+      #messagesContainer
+    >
+      <ng-container *ngIf="!loadingChats; else loadingBlock">
+        <div
+          *ngFor="let message of messages; let i = index"
+          class="chatbot-body-message"
+          [ngClass]="
+            (message.sender.includes('assistant') ? 'left' : 'right') +
+            (isMobile ? ' mobile' : '')
+          "
+        >
+          <div class="chatbot-body-message-text">
+            <div
+              class="chatbot-body-message-text-main"
+              [ngClass]="
+                message.sender == 'assistant' && i !== 0 ? 'response' : ''
+              "
+            >
+              <div
+                class="message-text"
+                [innerHtml]="linkify(message) | markdown | async"
+              ></div>
+              <div
+                class="chatbot-body-message-time user-message-time"
+                *ngIf="!message.sender.includes('assistant')"
+              >
+                <p>{{ message.timestamp }}</p>
+              </div>
+            </div>
+            <button
+              *ngFor="let source of message.sources; let i = index"
+              mat-button
+              (click)="openUrl(source.url)"
+              class="chatbot-body-message-open"
+              [ngClass]="isMobile ? 'mobile' : ''"
+            >
+              <span class="source-display">{{
+                i + 1 + ". " + source.display
+              }}</span>
+            </button>
+
+            <div
+              class="chatbot-body-message-footer"
+              *ngIf="message.sender == 'assistant' && i !== 0"
+            >
+              <ng-container *ngIf="message.completed">
+                <button
+                  mat-icon-button
+                  class="small-icon-button"
+                  (click)="copyContent(message)"
+                >
+                  <it-icon
+                    name="copy"
+                    class="bg-light"
+                    color="primary"
+                  ></it-icon>
+                </button>
+                <div class="right-footer-container">
+                  <button
+                    class="thumb-button small-icon-button"
+                    [itButton]="undefined"
+                    mat-icon-button
+                    (click)="giveFeedbackMessage(message.id, true)"
+                    *ngIf="
+                      message.feedback == true || message.feedback == undefined
+                    "
+                    [disabled]="message.feedback != undefined"
+                  >
+                    <mat-icon class="material-symbols-outlined thumb-icon"
+                      >thumb_up</mat-icon
+                    >
+                  </button>
+                  <button
+                    class="thumb-button small-icon-button"
+                    style="padding-right: 0"
+                    mat-icon-button
+                    [itButton]="undefined"
+                    (click)="giveFeedbackMessage(message.id, false)"
+                    *ngIf="
+                      message.feedback == false || message.feedback == undefined
+                    "
+                    [disabled]="message.feedback != undefined"
+                  >
+                    <mat-icon class="material-symbols-outlined thumb-icon"
+                      >thumb_down</mat-icon
+                    >
+                  </button>
+                  <div
+                    class="chatbot-body-message-time"
+                    *ngIf="message.sender.includes('assistant')"
+                  >
+                    <span>{{ message.timestamp }}</span>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+          <div
+            class="error-message-container"
+            *ngIf="errorRetryButton && i == messages.length - 1"
+          >
+            <p class="error-text">{{ language.errorRetry }}</p>
+            <button
+              class="retry-button"
+              itButton="warning"
+              (click)="retryMessageInNewChat(message)"
+            >
+              {{ language.retry }}
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="chatbot-header-title-writing"
+          *ngIf="loading"
+          style="margin-left: 24px"
+        >
+          {{ loadingText }}
+          <div class="dot-flashing"></div>
+        </div>
+      </ng-container>
+
+      <ng-template #loadingBlock>
+        <div class="spinner-container">
+          <mat-spinner></mat-spinner>
+        </div>
+      </ng-template>
+    </div>
+
+    <div class="chatbot-body-input" [ngClass]="isMobile ? 'mobile' : ''">
+      <button
+        itButton="primary"
+        class="mic-button"
+        (click)="openRecognitionModal()"
+        size="xs"
+        *ngIf="!isMobile"
+      >
+        <mat-icon class="material-symbols-outlined send-icon icon icon-light">{{
+          "mic"
+        }}</mat-icon>
+      </button>
+      <input
+        type="text"
+        [placeholder]="language.askQuestion"
+        [(ngModel)]="chatInput"
+        (keypress)="onKey($event)"
+        autofocus
+      />
+      <button
+        itButton="primary"
+        class="send-button-desktop"
+        (click)="sendMessage()"
+        [disabled]="
+          !this.chatInput ||
+          this.chatInput.length == 0 ||
+          loading ||
+          errorRetryButton
+        "
+        #textInput
+        *ngIf="!isMobile"
+      >
+        {{ language.send }}
+      </button>
+      <button
+        class="send-button"
+        itButton="primary"
+        (click)="
+          this.chatInput && this.chatInput.length > 0
+            ? sendMessage()
+            : openRecognitionModal()
+        "
+        [disabled]="loading || errorRetryButton"
+        *ngIf="isMobile"
+        size="xs"
+      >
+        <mat-icon class="material-symbols-outlined send-icon icon icon-light">{{
+          this.chatInput && this.chatInput.length > 0 ? "send" : "mic"
+        }}</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

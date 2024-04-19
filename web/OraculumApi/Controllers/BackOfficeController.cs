@@ -47,6 +47,8 @@ public class BackOfficeController : Controller
     [ValidateModelState]
     [DynamicAuthorize("sysadmin")]
     [SwaggerOperation("AddSibyllaConfigDto")]
+    [SwaggerResponse(statusCode: 200, type: typeof(List<SibyllaConfigDto>))]
+
     public async Task<IActionResult> AddSibyllaConfigDtoAsync([FromBody] List<SibyllaConfigDto> body)
     {
         foreach (SibyllaConfigDto sibyllaConfig in body)
@@ -71,6 +73,33 @@ public class BackOfficeController : Controller
     }
 
     /// <summary>
+    /// Reset and initialize schema (deletes all the data in the database and reinitializes the schema)
+    /// </summary>
+    /// <remarks>Reset and initialize schema (deletes all the data in the database and reinitializes the schema)</remarks>
+    /// <response code="200">Schema reset and initialized successfully</response>
+    /// <response code="500">Internal server error</response>
+    /// <response code="503">Service Unavailable</response>
+    /// <response code="504">Gateway Timeout</response>
+    [HttpPost]
+    [Route("reset-and-initialize-schema")]
+    [ValidateModelState]
+    [DynamicAuthorize("sysadmin")]
+    [SwaggerOperation("ResetAndInitializeSchema")]
+    public async Task<IActionResult> ResetAndInitializeSchema()
+    {
+        try
+        {
+            await _sibyllaManager.ResetAndInitializeSchema();
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error resetting and initializing schema");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
     /// Delete a fact by its ID
     /// </summary>
     /// <remarks>Delete a single Fact by ID</remarks>
@@ -89,9 +118,7 @@ public class BackOfficeController : Controller
         return Ok();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
+    /// <summary> Multiple fact delete with filters </summary>
     /// <param name="factType"></param>
     /// <param name="category"></param>
     /// <param name="expired"></param>
@@ -154,8 +181,8 @@ public class BackOfficeController : Controller
     /// Retrieve all facts
     /// </summary>
     /// <remarks>Retrive a list of Facts using pagination (default max 10 elements)</remarks>
-    /// <param name="perPage">Limit the number of facts returned.</param>
-    /// <param name="page">Offset to start the facts list from.</param>
+    /// <param name="limit">Limit the number of facts returned.</param>
+    /// <param name="offset">Offset to start the facts list from.</param>
     /// <param name="sort">Attribute to sort the facts by.</param>
     /// <param name="order">Order of sorting (asc or desc).</param>
     /// <response code="200">A list of facts</response>
@@ -186,7 +213,7 @@ public class BackOfficeController : Controller
     [ValidateModelState]
     [DynamicAuthorize("backoffice")]
     [SwaggerOperation("GetAllSibyllaConfigDtos")]
-    [SwaggerResponse(statusCode: 200, type: typeof(List<SibyllaConfigDto>), description: "List of Sibylla configurations")]
+    [SwaggerResponse(statusCode: 200, type: typeof(List<SibyllaConfigDto>), description: "List of all Sibylla configurations")]
     public async Task<IActionResult> GetAllSibyllaeConfigs()
     {
         var sibyllaeFromDB = await _sibyllaConfigService.List();
@@ -277,7 +304,7 @@ public class BackOfficeController : Controller
     /// <summary>
     /// Add new Facts
     /// </summary>
-    /// <remarks>Array of Fact objects that needs to be added</remarks>
+    /// <remarks>Array of Fact objects to be added</remarks>
     /// <param name="body"></param>
     /// <response code="200">OK</response>
     /// <response code="400">Bad Request</response>
@@ -399,9 +426,16 @@ public class BackOfficeController : Controller
         writer.TryComplete();
     }
 
-    // Method to add a new GenericObject
+    /// <summary>
+    /// Add a generic object
+    /// </summary>
+    /// <response code="200">OK</response>
+    /// <response code="400">Bad Request</response>
+    /// <response code="500">Internal Server Error</response>
     [HttpPost]
     [Route("generic-objects")]
+    [SwaggerOperation("AddGenericObject")]
+    [SwaggerResponse(statusCode: 200, type: typeof(GenericObject))]
     public async Task<IActionResult> AddGenericObject([FromBody] GenericObject genericObject)
     {
         try
@@ -416,9 +450,18 @@ public class BackOfficeController : Controller
         }
     }
 
-    // Method to get a GenericObject by ID
+
+    /// <summary>
+    /// Get a generic object
+    /// </summary>
+    /// <param name="id">Id of the object</param>
+    /// <response code="200">OK</response>
+    /// <response code="400">Bad Request</response>
+    /// <response code="404">Not Found</response>
+    /// <response code="500">Internal Server Error</response>
     [HttpGet]
     [Route("generic-objects/{id}")]
+    [SwaggerResponse(statusCode: 200, type: typeof(GenericObject))]
     public async Task<IActionResult> GetGenericObject([FromRoute] Guid id)
     {
         try
@@ -435,9 +478,18 @@ public class BackOfficeController : Controller
         }
     }
 
-    // Method to list all GenericObjects
+    /// <summary>
+    /// List all generic objects
+    /// </summary>
+    /// <param name="limit">Number of objects retrieved</param>
+    /// <param name="offset"></param>
+    /// <response code="200">OK</response>
+    /// <response code="400">Bad Request</response>
+    /// <response code="500">Internal Server Error</response>
     [HttpGet]
     [Route("generic-objects")]
+    [SwaggerResponse(statusCode: 200, type: typeof(List<GenericObject>))]
+
     public async Task<IActionResult> ListGenericObjects([FromQuery] int limit = 1024, [FromQuery] int offset = 0)
     {
         try
@@ -452,7 +504,12 @@ public class BackOfficeController : Controller
         }
     }
 
-    // Method to update a GenericObject
+    /// <summary>
+    /// Edit generic object
+    /// </summary>
+    /// <response code="200">OK</response>
+    /// <response code="400">Bad Request</response>
+    /// <response code="500">Internal Server Error</response>
     [HttpPut]
     [Route("generic-objects")]
     public async Task<IActionResult> UpdateGenericObject([FromBody] GenericObject genericObject)
@@ -469,7 +526,13 @@ public class BackOfficeController : Controller
         }
     }
 
-    // Method to delete a GenericObject by ID
+    /// <summary>
+    /// Delete a generic object by id
+    /// </summary>
+    /// <param name="id">Id of the object to delete</param>
+    /// <response code="200">OK</response>
+    /// <response code="404">Not Found</response>
+    /// <response code="500">Internal Server Error</response>
     [HttpDelete]
     [Route("generic-objects/{id}")]
     public async Task<IActionResult> DeleteGenericObject([FromRoute] Guid id)
@@ -488,8 +551,17 @@ public class BackOfficeController : Controller
         }
     }
 
+    /// <summary>
+    /// List feedbacks
+    /// </summary>
+    /// <param name="limit">Number of feedbacks retrieved</param>
+    /// <param name="offset">Number of feedbacks retrieved</param>
+    /// <response code="200">OK</response>
+    /// <response code="500">Internal Server Error</response>
     [HttpGet]
     [Route("feedback")]
+    [SwaggerOperation("ListFeedback")]
+    [SwaggerResponse(statusCode: 200, type: typeof(List<FeedbackDTO>))]
     public async Task<IActionResult> ListFeedback([FromQuery] int limit = 1024, [FromQuery] int offset = 0)
     {
         var objects = await _feedbackService.List(limit, offset);

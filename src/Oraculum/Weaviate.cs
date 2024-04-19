@@ -241,7 +241,24 @@ namespace Oraculum.Providers.Facts
                 f.Properties = fact;
                 toadd.Add(f);
             }
-            var ret = await _facts.Add(toadd);
+            ICollection<WeaviateObject<Fact>> ret;
+            try { ret = await _facts.Add(toadd); }
+            catch (Exception e)
+            {
+                _logger.Log(LogLevel.Error, $"AddFact: Error adding facts: {e.Message}");
+                return 0;
+            }
+
+            // Check if the added facts are the same as the facts you wanted to add
+            if (ret.Count != facts.Count)
+            {
+                _logger.Log(LogLevel.Error, "AddFact: Error adding facts. The added facts are not the same as the facts you wanted to add.");
+                foreach (var fact in ret)
+                {
+                    await fact.Delete();
+                }
+                return 0;
+            }
             return ret.Count;
         }
 

@@ -1,0 +1,340 @@
+@use "@angular/material" as mat;
+@use "./../../../custom-theme.scss" as theme;
+@import "material-symbols";
+:root {
+  --chat-height: 70vh;
+}
+
+.chatbot-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #ebeced;
+}
+
+.chatbot-header-title {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  height: 80px;
+  color: white;
+}
+
+.chatbot-body {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatbot-body-input {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  height: 50px;
+  padding: 0 20px;
+
+  input {
+    width: 100%;
+    height: 100%;
+    align-self: center;
+    background-color: white;
+    outline: none;
+    padding: 0 10px;
+    margin-left: 10px;
+  }
+  &.mobile {
+    height: 40px;
+    padding: 0 10px;
+    input {
+      margin-left: 0;
+    }
+  }
+}
+.send-button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  // border radius only top right and bottom right
+  border-radius: 0 4px 4px 0;
+  .send-icon {
+    font-variation-settings: "FILL" 0, "wght" 200, "GRAD" 0, "opsz" 24;
+    color: white;
+    margin: 7px;
+  }
+}
+.send-button-desktop {
+  border-radius: 0 4px 4px 0;
+}
+
+.chatbot-body-messages {
+  width: 100%;
+  overflow-y: auto;
+  flex-grow: 1;
+  max-height: calc(100vh - 200px);
+  scroll-behavior: smooth;
+  padding: 20px 0 16px 0;
+  box-sizing: border-box;
+  &.mobile {
+    max-height: calc(100vh - 200px);
+  }
+}
+#messagesContainer {
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  transition: scroll 300ms linear; // Adjust time as needed for faster animation
+}
+.error-message-container {
+  width: 100%;
+  padding: 10px 20px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  background-color: #ffcccc; // Light red for error indication
+  border: 1px solid #ff0000; // Red border for emphasis
+}
+
+.error-text {
+  color: #800000; // Dark red for readability
+  flex: 1; // Takes up the full width it can
+  margin: 0;
+}
+
+.retry-button {
+  padding: 5px 10px;
+  font-weight: bold;
+  color: #fff;
+  background-color: #ff0000; // Red button to match the error theme
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  &:hover {
+    background-color: #cc0000; // Darken on hover for interaction feedback
+  }
+}
+
+.chatbot-body-message {
+  max-width: 70%;
+  min-width: 14%;
+  width: fit-content;
+  min-height: 50px;
+  height: fit-content;
+  position: relative;
+  margin-bottom: 10px;
+  color: white;
+  &.mobile {
+    max-width: 87%;
+  }
+}
+.chatbot-body-message-open {
+  min-width: 20%;
+  max-width: 50%;
+  margin-left: 16px;
+  border: 1px solid #0066cc;
+  color: #0066cc;
+  display: block; /* Ensure it's a block container */
+  padding: 0 10px; /* Adjust padding as needed */
+  box-sizing: border-box; /* Include padding and border in the width */
+  &.mobile {
+    max-width: 90%;
+  }
+}
+
+.source-display {
+  display: block; /* Ensure it's a block element */
+  max-width: 100%; /* Ensure it doesn't exceed the parent's width */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box; /* Include padding and border in the width */
+}
+
+.chatbot-body-message.left {
+  margin-left: 15px;
+  margin-right: auto;
+  color: #2f475e;
+}
+
+.chatbot-body-message.right {
+  margin-left: auto;
+  margin-right: 15px;
+}
+
+.chatbot-body-message-text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  width: 100%;
+  background-color: #bfdfff;
+  border-radius: 4px;
+  height: 100%;
+  z-index: 1;
+}
+.chatbot-body-message-text-main {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  padding: 16px;
+  z-index: 1;
+  &.response {
+    padding-bottom: 0;
+  }
+}
+.chatbot-body-message-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0 10px 10px 10px;
+}
+
+.thumb-icon {
+  font-variation-settings: "FILL" 0, "wght" 250, "GRAD" 0, "opsz" 24;
+  color: var(--bs-primary);
+}
+
+.new-chat-icon {
+  font-variation-settings: "FILL" 0, "wght" 250, "GRAD" 0, "opsz" 24;
+  color: white;
+}
+
+.mobile-header-title {
+  margin: 0;
+}
+.mobile-header {
+  height: 44px;
+}
+
+.right-footer-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: flex-end;
+  .chatbot-body-message-time {
+    align-items: center;
+    color: #2f475e;
+  }
+}
+.thumb-button,
+.new-chat-button {
+  padding: 6px;
+  mat-icon {
+    font-size: 24px;
+    height: 24px;
+    width: 24px;
+  }
+}
+
+.chatbot-body-message.left .chatbot-body-message-text {
+  justify-content: flex-start;
+}
+
+.chatbot-body-message.right .chatbot-body-message-text {
+  justify-content: flex-end;
+  background-color: #0066cc;
+}
+
+.chatbot-body-message.right .message-text,
+.chatbot-body-message.left .message-text {
+  p {
+    text-align: left;
+  }
+  width: 100%;
+}
+
+.chatbot-body-message.left::after,
+.chatbot-body-message.right::after {
+  content: "";
+  position: absolute;
+  top: 0px;
+  width: 0;
+  height: 0;
+  border-top: 0 solid transparent;
+  border-bottom: 45px solid transparent;
+  z-index: 0;
+}
+
+.chatbot-body-message.left::after {
+  left: -10px;
+  border-right: 45px solid #bfdfff;
+}
+
+.chatbot-body-message.right::after {
+  right: -12px;
+  border-left: 45px solid #0066cc;
+}
+
+.chatbot-body-message-time {
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  p {
+    margin-bottom: 0 !important;
+    font-size: 16px !important;
+    vertical-align: bottom;
+  }
+}
+::ng-deep .message-text {
+  p {
+    margin-bottom: 0 !important;
+  }
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; /* Adjust based on your specific layout */
+}
+
+.dot-flashing {
+  position: relative;
+  top: 5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 5px;
+  background-color: var(--grey-300);
+  animation: dot-flashing 1s infinite linear alternate;
+  animation-delay: 0.5s;
+}
+
+.dot-flashing::before,
+.dot-flashing::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 5px;
+  background-color: var(--grey-300);
+  animation: dot-flashing 1s infinite alternate;
+}
+
+.dot-flashing::before {
+  left: -15px;
+  animation-delay: 0s;
+}
+
+.dot-flashing::after {
+  left: 15px;
+  animation-delay: 1s;
+}
+
+@keyframes dot-flashing {
+  0% {
+    background-color: var(--grey-300);
+  }
+  50%,
+  100% {
+    background-color: rgba(152, 128, 255, 0.2);
+  }
+}

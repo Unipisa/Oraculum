@@ -1,0 +1,48 @@
+<div class="column">
+  <div class="list-header">
+    <div class="title">{{ listTitle }}</div>
+    <button
+      *ngIf="mode == 'explain'"
+      class="unused-facts-button"
+      [itButton]="undefined"
+      (click)="scroll(otherRetrivedSources)"
+    >
+      <it-chip
+        class="unused-facts-chip"
+        [label]="unusedFactsChipTitle"
+      ></it-chip>
+    </button>
+  </div>
+  <div class="list-container scrollable">
+    <div *ngFor="let fact of usedFacts">
+      <app-fact-card
+        [fact]="fact"
+        [hideVoting]="hideVoting"
+        (editFact)="editFact(fact)"
+        (downvoteFact)="downvoteFact(fact)"
+        (upvoteFact)="upvoteFact(fact)"
+      ></app-fact-card>
+    </div>
+    <div
+      #otherRetrivedSources
+      id="otherRetrivedSources"
+      [style]="
+        !facts || facts.length == 0 || mode == 'search'
+          ? 'visibility: hidden'
+          : ''
+      "
+      class="separator-title"
+    >
+      {{ otherRetrivedSourcesTitle }}
+    </div>
+    <div *ngFor="let fact of unusedFacts">
+      <app-fact-card
+        [fact]="fact"
+        [hideVoting]="hideVoting"
+        (editFact)="editFact(fact)"
+        (downvoteFact)="downvoteFact(fact)"
+        (upvoteFact)="upvoteFact(fact)"
+      ></app-fact-card>
+    </div>
+  </div>
+</div>

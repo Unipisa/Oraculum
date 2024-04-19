@@ -352,6 +352,20 @@ namespace Oraculum
             }
         }
 
+        public async Task<int> BackupFacts(string fn, Func<int, int, int>? progress = null)
+        {
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
+            return await _oraculum.BackupFacts(fn, progress);
+        }
+
+        public async Task<int> RestoreFacts(string fn, Func<int, int, int>? progress = null)
+        {
+            if (!_oraculum.IsConnected)
+                await _oraculum.Connect();
+            return await _oraculum.RestoreFacts(fn, progress);
+        }
+
         // Method to add a new GenericObject
         public async Task<Guid?> AddGenericObjectAsync(GenericObject genericObject)
         {
@@ -377,6 +391,11 @@ namespace Oraculum
         }
 
         // Method to update a GenericObject
+
+        public async Task ResetAndInitializeSchema()
+        {
+            await _oraculum.Init();
+        }
         public async Task UpdateGenericObjectAsync(GenericObject genericObject)
         {
             if (!_oraculum.IsConnected)

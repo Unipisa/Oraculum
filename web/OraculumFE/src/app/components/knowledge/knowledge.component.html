@@ -52,9 +52,13 @@
       <button mat-flat-button color="primary" (click)="openFactDialog()">
         {{language.add}}
       </button>
-      <!--<button mat-flat-button color="primary" (click)="openImportDialog()">
-        Importa un documento
-      </button>-->
+      <div class="addSource">
+        <div class="d-flex gap-2">
+          <button type="button" itButton="primary" (click)="openAddSourceDialog()">
+            {{ language.addSource }}
+          </button>
+        </div>
+      </div>
     </div>
     <br />
     <div
