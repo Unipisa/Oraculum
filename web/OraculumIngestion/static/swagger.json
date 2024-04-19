@@ -1,0 +1,152 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "title": "Ingestion API",
+      "description": "API for ingesting data",
+      "version": "1.0.0"
+    },
+    "host": "localhost:5002",
+    "basePath": "/",
+    "schemes": [
+      "https"
+    ],
+    "paths": {
+      "/": {
+        "get": {
+          "summary": "Check server health status",
+          "responses": {
+            "200": {
+              "description": "Server is running and healthy"
+            }
+          }
+        }
+      },
+      "/API_facts_from_text": {
+        "post": {
+          "summary": "Extract facts from text content",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "description": "Text content from which facts will be extracted",
+              "required": true,
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "type": "string",
+                      "example": "inserire un testo che contenga almeno due argomenti, la natura. gli scacchi"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Facts extracted successfully",
+              "schema": {
+                "type": "object"
+              }
+            },
+            "400": {
+              "description": "Bad Request - No facts generated, content too short"
+            }
+          }
+        }
+      },
+      "/API_facts_from_web_pages": {
+        "post": {
+          "summary": "Extract facts from web pages",
+          "parameters": [
+            {
+              "name": "body",
+              "in": "body",
+              "description": "List of web pages from which facts will be extracted",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "origin": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "url",
+                      "example": "https://it.wikipedia.org/wiki/Pagina_principale"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Facts extracted successfully",
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },    
+      "/API_facts_from_documents": {
+        "post": {
+          "summary": "Extract facts from documents.",
+          "consumes": [
+            "multipart/form-data"
+          ],
+          "parameters": [
+            {
+              "name": "file",
+              "in": "formData",
+              "description": "Only files with the extensions .pdf and .docx are permissible",
+              "type": "file",
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Facts extracted successfully",
+              "schema": {
+                "type": "object"
+              }
+            },
+            "400": {
+              "description": "Bad Request - No file received or invalid file format"
+            }
+          }
+        }
+      },
+      "/API_facts_from_AudioVideo": {
+        "post": {
+          "summary": "Extract facts from audio/video files",
+          "consumes": [
+            "multipart/form-data"
+          ],
+          "parameters": [
+            {
+              "name": "file",
+              "in": "formData",
+              "description": "Only files with the extensions .mp3 and .mp4 are permissible",
+              "type": "file",
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Facts extracted successfully",
+              "schema": {
+                "type": "object"
+              }
+            },
+            "400": {
+              "description": "Bad Request - No file received or invalid file format"
+            }
+          }
+        }
+      }
+    }
+  }
+  

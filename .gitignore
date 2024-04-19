@@ -369,5 +369,10 @@ FodyWeavers.xsd
 # Editors config files
 .idea/
 .vscode/
+
+#File pipeline
+apps_to_refresh.txt
+commit_message
+OraculumEvaluate/ragas_evaluate_api/docs
 /demo/web/docker-compose.secret.yml
 /demo/web/oraculumApiAppsettings.secret.json

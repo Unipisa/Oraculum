@@ -1,0 +1,64 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "API for data augmentation, evaluation, retrieval, and reporting.",
+    "version": "1.0.0",
+    "title": "Evaluate API"
+  },
+  "host": "localhost:5001",  
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/evaluate": {
+      "post": {
+        "summary": "Augment data.",
+        "description": "Endpoint for augmenting and evaluated data.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "input_data",
+            "description": "JSON data to be augmented and evaluated.",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "example": "question"
+                  },
+                  "answer": {
+                    "type": "string",
+                    "example": "answer"
+                  },
+                  "ground_truth": {
+                    "type": "string",
+                    "example": "ground_truth"      
+                  },
+                  "contexts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "example": "contexts"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    }
+  }
+}

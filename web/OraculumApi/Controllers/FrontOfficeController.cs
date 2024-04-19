@@ -48,6 +48,15 @@ public class FrontOfficeController : Controller
         return Ok();
     }
 
+    /// <summary>
+    /// Delete a chat by its ID
+    /// </summary>
+    /// <remarks>Delete a single chat by ID</remarks>
+    /// <param name="chatId">ID of the fact to delete</param>
+    /// <param name="sibyllaId">ID of the sibylla associated with the chat</param>
+    /// <response code="200">Chat deleted successfully</response>
+    /// <response code="404">Chat not found</response>
+    /// <response code="500">Internal server error</response>
     [HttpDelete]
     [Route("sibylla/{sibyllaId}/chat/{chatId}")]
     [ValidateModelState]
@@ -58,18 +67,35 @@ public class FrontOfficeController : Controller
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Get all Sibyllae basic info
+    /// </summary>
+    /// <remarks>
+    /// </remarks>
+    /// <response code="200">Info found</response>
+    /// <response code="404">Info not found</response>
+    /// <response code="500">Internal server error</response>
     [HttpGet]
     [Route("sibylla")]
     [DynamicAuthorize("frontoffice")]
+    [SwaggerResponse(statusCode: 200, type: typeof(List<SibyllaInfoDto>))]
     public async Task<ActionResult<SibyllaInfoDto>> GetAllSibyllae()
     {
         var sibyllae = await _frontofficeService.GetAllSibyllaeInfo();
         return Ok(sibyllae);
     }
 
+    /// <summary>
+    /// Get all chats of a sibylla
+    /// </summary>
+    /// <remarks>Get all chats of a sibylla given its id.</remarks>
+    /// <response code="200">Chats found</response>
+    /// <response code="404">Chats not found</response>
+    /// <response code="500">Internal server error</response>
     [HttpGet]
     [Route("sibylla/{sibyllaId}/chat")]
     [DynamicAuthorize("frontoffice")]
+    [SwaggerResponse(200, "Chats", typeof(ChatDetailDTO))]
     public async Task<IActionResult> GetChats([FromRoute] string sibyllaId)
     {
         var chatDetails = await _chatDetailService.GetByProperty<string>("sibyllaId", sibyllaId);
@@ -87,9 +113,19 @@ public class FrontOfficeController : Controller
         return Ok(chatDetailDTOs);
     }
 
+    /// <summary>
+    /// Creates a new chat on a sibylla given its id
+    /// </summary>
+    /// <remarks>
+    /// Returns chat details of the new chat                                   
+    /// </remarks>
+    /// <param name="sibyllaId">Id of the sibylla where the new chat is created</param>
+    /// <response code="200">Chat created successfully</response>
+    /// <response code="500">Internal server error</response>
     [HttpPost]
     [Route("sibylla/{sibyllaId}/chat")]
     [DynamicAuthorize("frontoffice")]
+    [SwaggerResponse(200, "Chat detail", typeof(ChatDetailDTO))]
     public async Task<IActionResult> PostChat([FromRoute] string sibyllaId)
     {
         if (sibyllaId == null)
@@ -99,9 +135,20 @@ public class FrontOfficeController : Controller
         return Ok(chatDetailDTO);
     }
 
+    /// <summary>
+    /// Get single chat details by id
+    /// </summary>
+    /// <remarks>
+    /// Answers with chat details and messages                                   
+    /// </remarks>
+    /// <param name="sibyllaId">Id of the sibylla where the new chat is created</param>
+    /// <response code="200">Chat found</response>
+    /// <response code="404">Chat not found</response>
+    /// <response code="500">Internal server error</response>
     [HttpGet]
     [Route("sibylla/{sibyllaId}/chat/{chatId}")]
     [DynamicAuthorize("frontoffice")]
+    [SwaggerResponse(200, "Chat details", typeof(ChatDetailDTO))]
     public async Task<IActionResult> GetChatById([FromRoute] string sibyllaId, [FromRoute] string chatId)
     {
         var chatDetailDTO = await _frontofficeService.GetChatById(sibyllaId, chatId);
@@ -111,6 +158,16 @@ public class FrontOfficeController : Controller
         return Ok(chatDetailDTO);
     }
 
+    /// <summary>
+    /// Post a message in an existing and active chat
+    /// </summary>
+    /// <remarks>
+    /// </remarks>
+    /// <param name="chatId">Id of the chat</param>
+    /// <param name="sibyllaId">Id of the Sibylla</param>
+    /// <response code="200">OK</response>
+    /// <response code="404">Chat not found</response>
+    /// <response code="500">Internal server error</response>
     [HttpPost]
     [Route("sibylla/{sibyllaId}/chat/{chatId}/message")]
     [DynamicAuthorize("frontoffice")]
@@ -119,9 +176,22 @@ public class FrontOfficeController : Controller
         return await _frontofficeService.AddMessageAndStreamAnswer(sibyllaId, chatId, message);
     }
 
+    /// <summary>
+    /// Give a feedback to an existing message
+    /// </summary>
+    /// <remarks>
+    /// Leave a feedback and a comment (optional) to a chatbot message
+    /// </remarks>
+    /// <param name="sibyllaId">Id of the Sibylla</param>
+    /// <param name="chatId">Id of the chat</param>
+    /// <param name="feedback">Rating and text</param>
+    /// <response code="200">Chat found</response>
+    /// <response code="404">Chat not found</response>
+    /// <response code="500">Internal server error</response>
     [HttpPost]
     [Route("sibylla/{sibyllaId}/chat/{chatId}/feedback")]
     [DynamicAuthorize("frontoffice")]
+    [SwaggerResponse(200, "Feedback id", typeof(FeedbackDTO))]
     public async Task<IActionResult> PostFeedback([FromRoute] string sibyllaId, [FromRoute] string chatId, [FromBody] FeedbackDTO feedback)
     {
         if (feedback.Text == null && feedback.Rating == null) return BadRequest();
@@ -158,6 +228,9 @@ public class FrontOfficeController : Controller
         return Ok(new { id = feedbackId });
     }
 
+    /// <summary>
+    /// (not implemented)
+    /// </summary>
     [HttpGet]
     [Route("reference/{id}")]
     [DynamicAuthorize("frontoffice")]
@@ -166,7 +239,10 @@ public class FrontOfficeController : Controller
         throw new NotImplementedException();
     }
 
-    //api di debug per fare le metriche, metodo sincrono
+
+    /// <summary>
+    /// (debug API for metrics, sync method)
+    /// </summary>
     [HttpPost]
     [Route("debug/answer")]
     [DynamicAuthorize("frontoffice")]
@@ -190,6 +266,19 @@ public class FrontOfficeController : Controller
         return Ok(new { answer, prompt, factsList });
     }
 
+    /// <summary>
+    /// Post a message to an existing chat and get answer and relevant facts
+    /// </summary>
+    /// <remarks>
+    /// Only "text" is required in message object
+    /// </remarks>
+    /// <param name="sibyllaId">Id of the Sibylla</param>
+    /// <param name="chatId">Id of the chat</param>
+    /// <param name="message">Message to post</param>
+    /// <response code="200">OK</response>
+    /// <response code="400">Bad request</response>
+    /// <response code="404">Chat not found</response>
+    /// <response code="500">Internal server error</response>
     [HttpPost]
     [Route("sibylla/{sibyllaId}/chat-explain/{chatId}/message")]
     [DynamicAuthorize("frontoffice")]

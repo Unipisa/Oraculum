@@ -2,10 +2,10 @@
 <div mat-dialog-content class="dialog-content">
   <form [formGroup]="importForm" (ngSubmit)="onSubmit()" class="import-form">
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Label</mat-label>
+      <mat-label>{{ language.type }}</mat-label>
       <mat-select formControlName="label">
-        <mat-option value="document">Documento</mat-option>
-        <mat-option value="url">Url</mat-option>
+        <mat-option value="file">{{ language.file }}</mat-option>
+        <mat-option value="url">{{ language.url }}</mat-option>
       </mat-select>
     </mat-form-field>
 
@@ -13,7 +13,7 @@
       <input
         type="text"
         class="file-name"
-        placeholder="Carica documento"
+        placeholder="{{ language.loadfile }}"
         value="{{ fileName }}"
         readonly
       />
@@ -43,7 +43,7 @@
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
+    <!-- <mat-form-field appearance="outline" class="full-width">
       <mat-label>Tipo</mat-label>
       <input matInput formControlName="type" />
     </mat-form-field>
@@ -60,12 +60,19 @@
         [for]="expirationPicker"
       ></mat-datepicker-toggle>
       <mat-datepicker #expirationPicker></mat-datepicker>
-    </mat-form-field>
+    </mat-form-field> -->
   </form>
 </div>
+<div *ngIf="loading" style="padding: 0 32px">Importazione in corso...</div>
 <div mat-dialog-actions align="end" class="action-buttons">
   <button mat-button mat-dialog-close class="close-button">Chiudi</button>
-  <button mat-button color="primary" class="add-button" type="submit">
+  <button
+    mat-button
+    color="primary"
+    class="add-button"
+    type="submit"
+    (click)="onSubmit()"
+  >
     Importa
   </button>
 </div>

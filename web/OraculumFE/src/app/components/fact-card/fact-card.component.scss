@@ -1,0 +1,108 @@
+@use "@angular/material" as mat;
+@use "./../../../custom-theme.scss" as theme;
+@import 'material-symbols';
+
+.cardx{
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  margin: 16px;
+}
+
+.card-header {
+  padding: 16px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  background-color: #BFDFFF;
+  border-radius: 4px 4px 0 0;
+
+  &.out-of-limit{
+    background-color: var(--bs-gray-200);
+  }
+}
+
+.expand-button{
+   margin-left: auto;
+   padding: 0;
+   it-icon{
+     font-size: 20px;
+   }
+}
+
+.score{
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background-color: var(--bs-secondary);
+  text-align: center ;
+  font-size: 14px;
+  margin: 0;
+  font-weight: 400;
+  color: var(--bs-white);
+}
+
+.title {
+  margin: 0;
+  font-weight: 600;
+  color: #2F475E;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.card-body{
+  padding: 16px !important;
+  padding-bottom: 0;
+  max-height: 155px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pre-content{
+  display: flex;
+
+  .actions{
+    margin-left: auto;
+  }
+}
+
+.metadata{
+  margin-bottom: 8px;
+}
+
+.edit-button{
+  padding: 0;
+  it-icon {
+    font-size: 20px;
+  }
+}
+
+.metadata-key{
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.content{
+  p{
+    font-size: 16px;
+    margin-bottom: 0;
+  }
+}
+
+.card-footer{
+  padding-right: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.thumb-icon{
+  font-variation-settings: 'FILL' 0, 'wght' 250, 'GRAD' 0, 'opsz' 24;
+  color: var(--bs-primary)
+}
+
+.thumb-button{
+  padding: 6px;
+  mat-icon {
+    font-size: 24px;
+  }
+}

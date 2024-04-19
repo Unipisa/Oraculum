@@ -1,0 +1,11 @@
+Flask==3.0.1
+openai>=1.12.0,<2.0.0
+moviepy==1.0.3
+langchain>=0.1,<0.2
+pydub==0.25.1
+bs4==0.0.1
+langchain_experimental==0.0.49
+langchain_openai==0.0.5
+spacy==3.7.2
+flask-swagger-ui==4.11.1
+tenacity==8.2.3

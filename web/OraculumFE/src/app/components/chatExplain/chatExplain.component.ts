@@ -1,5 +1,5 @@
 import { Fact } from './../../interfaces/fact';
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, Inject } from '@angular/core';
 import { Message } from 'src/app/interfaces/message';
 import { PredictService } from 'src/app/services/predict.service';
 import { StreamService } from 'src/app/services/stream.service';
@@ -8,15 +8,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogFeedbackComponent } from '../dialogs/dialog-feedback/dialog-feedback.component';
 import { ConfigService } from 'src/app/services/config.service';
-import { FactDialogComponent } from '../dialogs/fact-dialog/fact-dialog.component';
 import { AuthService } from 'src/app/services/auth.service';
 import { BotInfo } from 'src/app/interfaces/botInfo';
 import { Chat } from 'src/app/interfaces/chat';
 import { KnowledgeService } from 'src/app/services/knowledge.service';
 import { QueryPayload_for_facts } from 'src/app/services/knowledge.service';
-import { SpeechRecognitionModalComponent } from '../speech-recognition-modal/speech-recognition-modal.component';
 import { SnackbarService } from 'src/app/services/snackbar.service';
 import language from 'src/app/config/language';
+import { AddSourceDialogComponent } from '../dialogs/add-source-dialog/add-source-dialog.component';
+import { FactDialogComponent } from '../dialogs/fact-dialog/fact-dialog.component';
 
 @Component({
   selector: 'app-chatExplain',
@@ -24,6 +24,8 @@ import language from 'src/app/config/language';
   styleUrls: ['./chatExplain.component.scss'],
 })
 export class ChatExplainComponent implements OnInit {
+  @ViewChild(AddSourceDialogComponent)
+  addSourceDialog!: AddSourceDialogComponent;
   language = language;
   botInfo: BotInfo = this.authService.selectedBot;
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
@@ -40,7 +42,7 @@ export class ChatExplainComponent implements OnInit {
     },
   ];
   facts!: Fact[];
-  activeChat!: Chat;
+  activeChatId!: string;
   // N_factsUsedForAnswer = this.configService.contentsForResponse.getValue();
   // N_totalFacts = this.configService.totalContentsHome.getValue();
   N_factsUsedForAnswer!: number;
@@ -66,132 +68,18 @@ export class ChatExplainComponent implements OnInit {
     private snackbarService: SnackbarService
   ) {}
 
-  ngOnInit() {
-    this.newChat();
+  ngOnInit() {}
+
+  updateUserMessage(messageId: string){
+    this.userMessageId = messageId;
   }
 
-  linkify(text: string) {
-    const urlRegex =
-      /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi;
-    const replacedText = text.replace(urlRegex, (url) => {
-      return '<a href="' + url + '" target="_blank">' + url + '</a>';
-    });
-    return replacedText;
+  updateAssistantMessage(messageId: string){
+    this.assistantMessageId = messageId;
   }
 
-  openRecognitionModal() {
-    const dialogRef = this.dialogFeedback.open(
-      SpeechRecognitionModalComponent,
-      {
-        disableClose: true,
-      }
-    );
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        //console.log('The dialog was closed with result:', result);
-        // Process the result here
-        //console.log('Result:', result);
-        this.sendMessage(result);
-      }
-    });
-  }
-
-  sendMessage(text?: string) {
-    // console.log('send message');
-    if (
-      (this.chatInput != '' &&
-        this.chatInput != null &&
-        this.chatInput != undefined) ||
-      (text != '' && text != null && text != undefined)
-    ) {
-      this.messages.push({
-        id: uuidv4(),
-        text: text ? text : this.chatInput,
-        sender: 'user',
-        timestamp: new Date().toLocaleTimeString().slice(0, 5),
-        completed: false,
-      });
-      this.chatInput = '';
-      this.loading = true;
-      const question = this.messages
-        .filter((m) => m.sender === 'user')
-        .filter((m) => m.completed !== true)
-        .map((m) => m.text)
-        .pop();
-      this.loading = true;
-      this.predictService
-        .askExplainNew(question, this.activeChat.sibyllaId, this.activeChat.id)
-        .subscribe({
-          next: (res) => {
-            this.userMessageId = res.userMessageId;
-            this.assistantMessageId = res.assistantMessageId;
-            this.messages.push({
-              id: uuidv4(),
-              text: res.answer,
-              sender: 'assistant',
-              timestamp: new Date().toLocaleTimeString().slice(0, 5),
-              completed: true,
-            });
-            this.N_factsUsedForAnswer = res.usedFactsList.length;
-            this.N_totalFacts =
-              res.usedFactsList.length + res.extraFactsList.length;
-            const factsList: Fact[] = [
-              ...res.usedFactsList.map((fact: Fact) => ({
-                ...fact,
-                score: Math.round((1 - fact.distance!) * 100),
-                outOfLimit: false,
-              })),
-              ...res.extraFactsList.map((fact: Fact) => ({
-                ...fact,
-                score: Math.round((1 - fact.distance!) * 100),
-                outOfLimit: true,
-              })),
-            ];
-
-            this.facts = factsList.sort((a, b) => b.score! - a.score!);
-            //console.log(this.facts);
-
-            this.loading = false;
-            this.oneshot = false;
-          },
-        });
-      // this.setAllMessagesCompleted()
-    }
-    // console.log(this.messages);
-  }
-
-  ngAfterViewChecked() {
-    this.scrollToBottom();
-  }
-
-  private scrollToBottom(): void {
-    try {
-      this.messagesContainer.nativeElement.scrollTo({
-        top: this.messagesContainer.nativeElement.scrollHeight,
-        behavior: 'smooth',
-      });
-    } catch (err) {}
-  }
-
-  //keypress event enter
-  onKey(event: any) {
-    // console.log(event);
-    if (event.key === 'Enter') {
-      this.sendMessage();
-    }
-  }
-
-  giveFeedbackMessage(messageId: string, newFeedback: boolean): void {
-    const messageIndex = this.messages.findIndex((m) => m.id === messageId);
-    if (messageIndex !== -1) {
-      this.messages[messageIndex] = {
-        ...this.messages[messageIndex],
-        feedback: newFeedback,
-      };
-    }
-    //console.log(this.messages[messageIndex]);
-    this.openDialogFeedback(messageId);
+  updateActiveChat(chatId: string) {
+    this.activeChatId = chatId;
   }
 
   openDialogFeedback(messageId: string) {
@@ -211,17 +99,39 @@ export class ChatExplainComponent implements OnInit {
       }
     });
   }
+  handleFactsChange(facts: Fact[]) {
+    console.log('Received updated facts:', facts);
+    this.facts = facts;
+  }
 
-  giveFeedBackFact(id: string, feedback: boolean) {
+  buildFeedBackFact(fact: Fact, feedback: boolean) {
+    console.log('buildFeedBackFact', fact, feedback)
+    if (feedback == false) {
+      const dialogRef = this.dialogFeedback.open(DialogFeedbackComponent, {
+        minWidth: '50%',
+      });
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result) {
+          this.giveFeedBackFact(fact.id, feedback, result);
+        }
+      });
+    }else{
+      this.giveFeedBackFact(fact.id, feedback);
+    }
+  }
+
+  giveFeedBackFact(id: string, feedback: boolean, textFeedback?: string) {
+    console.log('giveFeedBackFact', id, feedback, textFeedback)
     const payload: QueryPayload_for_facts = {
       messageId: this.assistantMessageId,
       factId: id,
       questionMessageId: this.userMessageId,
       rating: feedback.toString(),
+      text: textFeedback
     };
 
     this.knowledgeService
-      .postFeedbackFact(payload, this.botInfo.id, this.activeChat.id)
+      .postFeedbackFact(payload, this.botInfo.id, this.activeChatId)
       .subscribe({
         next: (res) => {
           //console.log('feedback send');
@@ -237,27 +147,6 @@ export class ChatExplainComponent implements OnInit {
       });
   }
 
-  copyContent(content: string): void {
-    navigator.clipboard.writeText(content).then(
-      () => {
-        //console.log('Text copied successfully', content);
-        // You can also implement a notification to the user here
-      },
-      (err) => {
-        console.error('Error in copying text: ', err);
-      }
-    );
-  }
-
-
-  // set all messages completed
-  setAllMessagesCompleted() {
-    this.messages.forEach((m) => (m.completed = true));
-  }
-
-  openUrl(url: string) {
-    window.open(url, '_blank');
-  }
   openFactDialog(fact?: Fact) {
     this.knowledgeService.getSibyllaeConfigs().subscribe((response) => {
       const selectedSibylla = localStorage.getItem('selectedSibylla');
@@ -343,34 +232,40 @@ export class ChatExplainComponent implements OnInit {
       });
     });
   }
-  newChat() {
-    if (this.buttonDisabled) return;
-    this.loading = true;
-    this.buttonDisabled = true;
-    this.facts = [];
-    this.N_factsUsedForAnswer = 0;
-    this.N_totalFacts = 0;
-    this.authService.newChat('explain').subscribe({
-      next: (c: Chat) => {
-        this.activeChat = c;
-        this.messages = [
-          {
-            id: uuidv4(),
-            text: this.botInfo
-              ? this.botInfo.baseAssistantPrompt
-              : this.defaultBaseAssistantPrompt,
-            sender: 'assistant',
-            timestamp: new Date().toLocaleTimeString().slice(0, 5),
-          },
-        ];
-      },
-      error: (err) => {
-        console.error('Error:', err);
-      },
-      complete: () => {
-        this.loading = false;
-        setTimeout(() => (this.buttonDisabled = false), 5000);
-      },
+
+  openAddSourceDialog(): void {
+    const dialogRef = this.dialog.open(AddSourceDialogComponent, {
+      minWidth: '50%',
     });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('Dialog closed with result:', result);
+
+      this.knowledgeService.getSibyllaeConfigs().subscribe((response) => {
+        const selectedSibylla = localStorage.getItem('selectedSibylla');
+        const categoryFilter = response.find((c) => c.id == selectedSibylla)
+          ?.memoryConfiguration.categoryFilter![0];
+
+      if (result.type === 'application/pdf' || result.type.includes('word')){
+        this.knowledgeService.ingestDocument(result.content, categoryFilter!).subscribe({
+        });
+      }
+      if (result.type === 'audio/mp3' || result.type === 'video/mp4'){
+        this.knowledgeService.ingestAudioVideo(result.content,categoryFilter!).subscribe({
+        });
+      }
+      if (result.type === 'url'){
+        this.knowledgeService.ingestWebpage(result.content,categoryFilter!).subscribe({
+        });
+      }
+      if (result.type === 'text'){
+        let cont = result.content
+        this.knowledgeService.ingestText(cont,categoryFilter!).subscribe({
+        });
+      }
+      
+    });
+  });
   }
+
 }

@@ -24,6 +24,7 @@ namespace OraculumApi.Models.BackOffice
         /// Distance criterion for search.
         /// </summary>
         /// <value>Distance criterion for search.</value>
+        /// <example>0.5</example>
 
         [DataMember(Name = "distance")]
         public float? Distance { get; set; }
@@ -32,6 +33,7 @@ namespace OraculumApi.Models.BackOffice
         /// Limit the number of facts returned.
         /// </summary>
         /// <value>Limit the number of facts returned.</value>
+        /// <example>10</example>
 
         [DataMember(Name = "limit")]
         public int? Limit { get; set; }
@@ -40,6 +42,7 @@ namespace OraculumApi.Models.BackOffice
         /// Auto-cut criterion for search.
         /// </summary>
         /// <value>Auto-cut criterion for search.</value>
+        /// <example>0</example>
 
         [DataMember(Name = "autoCut")]
         public int? AutoCut { get; set; }
@@ -48,6 +51,7 @@ namespace OraculumApi.Models.BackOffice
         /// Filter facts by type.
         /// </summary>
         /// <value>Filter facts by type.</value>
+        /// <example>["Type-A"]</example>
 
         [DataMember(Name = "factTypeFilter")]
         public string[]? FactTypeFilter { get; set; }
@@ -56,6 +60,7 @@ namespace OraculumApi.Models.BackOffice
         /// Filter facts by category.
         /// </summary>
         /// <value>Filter facts by category.</value>
+        /// <example>["Category-1"]</example>
 
         [DataMember(Name = "categoryFilter")]
         public string[]? CategoryFilter { get; set; }
@@ -67,6 +72,7 @@ namespace OraculumApi.Models.BackOffice
         /// Filter facts by tags.
         /// </summary>
         /// <value>Filter facts by tags.</value>
+        /// <example>["Tag1", "Tag2"]</example>
 
         [DataMember(Name = "tagsFilter")]
         public string[]? TagsFilter { get; set; }

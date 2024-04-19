@@ -1,19 +1,13 @@
-<div class="card-container">
-  <ng-container *ngFor="let bot of myBots">
-    <mat-card *ngIf="!bot.hidden">
-      <mat-card-header>
-        <mat-card-title>{{ bot.title }}</mat-card-title>
-      </mat-card-header>
-      <mat-card-actions align="end">
-        <button mat-flat-button color="primary" (click)="selectBot(bot)">
-          {{language.enter}}
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  </ng-container>
+<div class="container-fluid p-5">
+  <h2 class="text-white font-sans-serif">{{language.selection}}</h2>
+  <div class="d-flex flex-wrap">
 
-  <!-- Nuovo card for creating new items -->
-  <!-- <mat-card class="new-card">
-    <button mat-button><span>Nuova</span><br /><mat-icon>add</mat-icon></button>
-  </mat-card> -->
+      <it-card class="p-2" *ngFor="let bot of myBots" rounded="true">
+          <h4 class="card-title text-primary">{{ bot.title }}</h4>
+          <button itButton="outline-primary" (click)="selectBot(bot)">
+            {{language.selectionEnter}}
+          </button>
+      </it-card>
+
+  </div>
 </div>

@@ -7,7 +7,7 @@ import language from 'src/app/config/language';
 
 interface QuestionData {
   question: string;
-  ground_truths: string[];
+  ground_truth: string;
 }
 
 @Component({
@@ -73,7 +73,7 @@ export class ImportDialog implements OnInit {
         if (question && answer) {
           const jsonEntry = {
             question: question.trim(),
-            ground_truths: [answer.trim()]
+            ground_truth: answer.trim()
           };
 
           this.jsonData.push(jsonEntry);

@@ -3,6 +3,8 @@
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
 @import "./custom-theme.scss";
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined");
+// Importazione libreria SCSS di bootstrap-italia
+@import "bootstrap-italia/src/scss/bootstrap-italia"; // attenzione, modifica tutto il testo
 * {
   --purple-100: #6a6abd;
   --purple-200: #6868a7;
@@ -23,13 +25,15 @@
   --grey-700: #3c3c3c;
   --scrollbar-color: hsla(0, 0%, 100%, 0.2);
 }
+.chatbot-body-message-text a {
+  color: #aaaaff;
+}
 
 body,
 html {
   // background: var(--purple-700);
   color: var(--grey-700);
   z-index: 100;
-  font-family: "Roboto", sans-serif;
   margin: 0;
   padding: 0;
   height: 100%;
@@ -38,7 +42,6 @@ html {
 }
 .custom-link {
   text-decoration: none;
-  font-weight: 500;
   cursor: pointer;
   transition: color 0.3s ease-in-out;
 
