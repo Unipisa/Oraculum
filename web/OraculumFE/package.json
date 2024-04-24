@@ -29,6 +29,7 @@
     "ngx-markdown": "^17.2.0",
     "prismjs": "^1.28.0",
     "rxjs": "~7.8.0",
+    "source-map-support": "^0.5.21",
     "tslib": "^2.3.0",
     "uuid": "^9.0.1",
     "validator": "^13.11.0",
