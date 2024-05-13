@@ -349,17 +349,20 @@ export class ChatModularComponent implements OnInit {
         feedback: newFeedback,
       };
     }
+    let questionMessageId = this.messages[messageIndex - 1].id;
     if (!newFeedback) {
-      this.openDialogFeedback(messageId, newFeedback);
+      this.openDialogFeedback(messageId, newFeedback, questionMessageId);
     } else {
       // give feedback to the server without opening the dialog
       const feedbackData: {
         chatId: string;
         messageId: string;
         rating: string;
+        questionMessageId: string;
       } = {
         chatId: this.activeChat.id,
         messageId: messageId,
+        questionMessageId: questionMessageId,
         rating: 'positive',
       };
       this.authService.giveFeedback(feedbackData).subscribe({
@@ -371,7 +374,11 @@ export class ChatModularComponent implements OnInit {
     }
   }
 
-  openDialogFeedback(messageId: string, initialFeedback: boolean) {
+  openDialogFeedback(
+    messageId: string,
+    initialFeedback: boolean,
+    questionMessageId?: string
+  ) {
     const dialogRef = this.dialogFeedback.open(DialogFeedbackComponent, {
       minWidth: '50%',
     });
@@ -392,10 +399,12 @@ export class ChatModularComponent implements OnInit {
             messageId: string;
             text?: string; // Mark as optional
             rating: string;
+            questionMessageId?: string;
           } = {
             chatId: this.activeChat.id,
             messageId: messageId,
             rating: initialFeedback ? 'positive' : 'negative',
+            questionMessageId: questionMessageId,
           };
 
           // Conditionally add the text property only if it's not undefined
