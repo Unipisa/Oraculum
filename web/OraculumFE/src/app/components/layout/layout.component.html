@@ -1,37 +1,48 @@
-<header>
-  <h3 class="title">{{ title }}</h3>
-  <div class="navigation-buttons">
-    <a
-      mat-flat-button
-      *ngFor="let link of tabLinks"
-      [routerLink]="link.url"
-      routerLinkActive="active"
-      #rla="routerLinkActive"
-      [ngClass]="{ 'active-button': rla.isActive }"
-      class="nav-button"
-    >
-      {{ link.label }}
+<app-header expand="false" showSearch="false" slimTitle="Sibylla Assistant">
+  <ng-container slimLeftZone *ngIf="!noHome">
+    <a [routerLink]="'/selection'" id="sibylla-selection-link">
+      <img src="../../../assets/home.png" />
     </a>
-    <button mat-icon-button [matMenuTriggerFor]="profileMenu">
-      <mat-icon fontSet="material-icons-outlined">account_circle</mat-icon>
-    </button>
-    <mat-menu #profileMenu="matMenu">
-      <a mat-menu-item *ngFor="let option of menuLinks" [routerLink]="option.url">
-        <mat-icon fontSet="material-icons-outlined">{{ option.icon }}</mat-icon>
-        <span>{{ option.label }}</span>
-      </a>
-      <a mat-menu-item (click)="logout()">
-        <mat-icon fontSet="material-icons-outlined">logout</mat-icon>
-        <span>{{ "Logout" }}</span>
-      </a>
-    </mat-menu>
-  </div>
-</header>
+  </ng-container>
 
-<main>
+  <ul class="link-list" slimLinkList *ngIf="tabLinks.length > 0">
+    <li *ngFor="let link of tabLinks; let i = index">
+      <a
+        class="dropdown-item list-item"
+        [routerLink]="link.url"
+        routerLinkActive="active"
+        #rla="routerLinkActive"
+        [ngClass]="{ active: rla.isActive }"
+        (click)="setActiveTab(i)"
+        >{{ link.label }}</a
+      >
+    </li>
+  </ul>
+
+  <ng-container slimRightZone>
+    <it-dropdown mode="link">
+      <span button class="user_icon"
+        ><img src="../../../assets/user.png"
+      /></span>
+      <ng-container list>
+        <it-dropdown-item
+          href="/profile"
+          [iconName]="'user'"
+          iconPosition="left"
+          >Profilo</it-dropdown-item
+        >
+        <it-dropdown-item
+          href="#"
+          (click)="logout()"
+          [iconName]="'logout'"
+          iconPosition="left"
+          >Logout</it-dropdown-item
+        >
+      </ng-container>
+    </it-dropdown>
+  </ng-container>
+</app-header>
+
+<main [@slideAnimation]="activeTabIndex">
   <router-outlet></router-outlet>
 </main>
-
-<footer>
-  <p><strong>Cineca</strong> R&D</p>
-</footer>

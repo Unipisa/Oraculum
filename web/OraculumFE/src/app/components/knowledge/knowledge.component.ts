@@ -12,6 +12,7 @@ import {
 import { FactDialogComponent } from '../dialogs/fact-dialog/fact-dialog.component';
 import { ImportDialogComponent } from '../dialogs/import-dialog/import-dialog.component';
 import language from 'src/app/config/language';
+import { AddSourceDialogComponent } from '../dialogs/add-source-dialog/add-source-dialog.component';
 
 interface SearchPayload {
   query: string;
@@ -27,8 +28,42 @@ interface SearchPayload {
   styleUrls: ['./knowledge.component.scss'],
 })
 export class KnowledgeComponent implements OnInit {
+  openAddSourceDialog(): void {
+    const dialogRef = this.dialog.open(AddSourceDialogComponent, {
+      minWidth: '50%',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('Dialog closed with result:', result);
+
+      this.knowledgeService.getSibyllaeConfigs().subscribe((response) => {
+        const selectedSibylla = localStorage.getItem('selectedSibylla');
+        const categoryFilter = response.find((c) => c.id == selectedSibylla)
+          ?.memoryConfiguration.categoryFilter![0];
+
+      if (result.type === 'application/pdf' || result.type.includes('word')){
+        this.knowledgeService.ingestDocument(result.content,categoryFilter!)
+      }
+      if (result.type === 'audio/mp3' || result.type === 'video/mp4'){
+        this.knowledgeService.ingestAudioVideo(result.content,categoryFilter!)
+      }
+      if (result.type === 'url'){
+        this.knowledgeService.ingestWebpage(result.url,categoryFilter!)
+
+      }
+      if (result.type === 'text'){
+        let cont = result.title + result.content
+        this.knowledgeService.ingestText(cont,categoryFilter!)
+      }
+      
+    });
+  });
+  }
+
+
+
   language = language;
-  
+
   searchForm = this.fb.group({
     searchInput: ['', Validators.required],
     tipoInput: [''],
@@ -216,15 +251,20 @@ export class KnowledgeComponent implements OnInit {
   }
 
   openImportDialog() {
-    const dialogRef = this.dialog.open(ImportDialogComponent, {
-      width: '500px',
-      maxHeight: '90%',
-      // You can also pass data or configuration here if needed
-    });
+    this.knowledgeService.getSibyllaeConfigs().subscribe((response) => {
+      const selectedSibylla = localStorage.getItem('selectedSibylla');
+      const categoryFilter = response.find((c) => c.id == selectedSibylla)
+        ?.memoryConfiguration.categoryFilter![0];
+      const dialogRef = this.dialog.open(ImportDialogComponent, {
+        width: '500px',
+        maxHeight: '90%',
+        data: { category: categoryFilter ? categoryFilter : selectedSibylla },
+      });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log('The dialog was closed');
-      // Handle any actions after the dialog is closed
+      dialogRef.afterClosed().subscribe((result) => {
+        console.log('The dialog was closed');
+        // Handle any actions after the dialog is closed
+      });
     });
   }
 }

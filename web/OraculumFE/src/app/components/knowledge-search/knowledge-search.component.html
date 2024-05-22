@@ -1,0 +1,35 @@
+<div>
+  <div class="addSource">
+    <div class="d-flex gap-2">
+      <button type="button" itButton="primary" (click)="openAddSourceDialog()">
+        {{ language.addSource }}
+      </button>
+    </div>
+  </div>
+  <div class="explain-container">
+    <div class="chatbot-body-input">
+      <input
+        type="text"
+        [placeholder]="language.SearchSibylla"
+        [(ngModel)]="searchInput"
+        (keypress)="onKey($event)"
+        autofocus
+      />
+      <button
+        itButton="primary"
+        (click)="performSearch()"
+        [disabled]="!this.searchInput || this.searchInput.length == 0 || loading"
+        #textInput
+      >
+        Invio
+      </button>
+    </div>
+    <div class="fact-list">
+      <app-fact-list 
+        [mode]="'search'" 
+        [facts]="facts" [hideVoting]="true" 
+        (onEditFact)="openFactDialog($event)" 
+      ></app-fact-list>
+    </div>
+  </div>
+</div>

@@ -25,21 +25,20 @@
           "Audience": "your-valid-audience-here"
         },
         "AuthorizationRolesMap": {
-          "sysadmin": [
-            "sysadmin"
-          ],
-          "backoffice": [
-            "backoffice"
-          ],
-          "frontoffice": [
-            "frontoffice"
-          ]
+          "sysadmin": ["sysadmin"],
+          "backoffice": ["backoffice"],
+          "frontoffice": ["frontoffice"]
         }
       }
     }
   },
   "SibyllaConf": "Demo",
+  "EvaluateService": {
+    "MaxTimeoutMinutes": 240,
+    "ServiceEndpoint": "http://oraculum-evaluate"
+  },
   "DataIngestion": {
-    "TimeoutMinutes": 10
+    "ServiceEndpoint": "http://oraculum-dataingestion",
+    "MaxTimeoutMinutes": 20
   }
 }

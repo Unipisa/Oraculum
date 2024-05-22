@@ -1,0 +1,148 @@
+<div class="title">
+  <h5>{{ language.addSource }}</h5>
+</div>
+
+<div class="mt-5">
+  <it-tab-container>
+    <it-tab-item
+      *ngFor="let tab of tabs; let index = index"
+      [id]="'tab-' + index"
+      [label]="tab"
+      [active]="selectedIndex === index"
+      [disabled]="isUploading"
+    >
+      <!-- File Upload Tab -->
+      <div *ngIf="tabs[0] === tab">
+        <div class="containerUP">
+          <div class="col">
+            <it-upload-drag-drop
+              (fileStartUpload)="onDragUploadStart($event)"
+              #uploadDragDropComponent
+            ></it-upload-drag-drop>
+            <div *ngIf="isError" class="error-message">
+              {{ language.unsupportedformat }}
+            </div>
+          </div>
+        </div>
+        <div class="typeoffiletext">
+          <h6>{{ language.typeOfFile }}</h6>
+        </div>
+        <ng-container footer>
+          <div class="d-flex justify-content-end container-button">
+            <div class="cancelButton">
+              <button
+                itButton="outline-secondary"
+                size="sm"
+                type="button"
+                (click)="onCancel()"
+              >
+                {{ language.cancel }}
+              </button>
+            </div>
+            <button
+              itButton="primary"
+              size="sm"
+              type="button"
+              [disabled]="isUploading || isError"
+              (click)="onConfirm('file')"
+            >
+              {{ language.confirm }}
+            </button>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- URL Upload Tab -->
+      <div *ngIf="tabs[1] === tab">
+        <div class="containerUP">
+          <form [formGroup]="urlForm">
+            <it-input label="URL" formControlName="url" #url>
+              <ng-container error>
+                <div *ngIf="url.hasError('required')">
+                  {{ language.contentIsRequired }}
+                </div>
+                <div *ngIf="url.hasError('invalidUrl')">
+                  {{ language.invalidLink }}
+                </div>
+              </ng-container>
+            </it-input>
+          </form>
+        </div>
+        <ng-container footer>
+          <div class="d-flex justify-content-end container-button">
+            <div class="cancelButton">
+              <button
+                itButton="outline-secondary"
+                size="sm"
+                type="button"
+                (click)="onCancel()"
+              >
+                {{ language.cancel }}
+              </button>
+            </div>
+            <button
+              itButton="primary"
+              size="sm"
+              type="button"
+              [disabled]="urlForm.invalid"
+              (click)="onConfirm('link')"
+            >
+              {{ language.confirm }}
+            </button>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Text Upload Tab -->
+      <div *ngIf="tabs[2] === tab">
+        <form [formGroup]="myForm">
+          <div class="textareacontainer">
+            <it-textarea
+              label="{{ language.text }}"
+              formControlName="textarea"
+              #textarea
+            >
+              <ng-container error>
+                <div *ngIf="textarea.hasError('required')">
+                  {{ language.textRequired }}
+                </div>
+                <div *ngIf="textarea.hasError('maxlength')">
+                  {{ language.textMaxlength }}
+                </div>
+                <div *ngIf="textarea.hasError('minlength')">
+                  {{ language.textMinlength }}
+                </div>
+              </ng-container>
+            </it-textarea>
+          </div>
+          <div class="character-count">
+            {{ myForm.get("textarea")?.value?.length ?? 0 }} / 1200
+          </div>
+        </form>
+        <ng-container footer>
+          <div class="d-flex justify-content-end container-button">
+            <div class="cancelButton">
+              <button
+                itButton="outline-secondary"
+                size="sm"
+                type="button"
+                (click)="onCancel()"
+              >
+                {{ language.cancel }}
+              </button>
+            </div>
+            <button
+              itButton="primary"
+              size="sm"
+              type="button"
+              [disabled]="myForm.invalid"
+              (click)="onConfirm('content')"
+            >
+              {{ language.confirm }}
+            </button>
+          </div>
+        </ng-container>
+      </div>
+    </it-tab-item>
+  </it-tab-container>
+</div>

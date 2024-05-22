@@ -1,8 +1,10 @@
+using OraculumApi.Models;
+
 public interface IDataIngestionService
 {
-    Task<string> ExtractFactsFromTextAsync(dynamic jsonInput);
-    Task<string> ExtractFactsFromWebPagesAsync(dynamic jsonInput);
-    Task<string> ExtractFactsFromDocumentsAsync(IFormFile file);
-    Task<string> ExtractFactsFromAudioVideoAsync(IFormFile file);
+    Task<string> ExtractFactsFromTextAsync(List<DataIngestTextDTO> jsonInput, string? category = null);
+    Task<string> ExtractFactsFromWebPagesAsync(DataIngestWebPagesDTO jsonInput, string? category = null);
+    Task<string> ExtractFactsFromDocumentsAsync(IFormFile file, string category);
+    Task<string> ExtractFactsFromAudioVideoAsync(IFormFile file, string category);
     string CheckStatus(string taskId);
 }

@@ -17,8 +17,6 @@ export class SelectionComponent implements OnInit {
     this.authService.getMyBots().subscribe({
       next: data => {
         this.myBots = data.filter((bot: BotInfo) => !bot.hidden);
-        console.log(this.myBots);
-
         // Automatically select the bot if only one visible bot is present
         if (this.myBots.length === 1) {
           this.selectBot(this.myBots[0]);

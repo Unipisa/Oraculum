@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+using Oraculum;
 using WeaviateNET;
 
 namespace OraculumApi.Models
@@ -9,10 +11,26 @@ namespace OraculumApi.Models
         public  string? configJSON;
 
         public SibyllaPersistentConfigDTO toDTO(){
+            SibyllaConf parsedConfig = JsonConvert.DeserializeObject<SibyllaConf>(configJSON!) ?? new SibyllaConf();
+
             return new SibyllaPersistentConfigDTO(){
-                Id = this.id,
-                Name = this.name ?? "",
-                ConfigJSON = this.configJSON ?? ""
+                Id = id,
+                Name = name ?? "",
+                Title = parsedConfig.Title,
+                MemoryConfiguration = parsedConfig.MemoryConfiguration,
+                BaseSystemPrompt = parsedConfig.BaseSystemPrompt,
+                BaseAssistantPrompt = parsedConfig.BaseAssistantPrompt,
+                MaxTokens = parsedConfig.MaxTokens,
+                Model = parsedConfig.Model,
+                Temperature = parsedConfig.Temperature,
+                TopP = parsedConfig.TopP,
+                FrequencyPenalty = parsedConfig.FrequencyPenalty,
+                PresencePenalty = parsedConfig.PresencePenalty,
+                OutOfScopePrefix = parsedConfig.OutOfScopePrefix,
+                FunctionsDefaultAnswerHook = parsedConfig.FunctionsDefaultAnswerHook,
+                FunctionsBeforeAnswerHook = parsedConfig.FunctionsBeforeAnswerHook,
+                SibyllaName = parsedConfig.SibyllaName,
+                Hidden = parsedConfig.Hidden
             };
         }
     }

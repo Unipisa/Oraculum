@@ -13,26 +13,23 @@ namespace OraculumApi.Models.BackOffice
 {
     public partial class Metric : WeaviateEntity, IEntity<MetricDTO>
     {
-        public string[]? answer;
-        public double[]? answerCorrectness;
-        public double[]? answerRelevancy;
-        public double[]? answerSimilarity;
-        public double[]? contextPrecision;
-        public double[]? contextRecall;
-        // TODO: Change weaviateNET to support [][]
-        // public string[][]? contexts;
-        public double[]? faithfulness;
-        public string[]? groundTruth;
-        // TODO: Change weaviateNET to support [][]
-        // public string[][]? groundTruths;
-        // public Dictionary<string, double>? MeanMetrics;
-        public string[]? question;
-        // public DateTime? timestamp;
-
+        public string? evaluateId;
+        public string? answer;
+        public double? answerCorrectness;
+        public double? answerRelevancy;
+        public double? answerSimilarity;
+        public double? contextPrecision;
+        public double? contextRecall;
+        public string[]? contexts;
+        public double[]? distances;
+        public string? ground_truth;
+        public double? faithfulness;
+        public string? question;
         public MetricDTO toDTO()
         {
             return new MetricDTO()
             {
+                EvaluateId = this.evaluateId,
                 Id = this.id,
                 Answer = this.answer,
                 Answer_Correctness = this.answerCorrectness,
@@ -40,13 +37,11 @@ namespace OraculumApi.Models.BackOffice
                 Answer_Similarity = this.answerSimilarity,
                 Context_Precision = this.contextPrecision,
                 Context_Recall = this.contextRecall,
-                // Contexts = this.contexts,
+                Contexts = this.contexts,
                 Faithfulness = this.faithfulness,
-                Ground_Truth = this.groundTruth,
-                // Ground_Truths = this.groundTruths,
-                // MeanMetrics = this.MeanMetrics,
+                ground_truth = this.ground_truth,
                 Question = this.question,
-                // Timestamp = this.timestamp
+                Distances = this.distances
             };
         }
     }

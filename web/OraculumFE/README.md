@@ -1,6 +1,7 @@
 # Chatbot
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.2.6.
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.4.
+The project uses the UI kit Italia for angular https://github.com/italia/design-angular-kit?tab=readme-ov-file. https://italia.github.io/bootstrap-italia/
 
 ## Install Node
 

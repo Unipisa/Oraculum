@@ -12,14 +12,15 @@ using Newtonsoft.Json;
 namespace OraculumApi.Models.User
 {
     /// <summary>
-    /// 
+    /// Represents the user profile information, including roles.
     /// </summary>
     [DataContract]
     public partial class UserProfile
     {
         /// <summary>
-        /// Gets or Sets Id
+        /// A list of roles associated with the user
         /// </summary>
+        /// <example>["sysadmin", "backoffice", "frontoffice"]</example>
         [DataMember(Name = "roles")]
         public required List<String> Roles { get; set; }
 

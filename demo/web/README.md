@@ -11,7 +11,7 @@ with ``docker-compose.yml`` (in ``docker-compose.secret.yml``) and ``oraculumApi
 
 Start the system:
 
-    docker compose -f ./docker-compose.secret up
+    docker compose -f ./docker-compose.secret.yml up
 
 Open a new shell (or start the docker compose as a daemon) and execute the ``init.ps1`` script to reset the schema and load few facts for the demo.
 

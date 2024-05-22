@@ -1,0 +1,51 @@
+@use "@angular/material" as mat;
+@use "./../../../custom-theme.scss" as theme;
+@import "material-symbols";
+
+.title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #2f475e;
+  margin: 0;
+}
+
+.separator-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #2f475e;
+  margin-left: 17px;
+}
+
+.list-header {
+  display: flex;
+  align-items: baseline;
+  margin: 0 16px 0 16px;
+
+  .unused-facts-button {
+    margin-left: auto;
+    padding: 0;
+  }
+}
+
+.list-container {
+  overflow-y: auto;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+// column,list-container height 100%
+.column {
+  height: 100%;
+}
+
+.list-container {
+  display: block;
+  height: 100vh;
+}
+::-webkit-scrollbar {
+  display: none;
+}

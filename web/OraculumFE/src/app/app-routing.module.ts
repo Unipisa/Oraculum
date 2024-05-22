@@ -10,6 +10,8 @@ import { LoginComponent } from './components/login/login.component';
 import { AuthGuard } from './services/auth.guard';
 import { SelectionComponent } from './components/selection/selection.component';
 import { ProfileComponent } from './components/profile/profile.component';
+import { ChatModularComponent } from './components/chat-modular/chat-modular.component';
+import { KnowledgeSearchComponent } from './components/knowledge-search/knowledge-search.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -33,13 +35,21 @@ const routes: Routes = [
         canActivate: [AuthGuard],
       },
       {
+        path: 'chat-test',
+        component: ChatModularComponent,
+      },
+      {
         path: 'explain',
         component: ChatExplainComponent,
         canActivate: [AuthGuard],
       },
       {
+        path: 'knowledge-old',
+        component: KnowledgeComponent
+      },
+      {
         path: 'knowledge',
-        component: KnowledgeComponent,
+        component: KnowledgeSearchComponent,
         canActivate: [AuthGuard],
       },
       {
@@ -57,9 +67,9 @@ const routes: Routes = [
         component: ProfileComponent,
         canActivate: [],
       },
-    ]
+    ],
   },
-  { path: '**', redirectTo: 'login'},
+  { path: '**', redirectTo: 'login' },
 ];
 
 @NgModule({

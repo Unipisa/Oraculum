@@ -1,0 +1,43 @@
+<div class="cardx">
+  <div class="card-header" [class.out-of-limit]="fact.outOfLimit">
+    <div class="score">{{ fact.score }}</div>
+    <h6 class="title">{{ fact.title }}</h6>
+    <button class="expand-button" [itButton]="undefined" (click)="toggleExpand()" [style]="expanded ? 'transform: rotate(90deg)' : 'transform: rotate(-90deg)'">
+      <it-icon name="chevron-left"></it-icon>
+    </button>
+  </div>
+  <div #cardBody class="card-body">
+    <div class="pre-content">
+      <div class="metadata">
+        <div>
+          <span class="metadata-key">Fonte: </span>
+          <span>{{ fact.citation }}</span>
+        </div>
+        <div>
+          <span class="metadata-key">Categoria: </span>
+          <span>{{ fact.category }}</span>
+        </div>
+        <div>
+          <span class="metadata-key">Tipo: </span>
+          <span>{{ fact.factType }}</span>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="edit-button" [itButton]="undefined" (click)="onEditFact()">
+          <it-icon name="pencil" color="primary"></it-icon>
+        </button>
+      </div>
+    </div>
+    <div class="content">
+      <p class="font-serif">{{ fact.content }}</p>
+    </div>
+  </div>
+  <div *ngIf="expanded && !hideVoting" class="card-footer">
+    <button class="thumb-button"  [disabled]="voted != null" [itButton]="undefined" (click)="onUpvoteFact()">
+      <mat-icon class="thumb-icon" [ngClass]="{'material-symbols-outlined': voted != 'up'}"> thumb_up</mat-icon>
+    </button>
+    <button class="thumb-button" [disabled]="voted != null" style="padding-right: 0;" [itButton]="undefined" (click)="onDownvoteFact()">
+      <mat-icon class="thumb-icon" [ngClass]="{'material-symbols-outlined': voted != 'down'}">thumb_down</mat-icon>
+    </button>
+  </div>
+</div>
