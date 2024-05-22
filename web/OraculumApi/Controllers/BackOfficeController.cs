@@ -111,8 +111,8 @@ public class BackOfficeController : Controller
     /// </summary>
     /// <remarks>Delete a Sibylla config by ID</remarks>
     /// <param name="id">ID of the Sibylla configuration to delete</param>
-    /// <response code="200">Configuration deleted successfully</response>
-    /// <response code="404">Configuration not found</response>
+    /// <response code="200">OraculumConfiguration deleted successfully</response>
+    /// <response code="404">OraculumConfiguration not found</response>
     /// <response code="500">Internal server error</response>
     [HttpDelete]
     [Route("sibylla-configs/{id}")]
@@ -256,7 +256,7 @@ public class BackOfficeController : Controller
     /// <remarks>Get a Sibylla config by ID</remarks>
     /// <param name="id">ID of the Sibylla configuration to retrieve</param>
     /// <response code="200">Specific Sibylla configuration data</response>
-    /// <response code="404">Configuration not found</response>
+    /// <response code="404">OraculumConfiguration not found</response>
     /// <response code="500">Internal server error</response>
     [HttpGet]
     [Route("sibylla-configs/{id}")]

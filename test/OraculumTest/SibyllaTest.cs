@@ -27,11 +27,11 @@ namespace OraculumTest
                 MaxTokens = 1024
             };
 
-            sibylla = new Sibylla(new Configuration()
+            sibylla = new Sibylla(new OraculumConfiguration()
             {
                 WeaviateApiKey = conf["Weaviate:ApiKey"],
                 WeaviateEndpoint = conf["Weaviate:ServiceEndpoint"],
-                Provider = conf["GPTProvider"] == "Azure" ? OpenAI.ProviderType.Azure : OpenAI.ProviderType.OpenAi,
+                ModelProvider = conf["GPTProvider"] == "Azure" ? OpenAI.ProviderType.Azure : OpenAI.ProviderType.OpenAi,
                 OpenAIApiKey = conf["OpenAI:ApiKey"],
                 OpenAIOrgId = conf["OpenAI:OrgId"],
                 AzureOpenAIApiKey = conf["Azure:ApiKey"],

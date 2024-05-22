@@ -17,7 +17,7 @@ namespace Oraculum
         private Dictionary<string, List<string>> response = new Dictionary<string, List<string>>();
         private List<string> completed = new List<string>();
         private string _dataDir;
-        private Configuration _oraculumConf;
+        private OraculumConfiguration _oraculumConf;
         private ILogger _logger;
         private Oraculum _oraculum;
 
@@ -33,12 +33,12 @@ namespace Oraculum
             }
         }
 
-        public SibyllaManager(Configuration oraculumConf, string configurationsPath, ILogger? logger = null)
+        public SibyllaManager(OraculumConfiguration oraculumConf, string configurationsPath, ILogger? logger = null)
         {
             _logger = logger ?? NullLogger.Instance;
 
             if (!Directory.Exists(configurationsPath))
-                throw new DirectoryNotFoundException($"Configuration directory {configurationsPath} not found.");
+                throw new DirectoryNotFoundException($"OraculumConfiguration directory {configurationsPath} not found.");
 
             _dataDir = configurationsPath;
             _oraculumConf = oraculumConf;
@@ -49,7 +49,7 @@ namespace Oraculum
         {
             var path = Path.Combine(_dataDir, $"{name}.json");
             if (!File.Exists(path))
-                throw new FileNotFoundException($"Configuration file {path} not found.");
+                throw new FileNotFoundException($"OraculumConfiguration file {path} not found.");
 
             return path;
         }
@@ -99,7 +99,7 @@ namespace Oraculum
             return false;
         }
 
-        public async Task<(Guid, Sibylla)> AddSibylla(string name, Configuration? oraculumConf = null, SibyllaConf? sibyllaConf = null, DateTime? expiration = null, bool connect = true)
+        public async Task<(Guid, Sibylla)> AddSibylla(string name, OraculumConfiguration? oraculumConf = null, SibyllaConf? sibyllaConf = null, DateTime? expiration = null, bool connect = true)
         {
             var s = new Sibylla
                 (
@@ -237,7 +237,7 @@ namespace Oraculum
             {
                 return null;
             }
-            return SibyllaConf.FromJson(File.ReadAllText(ConfFile(sibyllaId))) ?? throw new Exception($"Configuration file {ConfFile(sibyllaId)} is not valid.");
+            return SibyllaConf.FromJson(File.ReadAllText(ConfFile(sibyllaId))) ?? throw new Exception($"OraculumConfiguration file {ConfFile(sibyllaId)} is not valid.");
         }
 
         public Dictionary<string, SibyllaConf> GetSibyllaeDict()

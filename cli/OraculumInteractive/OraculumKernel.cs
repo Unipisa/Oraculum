@@ -9,7 +9,7 @@ namespace OraculumInteractive
 {
     public class OraculumKernel : Kernel, IKernelCommandHandler<SubmitCode>
     {
-        private readonly Configuration oraculumConfig;
+        private readonly OraculumConfiguration oraculumConfig;
         private readonly SibyllaConf sibyllaConf;
         private readonly Command useCategoryFilterCommand = new Command("#!use-category-filter");
         private readonly Command noCategoryFilterCommand = new Command("#!no-category-filter");
@@ -28,7 +28,7 @@ namespace OraculumInteractive
             return sibylla;
         }   
 
-        public OraculumKernel(string name, Oraculum.Configuration oraculumConfig, SibyllaConf sibyllaConf) : base(name)
+        public OraculumKernel(string name, Oraculum.OraculumConfiguration oraculumConfig, SibyllaConf sibyllaConf) : base(name)
         {
             this.oraculumConfig = oraculumConfig;
             this.sibyllaConf = sibyllaConf;

@@ -103,7 +103,7 @@ namespace Oraculum
             }
         }
 
-        public Sibylla(Configuration conf, SibyllaConf sybillaConf, ILogger? logger = null)
+        public Sibylla(OraculumConfiguration conf, SibyllaConf sybillaConf, ILogger? logger = null)
         {
             _logger = logger ?? NullLogger.Instance;
 
