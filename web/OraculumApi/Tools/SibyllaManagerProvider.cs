@@ -26,23 +26,23 @@ public class SibyllaManagerProvider
         if (!_managers.ContainsKey(tenantId))
         {
             var sibyllaeConfigPath = Path.Combine(_env.ContentRootPath, "SibyllaeConf");
-            var config = new Oraculum.OraculumConfiguration()
+            var config = new Oraculum.Configuration()
             {
                 WeaviateEndpoint = _configuration[$"Tenants:{tenantId}:Weaviate:ServiceEndpoint"],
                 WeaviateApiKey = _configuration[$"Tenants:{tenantId}:Weaviate:ApiKey"],
-                ModelProvider = _configuration[$"Tenants:{tenantId}:GPTProvider"] == "Azure" ? OpenAI.ProviderType.Azure : OpenAI.ProviderType.OpenAi,
+                Provider = _configuration[$"Tenants:{tenantId}:GPTProvider"] == "Azure" ? OpenAI.ProviderType.Azure : OpenAI.ProviderType.OpenAi,
                 OpenAIApiKey = _configuration[$"Tenants:{tenantId}:OpenAI:ApiKey"],
                 OpenAIOrgId = _configuration[$"Tenants:{tenantId}:OpenAI:OrgId"],
                 AzureOpenAIApiKey = _configuration[$"Tenants:{tenantId}:Azure:ApiKey"],
                 AzureResourceName = _configuration[$"Tenants:{tenantId}:Azure:ResourceName"],
                 AzureDeploymentId = _configuration[$"Tenants:{tenantId}:Azure:DeploymentId"],
-                LocalModel =_configuration[$"Tenants:{tenantId}:EndPoint"]
+                LocalProvider =_configuration[$"Tenants:{tenantId}:EndPoint"]
             };
 
             if (
                 string.IsNullOrEmpty(config.WeaviateEndpoint) || 
-                config.ModelProvider == OpenAI.ProviderType.OpenAi && (string.IsNullOrEmpty(config.OpenAIApiKey) || string.IsNullOrEmpty(config.OpenAIOrgId)) ||
-                config.ModelProvider == OpenAI.ProviderType.Azure && (string.IsNullOrEmpty(config.AzureOpenAIApiKey) || string.IsNullOrEmpty(config.AzureResourceName) || string.IsNullOrEmpty(config.AzureDeploymentId))
+                config.Provider == OpenAI.ProviderType.OpenAi && (string.IsNullOrEmpty(config.OpenAIApiKey) || string.IsNullOrEmpty(config.OpenAIOrgId)) ||
+                config.Provider == OpenAI.ProviderType.Azure && (string.IsNullOrEmpty(config.AzureOpenAIApiKey) || string.IsNullOrEmpty(config.AzureResourceName) || string.IsNullOrEmpty(config.AzureDeploymentId))
             )
             {
                 throw new Exception("Sibylla is not properly configured for tenant " + tenantId);

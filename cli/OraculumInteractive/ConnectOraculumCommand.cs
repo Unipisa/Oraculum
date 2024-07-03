@@ -31,7 +31,7 @@ namespace OraculumInteractive
         {
             var kernelName = commandLineContext.ParseResult.GetValueForOption(KernelNameOption);
             var oraculumConfigFile = commandLineContext.ParseResult.GetValueForOption(oraculumConfigFileOption);
-            var oraculumConfig = Oraculum.OraculumConfiguration.FromJson(System.IO.File.ReadAllText(oraculumConfigFile!.FullName));
+            var oraculumConfig = Oraculum.Configuration.FromJson(System.IO.File.ReadAllText(oraculumConfigFile!.FullName));
             var sibyllaConfigJson = commandLineContext.ParseResult.GetValueForOption(sibyllaConfigJsonOption);
             if (string.IsNullOrEmpty(sibyllaConfigJson))
             {

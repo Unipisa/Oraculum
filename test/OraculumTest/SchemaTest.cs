@@ -20,10 +20,10 @@ namespace OraculumTest
                 .AddUserSecrets<SchemaTest>();
             var conf = config.Build();
 
-            oraculum = new Oraculum.Oraculum(new OraculumConfiguration() { 
+            oraculum = new Oraculum.Oraculum(new Configuration() { 
                 WeaviateApiKey = conf["Weaviate:ApiKey"],
                 WeaviateEndpoint = conf["Weaviate:ServiceEndpoint"],
-                ModelProvider = conf["GPTProvider"] == "Azure" ? OpenAI.ProviderType.Azure : OpenAI.ProviderType.OpenAi,
+                Provider = conf["GPTProvider"] == "Azure" ? OpenAI.ProviderType.Azure : OpenAI.ProviderType.OpenAi,
                 OpenAIApiKey = conf["OpenAI:ApiKey"],
                 OpenAIOrgId = conf["OpenAI:OrgId"],
                 AzureOpenAIApiKey = conf["Azure:ApiKey"],

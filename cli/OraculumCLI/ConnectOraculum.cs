@@ -54,17 +54,17 @@ namespace OraculumCLI
                 throw new Exception("Either ConfigFile or Config must be set");
             }
 
-            var config = new Oraculum.OraculumConfiguration()
+            var config = new Oraculum.Configuration()
             {
                 WeaviateEndpoint = Config.WeaviateEndpoint,
                 WeaviateApiKey = Config.WeaviateApiKey,
-                LocalModel = Config.LocalProvider,
+                LocalProvider = Config.LocalProvider,
                 OpenAIApiKey = Config.OpenAIApiKey,
                 OpenAIOrgId = Config.OpenAIOrgId,
                 AzureOpenAIApiKey = Config.AzureApiKey,
                 AzureResourceName = Config.AzureResourceName,
                 AzureDeploymentId = Config.AzureDeploymentId,
-                ModelProvider = Config.GPTProvider == GPTProvider.Azure ? OpenAI.ProviderType.Azure : OpenAI.ProviderType.OpenAi,
+                Provider = Config.GPTProvider == GPTProvider.Azure ? OpenAI.ProviderType.Azure : OpenAI.ProviderType.OpenAi,
                 UserName = Config.UserName
             };
             var oraculum = new Oraculum.Oraculum(config);

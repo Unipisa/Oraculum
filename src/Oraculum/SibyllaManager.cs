@@ -17,7 +17,7 @@ namespace Oraculum
         private Dictionary<string, List<string>> response = new Dictionary<string, List<string>>();
         private List<string> completed = new List<string>();
         private string _dataDir;
-        private OraculumConfiguration _oraculumConf;
+        private Configuration _oraculumConf;
         private ILogger _logger;
         private Oraculum _oraculum;
 
@@ -33,7 +33,7 @@ namespace Oraculum
             }
         }
 
-        public SibyllaManager(OraculumConfiguration oraculumConf, string configurationsPath, ILogger? logger = null)
+        public SibyllaManager(Configuration oraculumConf, string configurationsPath, ILogger? logger = null)
         {
             _logger = logger ?? NullLogger.Instance;
 
@@ -99,7 +99,7 @@ namespace Oraculum
             return false;
         }
 
-        public async Task<(Guid, Sibylla)> AddSibylla(string name, OraculumConfiguration? oraculumConf = null, SibyllaConf? sibyllaConf = null, DateTime? expiration = null, bool connect = true)
+        public async Task<(Guid, Sibylla)> AddSibylla(string name, Configuration? oraculumConf = null, SibyllaConf? sibyllaConf = null, DateTime? expiration = null, bool connect = true)
         {
             var s = new Sibylla
                 (
