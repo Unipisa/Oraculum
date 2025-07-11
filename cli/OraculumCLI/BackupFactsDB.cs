@@ -20,7 +20,8 @@ namespace OraculumCLI
         {
             base.ProcessRecord();
             var progress = new ProgressRecord(1, "restoring", "Number of facts restored");
-            var j = Connection.BackupFacts(FileName!, (num, total) => {
+            var path = SessionState.Path.GetUnresolvedProviderPathFromPSPath(FileName!);
+            var j = Connection.BackupFacts(path, (num, total) => {
                 progress.PercentComplete = (int)(num / (double)total);
                 progress.StatusDescription = $"Read {num} of {total} facts";
                 return 0;

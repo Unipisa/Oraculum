@@ -47,7 +47,8 @@ namespace OraculumCLI
         {
             if (ConfigFile != null)
             {
-                var json = System.IO.File.ReadAllText(ConfigFile);
+                var path = SessionState.Path.GetUnresolvedProviderPathFromPSPath(ConfigFile);
+                var json = System.IO.File.ReadAllText(path);
                 Config = OraculumConfiguration.FromJson(json)!;
             } else if (Config == null)
             {

@@ -50,7 +50,8 @@ namespace OraculumCLI
             };
             if (File != null)
             {
-                System.IO.File.WriteAllText(File, JsonSerializer.Serialize(c));
+                var path = SessionState.Path.GetUnresolvedProviderPathFromPSPath(File);
+                System.IO.File.WriteAllText(path, JsonSerializer.Serialize(c));
             }
             WriteObject(c);
         }

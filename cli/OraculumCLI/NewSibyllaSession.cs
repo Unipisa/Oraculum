@@ -25,7 +25,8 @@ namespace OraculumCLI
             base.ProcessRecord();
             if (ConfigFile != null)
             {
-                var json = System.IO.File.ReadAllText(ConfigFile);
+                var path = SessionState.Path.GetUnresolvedProviderPathFromPSPath(ConfigFile);
+                var json = System.IO.File.ReadAllText(path);
                 Config = System.Text.Json.JsonSerializer.Deserialize<SibyllaConf>(json);
             } else if (Config == null)
             {
